@@ -1,0 +1,1 @@
+-e https://github.com/hardbyte/python-can.git
