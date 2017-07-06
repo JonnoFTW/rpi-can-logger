@@ -118,49 +118,68 @@ def PID_TESLA_REAR_DRIVE_UNIT_POWER(msg):
 pids = {
     0x0102: {
         'name': 'PID_TESLA_BMS_CUR_VOLTAGE',
-        'parse': PID_TESLA_BMS_CUR_VOLTAGE},
+        'parse': PID_TESLA_BMS_CUR_VOLTAGE
+    },
     0x0106: {
         'name': 'PID_TESLA_REAR_DRIVE_UNIT_INFO',
-        'parse': PID_TESLA_REAR_DRIVE_UNIT_INFO},
+        'parse': PID_TESLA_REAR_DRIVE_UNIT_INFO
+    },
     0x0154: {
         'name': 'PID_TESLA_REAR_DRIVE_UNIT_MEASUREMENT',
-        'parse': PID_TESLA_REAR_DRIVE_UNIT_MEASUREMENT},
+        'parse': PID_TESLA_REAR_DRIVE_UNIT_MEASUREMENT}
+    ,
     0x0266: {
         'name': 'PID_TESLA_REAR_DRIVE_UNIT_POWER',
-        'parse': PID_TESLA_REAR_DRIVE_UNIT_POWER},
+        'parse': PID_TESLA_REAR_DRIVE_UNIT_POWER
+    },
     0x0116: {
         'name': 'PID_TESLA_REAR_DRIVE_UNIT_TORQUE_STATUS',
-        'parse': PID_TESLA_REAR_DRIVE_UNIT_TORQUE_STATUS},
+        'parse': PID_TESLA_REAR_DRIVE_UNIT_TORQUE_STATUS
+    },
     0x01D4: {
         'name': 'PID_TESLA_FRONT_DRIVE_UNIT',
-        'parse': PID_TESLA_FRONT_DRIVE_UNIT},
+        'parse': PID_TESLA_FRONT_DRIVE_UNIT
+    },
     0x02E5: {
         'name': 'PID_TESLA_FRONT_DRIVE_UNIT_POWER',
-        'parse': PID_TESLA_FRONT_DRIVE_UNIT_POWER},
+        'parse': PID_TESLA_FRONT_DRIVE_UNIT_POWER
+    },
     0x0145: {
         'name': 'PID_TESLA_FRONT_DRIVE_UNIT_TORQUE',
-        'parse': PID_TESLA_FRONT_DRIVE_UNIT_TORQUE},
+        'parse': PID_TESLA_FRONT_DRIVE_UNIT_TORQUE
+    },
     0x0232: {
         'name': 'PID_TESLA_BATTERY_POWER_LIMITS',
-        'parse': PID_TESLA_BATTERY_POWER_LIMITS},
+        'parse': PID_TESLA_BATTERY_POWER_LIMITS
+    },
     0x0562: {
         'name': 'PID_TESLA_BATTERY_ODOMETER',
-        'parse': PID_TESLA_BATTERY_ODOMETER},
+        'parse': PID_TESLA_BATTERY_ODOMETER
+    },
     0x03D2: {
         'name': 'PID_TESLA_BATTERY_LIFETIME_ENERGY_STATS',
-        'parse': PID_TESLA_BATTERY_LIFETIME_ENERGY_STATS},
+        'parse': PID_TESLA_BATTERY_LIFETIME_ENERGY_STATS
+    },
     0x0302: {
         'name': 'PID_TESLA_BATTERY_STATE_OF_CHARGE',
-        'parse': PID_TESLA_BATTERY_STATE_OF_CHARGE},
+        'parse': PID_TESLA_BATTERY_STATE_OF_CHARGE
+    },
     0x0382: {
         'name': 'PID_TESLA_BATTERY_ENERGY_STATUS',
-        'parse': PID_TESLA_BATTERY_ENERGY_STATUS},
+        'parse': PID_TESLA_BATTERY_ENERGY_STATUS
+    },
     0x0210: {
         'name': 'PID_TESLA_DC_DC_CONVERTER_STATUS',
-        'parse': PID_TESLA_DC_DC_CONVERTER_STATUS},
+        'parse': PID_TESLA_DC_DC_CONVERTER_STATUS
+    },
     0x0256: {
         'name': 'PID_TESLA_CRUISE_CONTROL',
-        'parse': PID_TESLA_CRUISE_CONTROL}
+        'parse': PID_TESLA_CRUISE_CONTROL
+    },
 }
+import inspect
+import re
 
-name2pid = {y['name']: x for x, y in pids.items()}
+for pid, data in pids.items():
+    pids[pid]['fields'] = re.findall(r"\s[^#]\s*'(.*)'", inspect.getsource(data['parse']))
+
