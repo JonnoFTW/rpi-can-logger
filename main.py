@@ -1,13 +1,11 @@
-import csv
 import can
 import argparse
 import os
 import gps
 import logging
-from datetime import datetime
-import subprocess
 import atexit
-from pathlib import Path
+import subprocess
+from logger import CSVLogRotator
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='pcan', help='CAN Interface to use')
@@ -26,7 +24,7 @@ parser.add_argument('--tesla', action='store_true', help='Indicate that we are l
 parser.add_argument('--log-trigger', '-lg', help='PID to trigger logging event.')
 
 args = parser.parse_args()
-print (args)
+
 is_tesla = args.tesla
 if is_tesla:
     from logger import tesla_pids as pids, tesla_name2pid as name2pid
@@ -35,10 +33,7 @@ else:
 # PCAN conf
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
-print(can.rc)
-can.rc['interface'] = 'pcan'
-can.rc['channel'] = 'PCAN_USBBUS1'
-print(can.rc)
+
 # PiCAN2 conf
 # need to use these steps: http://skpang.co.uk/blog/archives/1220
 if can.rc['interface'] == 'socketcan_native':
@@ -54,7 +49,7 @@ for p in [log_messages, log_folder]:
 
 logging.basicConfig(
     # filename=log_messages + '/messages.log',
-    level=logging.DEBUG,
+    level=logging.WARNING,
     filemode='a',
     format='%(asctime)s:%(levelname)s: %(message)s'
 )
@@ -81,13 +76,6 @@ bytes_per_log = 2 ** 20 * log_size
 fields = list(set([val for sublist in [pids[p]['fields'] for p in pid_ids] for val in sublist]))
 gps_fields = ['lat', 'lng', 'alt', 'spd']
 all_fields = fields + gps_fields
-
-
-def make_writer(now):
-    out_csv = open(now.strftime('%Y%m%d_%H%M.csv'), 'w')
-    out_writer = csv.DictWriter(out_csv, fieldnames=all_fields, restval=None)
-    out_writer.writeheader()
-    return out_writer, out_csv
 
 
 def make_msg(m):
@@ -139,7 +127,7 @@ def do_log(sniffing):
     buff = {}
     # log_at = datetime.now() + log_delay
     bytes_written = 0
-    out_writer, out_file = make_writer(datetime.now())
+    csv_writer = CSVLogRotator(maxbytes=bytes_per_log)
     while 1:
         if not sniffing:
             # send a message asking for those requested pids
@@ -167,23 +155,13 @@ def do_log(sniffing):
             parsed = pids[pid]['parse'](obd_data)
             buff.update(parsed)
         # read in the gps data
-        now = datetime.now()
 
-        if msg.arbitration_id == OBD_RESPONSE:
+        if msg.arbitration_id == OBD_RESPONSE and pid == log_trigger:
             # get GPS readings then log
             buff.update(gps.read())
             # put the buffer into the csv logs
-            bytes_written += out_writer.writerow(buff)
+            csv_writer.writerow(buff)
             buff = {}
-            if bytes_written >= bytes_per_log:
-                # open a new file
-                out_file.close()
-                out_name = str(Path(out_file.name).absolute())
-                subprocess.Popen(['7zr', 'a', '-m0=lzma', '-mx=9', '-mfb=64', '-md=16m',
-                                  out_name + '.7z',
-                                  out_name])
-                # should gzip the file (on a new process)
-                out_writer, out_file = make_writer(now)
 
 
 def determine_sniff_query():

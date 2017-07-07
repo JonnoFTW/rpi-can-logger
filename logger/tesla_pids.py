@@ -1,3 +1,7 @@
+import inspect
+import re
+
+
 def PID_TESLA_BMS_CUR_VOLTAGE(msg):
     return {
         'battery_voltage': (msg[1] * 256 + msg[0]) / 100.,
@@ -177,9 +181,6 @@ pids = {
         'parse': PID_TESLA_CRUISE_CONTROL
     },
 }
-import inspect
-import re
 
 for pid, data in pids.items():
     pids[pid]['fields'] = re.findall(r"\s[^#]\s*'(.*)'", inspect.getsource(data['parse']))
-

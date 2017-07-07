@@ -1,3 +1,5 @@
+from itertools import cycle
+
 toInt = lambda x: x[0] * 256 + x[1]
 
 
@@ -6,6 +8,8 @@ class Unit:
         raise NotImplementedError("Please use a Unit.* unit")
 
     class Special:
+        units = ['']
+
         def __call__(self, bs):
             return bs[0]
 
@@ -209,14 +213,19 @@ class PID:
     def __init__(self, pid: int, name: str, dtype, fields=None):
         self.pid = pid
         self.name = name
-        self.dtype = dtype
-        self.fields = fields
+        self.dtype = dtype()
+        self.fields = ['{} ({})'.format(name, u) for u in self.dtype.units]
+        # if type(fields) in [list, tuple]:
+        #     self.fields = fields
+        # else:
+        #     self.fields = [fields]
 
     def __call__(self, bs):
         vals = self.dtype(bs)
-        if not type(vals) not in (tuple, list):
+        if type(vals) not in (tuple, list):
             vals = (vals,)
-        return {field: val for field, val in zip(self.fields, vals)}
+        return {'{} ({})'.format(pid_name, unit): val for pid_name, val, unit in
+                zip(cycle([self.name]), vals, self.dtype.units)}
 
 
 _pids = [
