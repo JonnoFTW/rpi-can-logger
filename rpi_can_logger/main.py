@@ -1,11 +1,13 @@
-import can
 import argparse
-import os
-import gps
-import logging
 import atexit
+import logging
+import os
 import subprocess
-from logger import CSVLogRotator
+
+import can
+
+from .gps import GPS
+from .logger import CSVLogRotator
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='pcan', help='CAN Interface to use')
@@ -21,15 +23,30 @@ parser.add_argument('--log-pids', '-lp', nargs='+', help='PID names to log',
                              'PID_TESLA_DC_DC_CONVERTER_STATUS'
                              ])
 parser.add_argument('--tesla', action='store_true', help='Indicate that we are logging a tesla')
+parser.add_argument('--sniffing', action='store_true',
+                    help='Set sniffing mode on, otherwise the logger will poll. Setting --tesla will make this true by default')
 parser.add_argument('--log-trigger', '-lg', help='PID to trigger logging event.')
+parser.add_argument('--disable-gps', '-dg', action='store_false', help='Explicitly disable GPS logging')
+parser.add_argument('--conf', default=False, type=str,
+                    help='Override options given here with those in the provided config file')
 
 args = parser.parse_args()
 
+if args.conf:
+    from yaml import load
+
+    with open(args.conf, 'r') as conf_fh:
+        new_args = load(conf_fh)
+        # should validate the config here...
+    args = new_args
+
 is_tesla = args.tesla
 if is_tesla:
-    from logger import tesla_pids as pids, tesla_name2pid as name2pid
+    from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
+
+    args.sniffing = True
 else:
-    from logger import obd_pids as pids, obd_name2pid as name2pid
+    from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
 # PCAN conf
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
@@ -65,7 +82,6 @@ OBD_RESPONSE = 0x07E8
 # pids to log
 log_pids = args.log_pids
 
-
 if any([pid not in name2pid for pid in log_pids]):
     exit("Unrecognised Tesla CAN PID(s) {}".format([pid for pid in log_pids if pid not in name2pid]))
 pid_ids = set([name2pid[pid] for pid in log_pids])
@@ -76,6 +92,8 @@ bytes_per_log = 2 ** 20 * log_size
 fields = list(set([val for sublist in [pids[p]['fields'] for p in pid_ids] for val in sublist]))
 gps_fields = ['lat', 'lng', 'alt', 'spd']
 all_fields = fields + gps_fields
+if args.disable_gps:
+    all_fields = fields
 
 
 def make_msg(m):
@@ -120,13 +138,12 @@ def get_vin(bus):
 def do_log(sniffing):
     try:
         bus = can.interface.Bus()
+        gps = GPS('/dev/ttyUSB0')
         atexit.register(bus.shutdown)
     except can.CanError as err:
-        logging.error('Failed to initialise CAN BUS: '+str(err))
+        logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
     buff = {}
-    # log_at = datetime.now() + log_delay
-    bytes_written = 0
     csv_writer = CSVLogRotator(maxbytes=bytes_per_log)
     while 1:
         if not sniffing:
@@ -158,7 +175,8 @@ def do_log(sniffing):
 
         if msg.arbitration_id == OBD_RESPONSE and pid == log_trigger:
             # get GPS readings then log
-            buff.update(gps.read())
+            if not args.disable_gps:
+                buff.update(GPS.read())
             # put the buffer into the csv logs
             csv_writer.writerow(buff)
             buff = {}
@@ -174,6 +192,7 @@ def determine_sniff_query():
 if __name__ == "__main__":
     # start logging loop
     import time
+
     is_sniff = determine_sniff_query()
     sleep_time = 10
     err_count = 0

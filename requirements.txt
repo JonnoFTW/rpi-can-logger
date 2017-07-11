@@ -1,2 +1,4 @@
 -e git+https://github.com/hardbyte/python-can.git#egg=Package
 pytest
+pynmea2
+pyyaml

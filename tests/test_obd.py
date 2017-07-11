@@ -1,5 +1,4 @@
-import pytest
-from logger.obd_pids import _pids
+from rpi_can_logger.logger import _pids
 
 #check there are no dups
 
