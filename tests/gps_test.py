@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import serial
 
 s = serial.Serial(
@@ -8,5 +9,6 @@ s = serial.Serial(
     bytesize=serial.EIGHTBITS,
     timeout=1
 )
+print("Reading from", s.portstr)
 while 1:
     print(s.readline())
