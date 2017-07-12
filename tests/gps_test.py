@@ -43,7 +43,7 @@ while 1:
     try:
         try:
             ins = s.read()
-            ins = re.sub(r"\r|\n", '', ins.decode('ASCII'))
+            ins = re.sub(r"\r|\n|[^\x00-\x7F]", '', ins.decode('ASCII'))
         except:
             print("Couldn't decode", ins)
         # print(ins)
