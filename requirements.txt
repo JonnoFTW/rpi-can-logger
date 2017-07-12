@@ -2,3 +2,4 @@
 pytest
 pynmea2
 pyyaml
+pyserial

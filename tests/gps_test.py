@@ -3,7 +3,9 @@ import serial
 import pynmea2
 import atexit
 import time
+import re
 import sys
+
 # should be ttyUSB0 or 1, tty AMA0
 port = '/dev/ttyUSB1'
 if len(sys.argv) >= 2:
@@ -29,21 +31,26 @@ for i in [
     '24 45 49 47 50 51 2c 56 54 47 2a 32 33 0d 0a b5 62 06 01 03 00 f0 05 00 ff 19',
     '24 45 49 47 50 51 2c 5a 44 41 2a 33 39 0d 0a b5 62 06 01 03 00 f0 08 00 02 1f',
 ]:
-    s.write(map(lambda x: int(x, 16), i.split(' ')))
-    print("writing", i)
-    time.sleep(0.5)
+    pass
+    # s.write(map(lambda x: int(x, 16), i.split(' ')))
+    # print("writing", i)
+    # time.sleep(0.5)
 print("Reading from", s.portstr)
 from io import StringIO
+
 buff = StringIO()
 while 1:
     try:
-        ins = s.read()
-        ins = ins.decode('ASCII')
-    except:
-        print("Couldn't decode", ins)
-    # print(ins)
-    if ins == '$':
-        print("R>", pynmea2.parse(buff.getvalue()))
-        buff = StringIO()
-    elif isinstance(ins, str):
-        buff.write(ins)
+        try:
+            ins = s.read()
+            ins = re.sub(r"\r|\n", '', ins.decode('ASCII'))
+        except:
+            print("Couldn't decode", ins)
+        # print(ins)
+        if ins == '$':
+            print("R>", pynmea2.parse(buff.getvalue()))
+            buff = StringIO()
+        elif isinstance(ins, str):
+            buff.write(ins)
+    except KeyboardInterrupt:
+        break
