@@ -48,7 +48,10 @@ while 1:
             print("Couldn't decode", ins)
         # print(ins)
         if ins == '$':
-            print("R>", pynmea2.parse(buff.getvalue()))
+            try:
+                print("R>", pynmea2.parse(buff.getvalue()))
+            except pynmea2.ParseError:
+                pass
             buff = StringIO()
         elif isinstance(ins, str):
             buff.write(ins)
