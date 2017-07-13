@@ -3,10 +3,9 @@ import argparse
 import atexit
 import logging
 import os
-import subprocess
 
 import can
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.logger import CSVLogRotator
 
