@@ -10,15 +10,6 @@ import sys
 port = '/dev/ttyUSB1'
 if len(sys.argv) >= 2:
     port = sys.argv[1]
-s = serial.Serial(
-    port=port,
-    baudrate=115200,
-    parity=serial.PARITY_NONE,
-    stopbits=serial.STOPBITS_ONE,
-    bytesize=serial.EIGHTBITS,
-    timeout=1
-)
-atexit.register(s.close)
 for i in [
     '24 45 49 47 50 51 2c 44 54 4d 2a 33 42 0d 0a b5 62 06 01 03 00 f0 0a 00 04 23',
     '24 45 49 47 50 51 2c 47 42 53 2a 33 30 0d 0a b5 62 06 01 03 00 f0 09 00 03 21',
@@ -35,10 +26,11 @@ for i in [
     # s.write(map(lambda x: int(x, 16), i.split(' ')))
     # print("writing", i)
     # time.sleep(0.5)
-print("Reading from", s.portstr)
 from io import StringIO
 from rpi_can_logger.gps import GPS
-gps = GPS('/dev/ttyS0')
+gps = GPS(port)
+print("Reading from", gps.ser.portstr)
+
 buff = StringIO()
 while 1:
     try:

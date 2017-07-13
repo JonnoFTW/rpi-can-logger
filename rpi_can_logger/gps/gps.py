@@ -2,10 +2,9 @@ import serial
 import pynmea2
 import re
 from io import StringIO
-
+import atexit
 """
-Wrapper for the NEAMS thingo
-
+Wrapper for the NMEA GPS device
 """
 
 
@@ -26,7 +25,7 @@ class GPS:
             bytesize=self.bytesize,
             timeout=self.timeout
         )
-
+        atexit.register(self.close)
     def close(self):
         self.ser.close()
 
@@ -41,13 +40,14 @@ class GPS:
             buff.write(ins)
         try:
             msg = pynmea2.parse(buff.getvalue())
+            return repr(msg)
+            return {
+                'time': msg.time,
+                'lat': msg.latitude,
+                'lng': msg.longitude,
+                'alt': msg.altitude,
+                'spd': msg.speed
+            }
         except pynmea2.ParseError as e:
             print("Parse error:", e)
             return {'err': str(e)}
-        return {
-            'time': msg.time,
-            'lat': msg.latitude,
-            'lng': msg.longitude,
-            'alt': msg.altitude,
-            'spd': msg.speed
-        }
