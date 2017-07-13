@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import argparse
 import atexit
 import logging
@@ -6,8 +7,8 @@ import subprocess
 
 import can
 
-from .gps import GPS
-from .logger import CSVLogRotator
+from rpi_can_logger.gps import GPS
+from rpi_can_logger.logger import CSVLogRotator
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='pcan', help='CAN Interface to use')
@@ -90,7 +91,7 @@ log_trigger = name2pid[args.log_trigger]
 bytes_per_log = 2 ** 20 * log_size
 
 fields = list(set([val for sublist in [pids[p]['fields'] for p in pid_ids] for val in sublist]))
-gps_fields = ['lat', 'lng', 'alt', 'spd']
+gps_fields = GPS.FIELDS
 all_fields = fields + gps_fields
 if args.disable_gps:
     all_fields = fields
