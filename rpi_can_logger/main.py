@@ -33,20 +33,25 @@ parser.add_argument('--conf', default=False, type=str,
 args = parser.parse_args()
 
 from yaml import load, dump
+
 if args.conf:
 
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
         # should validate the config here...
-    store_bool = set(['--'+action.dest for action in parser._actions if isinstance(action.default, bool)])
-    def is_store_true(k,v):
+    store_bool = set(['--' + action.dest for action in parser._actions if isinstance(action.default, bool)])
+
+
+    def is_store_true(k, v):
         if type(v) not in [list, str]:
             v = str(v)
         if k in store_bool:
             return (k,)
         else:
             return (k, v)
-    largs = [item for k in new_args for item in is_store_true('--'+k, new_args[k])]
+
+
+    largs = [item for k in new_args for item in is_store_true('--' + k, new_args[k])]
 
     args = parser.parse_args(largs)
 
@@ -218,21 +223,24 @@ def determine_sniff_query():
 
 def shutdown():
     GPIO.cleanup()
+
+
 atexit.register(shutdown)
 
 if __name__ == "__main__":
     # start logging loop
     import time
+
     setup_GPIO()
-    led1(1)
-    led2(1)
-    is_sniff = determine_sniff_query()
-    led2(0)
-    led1(0)
     sleep_time = 10
     err_count = 0
     while 1:
-        do_log(is_sniff)
+        do_log(args.sniffing)
+
+        led1(1)
+        led2(1)
         logging.debug("Sleeping for {}s".format(sleep_time))
+        led2(0)
+        led1(0)
         time.sleep(sleep_time)
         err_count += 1
