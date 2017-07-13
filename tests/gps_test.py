@@ -37,23 +37,12 @@ for i in [
     # time.sleep(0.5)
 print("Reading from", s.portstr)
 from io import StringIO
-
+from rpi_can_logger.gps import GPS
+gps = GPS('/dev/ttyS0')
 buff = StringIO()
 while 1:
     try:
-        try:
-            ins = s.read()
-            ins = re.sub(r'[\x00-\x1F]|\r|\n|\t', '', ins.decode('ASCII'))
-        except:
-            print("Couldn't decode", ins)
-        # print(ins)
-        if ins == '$':
-            try:
-                print("R>", pynmea2.parse(buff.getvalue()))
-            except pynmea2.ParseError:
-                pass
-            buff = StringIO()
-        elif isinstance(ins, str):
-            buff.write(ins)
+        print("R>", gps.read())
     except KeyboardInterrupt:
+        print("\nTerminating")
         break

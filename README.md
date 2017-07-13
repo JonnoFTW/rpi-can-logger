@@ -32,9 +32,21 @@ Better description of all necessary parts (coming soon).
 2. Copy this repo to your Raspberry Pi:
 ````
 git clone https://github.com/JonnoFTW/rpi-can-logger.git
+````  
+4. Run `python setup.py install` to install everything. You'll need root access if you want it to be installed a service that runs on startup.
+3. Enable UART on your RPI (for the GPS) and CAN for the CAN shield by adding these lines to `/boot/config.txt`:
+```
+enable_uart=1
+dtparam=spi=on
+dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=25
+dtoverlay=mcp2515-can1,oscillator=16000000,interrupt=24
+dtoverlay=spi-bcm2835
+```
+4. In order to stop the RPI from asking your serial ports /ttyS0 from logging on, change `/boot/cmdline.txt` and remove:
+```
+console=serial0,baudrate=115200
+```
 
-
-````    
   
 ## Configuration
 
