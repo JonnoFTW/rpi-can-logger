@@ -9,6 +9,5 @@ log-pids:
   - PID_TESLA_BATTERY_STATE_OF_CHARGE
   - PID_TESLA_DC_DC_CONVERTER_STATUS
 log-trigger: PID_TESLA_BATTERY_STATE_OF_CHARGE
-disable-gps: false
 tesla: true
 sniffing: true

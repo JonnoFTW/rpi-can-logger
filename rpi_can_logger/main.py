@@ -6,7 +6,7 @@ import os
 import subprocess
 
 import can
-import RPi.GPIO as GPIO
+# import RPi.GPIO as GPIO
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.logger import CSVLogRotator
 
@@ -39,7 +39,17 @@ if args.conf:
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
         # should validate the config here...
-    args = new_args
+    store_bool = set(['--'+action.dest for action in parser._actions if isinstance(action.default, bool)])
+    def is_store_true(k,v):
+        if type(v) not in [list, str]:
+            v = str(v)
+        if k in store_bool:
+            return (k,)
+        else:
+            return (k, v)
+    largs = [item for k in new_args for item in is_store_true('--'+k, new_args[k])]
+
+    args = parser.parse_args(largs)
 
 print(dump(args))
 is_tesla = args.tesla
@@ -52,11 +62,6 @@ else:
 # PCAN conf
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
-
-# PiCAN2 conf
-# need to use these steps: http://skpang.co.uk/blog/archives/1220
-if can.rc['interface'] == 'socketcan_native':
-    subprocess.call('/sbin/ip link set can0 up type can bitrate 500000'.split(' '))
 
 log_messages = args.log_messages
 # log folder
@@ -82,7 +87,10 @@ OBD_REQUEST = 0x07DF
 OBD_RESPONSE = 0x07E8
 
 # pids to log
-log_pids = args.log_pids
+if type(args.log_pids[0]) is list:
+    log_pids = args.log_pids[0]
+else:
+    log_pids = args.log_pids
 
 if any([pid not in name2pid for pid in log_pids]):
     exit("Unrecognised Tesla CAN PID(s) {}".format([pid for pid in log_pids if pid not in name2pid]))
