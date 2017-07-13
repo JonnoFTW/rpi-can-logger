@@ -6,13 +6,13 @@ import os
 import subprocess
 
 import can
-
+import RPi.GPIO as GPIO
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.logger import CSVLogRotator
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
-parser.add_argument('--interface', '-i', default='pcan', help='CAN Interface to use')
-parser.add_argument('--channel', '-c', default='PCAN_USBBUS1', help='CAN Channel to use')
+parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
+parser.add_argument('--channel', '-c', default='socketcan_native', help='CAN Channel to use')
 parser.add_argument('--log-messages', '-lm', default='/var/log/can-log/messages/',
                     help='Folder where debug messages are store')
 parser.add_argument('--log-folder', '-lf', default='/var/log/can-log/', help='Where logged CAN/GPS data is stored')
@@ -33,14 +33,15 @@ parser.add_argument('--conf', default=False, type=str,
 
 args = parser.parse_args()
 
+from yaml import load, dump
 if args.conf:
-    from yaml import load
 
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
         # should validate the config here...
     args = new_args
 
+print(dump(args))
 is_tesla = args.tesla
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
@@ -111,6 +112,20 @@ def make_msg(m):
     )
 
 
+def setup_GPIO():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(7, GPIO.OUT)
+    GPIO.setup(37, GPIO.OUT)
+
+
+def led1(on_off):
+    GPIO.output(7, bool(on_off))
+
+
+def led2(on_off):
+    GPIO.output(37, bool(on_off))
+
+
 def get_vin(bus):
     vin_request_message = can.Message(data=[2, 9, 0x02, 0, 0, 0, 0, 0],
                                       arbitration_id=0x7df,
@@ -156,7 +171,9 @@ def do_log(sniffing):
 
         try:
             # should try to receive as many pids as asked for
+            led1(1)
             msg = bus.recv()
+            led1(0)
         except can.CanError as e:
             # error receiving on the can bus
             #
@@ -177,7 +194,9 @@ def do_log(sniffing):
         if msg.arbitration_id == OBD_RESPONSE and pid == log_trigger:
             # get GPS readings then log
             if not args.disable_gps:
+                led2(1)
                 buff.update(GPS.read())
+                led2(0)
             # put the buffer into the csv logs
             csv_writer.writerow(buff)
             buff = {}
@@ -190,11 +209,19 @@ def determine_sniff_query():
     return True
 
 
+def shutdown():
+    GPIO.cleanup()
+atexit.register(shutdown)
+
 if __name__ == "__main__":
     # start logging loop
     import time
-
+    setup_GPIO()
+    led1(1)
+    led2(1)
     is_sniff = determine_sniff_query()
+    led2(0)
+    led1(0)
     sleep_time = 10
     err_count = 0
     while 1:

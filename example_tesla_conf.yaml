@@ -1,7 +1,7 @@
 interface: socketcan_native
 channel: /dev/can1
-log-messages: /var/log/can-log/messages/
-log-folder: /var/log/can-log/
+log-messages: ~/log/can-log/messages/
+log-folder: ~/log/can-log/
 log-size: 32
 log-pids:
   - PID_TESLA_REAR_DRIVE_UNIT_POWER
