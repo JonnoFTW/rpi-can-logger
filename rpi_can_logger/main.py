@@ -170,6 +170,7 @@ def get_vin(bus):
 def do_log(sniffing):
     try:
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface)
+        print(bus)
         gps = GPS(args.gps_port)
 
         led2(0)
@@ -186,18 +187,19 @@ def do_log(sniffing):
                 bus.send(make_msg(m))
                 # if not sniffing:
                 # keep receving can packets until we get everything
-
-        try:
-            # should try to receive as many pids as asked for
-            led1(1)
-            msg = bus.recv()
-            print(msg)
-            led1(0)
-        except can.CanError as e:
-            # error receiving on the can bus
-            #
-            continue
-            pass
+        else:
+            try:
+                # should try to receive as many pids as asked for
+                led1(1)
+                print("rece")
+                msg = bus.recv()
+                print(msg)
+                led1(0)
+            except can.CanError as e:
+                # error receiving on the can bus
+                #
+                logging.warning(e)
+                pass
         if is_tesla:
             pid = msg.arbitration_id
             obd_data = msg.data
@@ -243,12 +245,13 @@ if __name__ == "__main__":
     setup_GPIO()
     sleep_time = 10
     err_count = 0
+    logging.warning("Starting logging")
     while 1:
         do_log(args.sniffing)
 
         led1(1)
         led2(1)
-        logging.debug("Sleeping for {}s".format(sleep_time))
+        logging.warning("Sleeping for {}s".format(sleep_time))
         time.sleep(sleep_time)
         led2(0)
         led1(0)
