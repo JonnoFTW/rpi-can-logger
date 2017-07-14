@@ -65,7 +65,8 @@ if is_tesla:
     args.sniffing = True
 else:
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
-# PCAN conf
+
+
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
 
@@ -78,7 +79,7 @@ for p in [log_messages, log_folder]:
         print("Created log folder", p)
 
 logging.basicConfig(
-    # filename=log_messages + '/messages.log',
+    filename=log_messages + '/messages.log',
     level=logging.WARNING,
     filemode='a',
     format='%(asctime)s:%(levelname)s: %(message)s'
@@ -190,6 +191,7 @@ def do_log(sniffing):
             # should try to receive as many pids as asked for
             led1(1)
             msg = bus.recv()
+            print(msg)
             led1(0)
         except can.CanError as e:
             # error receiving on the can bus
@@ -221,11 +223,11 @@ def do_log(sniffing):
             buff = {}
 
 
-def determine_sniff_query():
-    # try sending a regular old query for standard RPM
-    bus = can.interface.Bus()
-    bus.shutdown()
-    return True
+# def determine_sniff_query():
+#     # try sending a regular old query for standard RPM
+#     bus = can.interface.Bus()
+#     bus.shutdown()
+#     return True
 
 
 def shutdown():
