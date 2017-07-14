@@ -210,7 +210,7 @@ def do_log(sniffing):
             buff.update(parsed)
         # read in the gps data
 
-        if msg.arbitration_id == OBD_RESPONSE and pid == log_trigger:
+        if pid == log_trigger:
             # get GPS readings then log
             if not args.disable_gps:
                 led2(1)
