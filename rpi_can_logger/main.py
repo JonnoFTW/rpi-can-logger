@@ -30,6 +30,7 @@ parser.add_argument('--disable-gps', '-dg', action='store_false', help='Explicit
 parser.add_argument('--gps-port', '-gp', default='/dev/ttyS0', help='GPS serial port')
 parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
+parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
 
 args = parser.parse_args()
 
@@ -82,6 +83,7 @@ logging.basicConfig(
     filemode='a',
     format='%(asctime)s:%(levelname)s: %(message)s'
 )
+logging.getLogger().addHandler(logging.StreamHandler())
 # log file size in MB
 log_size = args.log_size
 
@@ -211,6 +213,8 @@ def do_log(sniffing):
                 buff.update(gps.read())
                 led2(0)
             # put the buffer into the csv logs
+            if args.verbose:
+                print(buff)
             csv_writer.writerow(buff)
             buff = {}
 
