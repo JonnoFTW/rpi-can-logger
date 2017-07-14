@@ -191,9 +191,7 @@ def do_log(sniffing):
             try:
                 # should try to receive as many pids as asked for
                 led1(1)
-                print("rece")
                 msg = bus.recv()
-                print(msg)
                 led1(0)
             except can.CanError as e:
                 # error receiving on the can bus
