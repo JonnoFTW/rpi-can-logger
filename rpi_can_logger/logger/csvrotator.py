@@ -4,10 +4,12 @@ import subprocess
 from pathlib import Path
 import logging
 
+
 class CSVLogRotator:
     """
 
     """
+
     def __init__(self, log_folder, maxbytes, fieldnames):
         """
 
@@ -30,7 +32,7 @@ class CSVLogRotator:
         """
         now = datetime.now()
         self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'), 'w')
-        logging.warning("Writing to", self._out_csv.name)
+        logging.warning("Writing to " + self._out_csv.name)
         self._out_writer = csv.DictWriter(self._out_csv, fieldnames=self.fieldnames, restval=None)
         self._out_writer.writeheader()
 
