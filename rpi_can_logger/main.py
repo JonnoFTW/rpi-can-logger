@@ -26,7 +26,7 @@ parser.add_argument('--tesla', action='store_true', help='Indicate that we are l
 parser.add_argument('--sniffing', action='store_true',
                     help='Set sniffing mode on, otherwise the logger will poll. Setting --tesla will make this true by default')
 parser.add_argument('--log-trigger', '-lg', help='PID to trigger logging event.')
-parser.add_argument('--disable-gps', '-dg', action='store_false', help='Explicitly disable GPS logging')
+parser.add_argument('--disable-gps', '-dg', action='store_true', help='Explicitly disable GPS logging')
 parser.add_argument('--gps-port', '-gp', default='/dev/ttyS0', help='GPS serial port')
 parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
