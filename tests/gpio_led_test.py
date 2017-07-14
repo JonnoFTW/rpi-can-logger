@@ -24,9 +24,11 @@ if __name__ == "__main__":
             led1(1)
             led2(1)
             print("Sleeping for {}s".format(sleep_time))
+            time.sleep(sleep_time)
             led2(0)
             led1(0)
             print("Sleeping for {}s".format(sleep_time))
+            time.sleep(sleep_time)
         except KeyboardInterrupt:
             break
 
