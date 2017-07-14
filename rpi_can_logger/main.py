@@ -56,8 +56,8 @@ if args.conf:
     largs = [item for k in new_args for item in is_store_true('--' + k, new_args[k])]
 
     args = parser.parse_args(largs)
-
-print(dump(args))
+if args.verbose:
+    print(dump(args))
 is_tesla = args.tesla
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
@@ -65,7 +65,6 @@ if is_tesla:
     args.sniffing = True
 else:
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
-
 
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
@@ -170,9 +169,7 @@ def get_vin(bus):
 def do_log(sniffing):
     try:
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface)
-        print(bus)
         gps = GPS(args.gps_port)
-
         led2(0)
         led1(0)
     except can.CanError as err:
