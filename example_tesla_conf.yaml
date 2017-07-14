@@ -1,7 +1,7 @@
 interface: socketcan_native
-channel: /dev/can1
-log-messages: ~/log/can-log/messages/
-log-folder: ~/log/can-log/
+channel: can1
+log-messages: /home/pi/log/can-log/messages/
+log-folder: /home/pi/log/can-log/
 log-size: 32
 log-pids:
   - PID_TESLA_REAR_DRIVE_UNIT_POWER
@@ -9,5 +9,6 @@ log-pids:
   - PID_TESLA_BATTERY_STATE_OF_CHARGE
   - PID_TESLA_DC_DC_CONVERTER_STATUS
 log-trigger: PID_TESLA_BATTERY_STATE_OF_CHARGE
+gps-port: /dev/ttyS0
 tesla: true
 sniffing: true

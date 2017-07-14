@@ -27,6 +27,7 @@ parser.add_argument('--sniffing', action='store_true',
                     help='Set sniffing mode on, otherwise the logger will poll. Setting --tesla will make this true by default')
 parser.add_argument('--log-trigger', '-lg', help='PID to trigger logging event.')
 parser.add_argument('--disable-gps', '-dg', action='store_false', help='Explicitly disable GPS logging')
+parser.add_argument('--gps-port', '-gp', default='/dev/ttyS0', help='GPS serial port')
 parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
 
@@ -166,13 +167,13 @@ def get_vin(bus):
 def do_log(sniffing):
     try:
         bus = can.interface.Bus()
-        gps = GPS('/dev/ttyUSB0')
+        gps = GPS(args.gps_port)
         atexit.register(bus.shutdown)
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
     buff = {}
-    csv_writer = CSVLogRotator(maxbytes=bytes_per_log)
+    csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields)
     while 1:
         if not sniffing:
             # send a message asking for those requested pids
@@ -207,7 +208,7 @@ def do_log(sniffing):
             # get GPS readings then log
             if not args.disable_gps:
                 led2(1)
-                buff.update(GPS.read())
+                buff.update(gps.read())
                 led2(0)
             # put the buffer into the csv logs
             csv_writer.writerow(buff)
@@ -240,7 +241,7 @@ if __name__ == "__main__":
         led1(1)
         led2(1)
         logging.debug("Sleeping for {}s".format(sleep_time))
+        time.sleep(sleep_time)
         led2(0)
         led1(0)
-        time.sleep(sleep_time)
         err_count += 1

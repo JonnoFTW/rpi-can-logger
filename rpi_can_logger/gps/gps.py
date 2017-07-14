@@ -51,3 +51,6 @@ class GPS:
         except pynmea2.ParseError as e:
             print("Parse error:", e)
         return out
+
+    def readline(self):
+        return self.ser.readline().decode('ascii').strip()

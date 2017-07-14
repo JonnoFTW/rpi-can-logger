@@ -34,7 +34,7 @@ print("Reading from", gps.ser.portstr)
 buff = StringIO()
 while 1:
     try:
-        print("R>", gps.read())
+        print("R>", gps.readline())
     except KeyboardInterrupt:
         print("\nTerminating")
         break

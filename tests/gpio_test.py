@@ -21,9 +21,9 @@ atexit.register(s.close)
 print("Reading from", s.portstr)
 while 1:
     try:
-       print("R>", s.readline().decode('ASCII'), end='')
+        print("R>", s.readline().decode('ASCII'), end='')
     except serial.SerialException as e:
-       print(e)       
+        print(e)
     except KeyboardInterrupt:
         print("\nTerminating")
         break

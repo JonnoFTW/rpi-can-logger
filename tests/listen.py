@@ -10,4 +10,3 @@ while 1:
     except KeyboardInterrupt:
         print("Terminating")
         break
-
