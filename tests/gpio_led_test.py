@@ -19,7 +19,7 @@ def led2(on_off):
 
 if __name__ == "__main__":
     sleep_time = 0.25
-
+    setup_GPIO()
     while 1:
         try:
             led1(1)
