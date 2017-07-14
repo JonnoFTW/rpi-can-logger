@@ -168,9 +168,11 @@ def get_vin(bus):
 
 def do_log(sniffing):
     try:
-        bus = can.interface.Bus()
+        bus = can.interface.Bus(channel=args.channel, bustype=args.interface)
         gps = GPS(args.gps_port)
-        atexit.register(bus.shutdown)
+
+        led2(0)
+        led1(0)
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
