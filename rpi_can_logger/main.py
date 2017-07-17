@@ -7,7 +7,7 @@ from yaml import load, dump
 import can
 import RPi.GPIO as GPIO
 from rpi_can_logger.gps import GPS
-from rpi_can_logger.logger import CSVLogRotator, TeslaLogger, SniffingOBDLogger, QueryingOBDLogger
+from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
@@ -158,7 +158,7 @@ def do_log(sniffing, tesla):
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
     if tesla:
-        logger_c = TeslaLogger
+        logger_c = TeslaSniffingLogger
     elif sniffing:
         logger_c = SniffingOBDLogger
     else:
