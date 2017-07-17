@@ -3,11 +3,11 @@ import argparse
 import atexit
 import logging
 import os
-
+from yaml import load, dump
 import can
 import RPi.GPIO as GPIO
 from rpi_can_logger.gps import GPS
-from rpi_can_logger.logger import CSVLogRotator
+from rpi_can_logger.logger import CSVLogRotator, TeslaLogger, SniffingOBDLogger, QueryingOBDLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
@@ -33,8 +33,6 @@ parser.add_argument('--conf', default=False, type=str,
 parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
 
 args = parser.parse_args()
-
-from yaml import load, dump
 
 if args.conf:
 
@@ -87,9 +85,6 @@ logging.getLogger().addHandler(logging.StreamHandler())
 # log file size in MB
 log_size = args.log_size
 
-# log frequency
-# log_freq = 5  # 5 times per second
-# log_delay = timedelta(seconds=1. / log_freq)
 OBD_REQUEST = 0x07DF
 OBD_RESPONSE = 0x07E8
 
@@ -113,20 +108,6 @@ if args.disable_gps:
     all_fields = fields
 
 
-def make_msg(m):
-    """
-
-    :param m: the pid to make a CAN OBD request for
-    :return: can.Message
-    """
-    mode, pid = divmod(m, 0x100)
-    return can.Message(
-        arbitration_id=0x7df,
-        data=[2, mode, pid, 0, 0, 0, 0, 0],
-        extended_id=False
-    )
-
-
 def setup_GPIO():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(7, GPIO.OUT)
@@ -143,10 +124,10 @@ def led2(on_off):
 
 def get_vin(bus):
     vin_request_message = can.Message(data=[2, 9, 0x02, 0, 0, 0, 0, 0],
-                                      arbitration_id=0x7df,
+                                      arbitration_id=OBD_REQUEST,
                                       extended_id=0)
     bus.send(vin_request_message)
-    # keep receving otherwise timeout
+    # keep receiving otherwise timeout
     vin = ""
 
     def makeVin(data):
@@ -154,7 +135,7 @@ def get_vin(bus):
 
     for i in range(128):
         msg = bus.recv()
-        if msg.arbitration_id == 0x07e8 and msg.data[2:4] == bytearray([0x49, 0x02]):
+        if msg.arbitration_id == OBD_RESPONSE and msg.data[2:4] == bytearray([0x49, 0x02]):
             vin += makeVin(msg.data[-3:])
             nxtmsg = can.Message(extended_id=0, arbitration_id=0x07e0, data=[0x30, 0, 4, 0, 0, 0, 0, 0])
             bus.send(nxtmsg)
@@ -166,7 +147,7 @@ def get_vin(bus):
     return "NO_VIN"
 
 
-def do_log(sniffing):
+def do_log(sniffing, tesla):
     try:
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface)
         gps = GPS(args.gps_port)
@@ -175,49 +156,28 @@ def do_log(sniffing):
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
+    if tesla:
+        logger_c = TeslaLogger
+    elif sniffing:
+        logger_c = SniffingOBDLogger
+    else:
+        logger_c = QueryingOBDLogger
+    logger = logger_c(bus, pid_ids, pids, log_trigger)
     buff = {}
     csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields)
     while 1:
-        if not sniffing:
-            # send a message asking for those requested pids
-            for m in pid_ids:
-                bus.send(make_msg(m))
-                # if not sniffing:
-                # keep receving can packets until we get everything
-        else:
-            try:
-                # should try to receive as many pids as asked for
-                led1(1)
-                msg = bus.recv()
-                led1(0)
-            except can.CanError as e:
-                # error receiving on the can bus
-                #
-                logging.warning(e)
-                pass
-        if is_tesla:
-            pid = msg.arbitration_id
-            obd_data = msg.data
-        else:
-            pid = ((msg.data[1] - 0x40) * 256) + msg.data[2]
-            obd_data = msg.data[3:]
-
-        if pid in pid_ids:
-            parsed = pids[pid]['parse'](obd_data)
-            buff.update(parsed)
-        # read in the gps data
-
-        if pid == log_trigger:
-            # get GPS readings then log
-            if not args.disable_gps:
-                led2(1)
-                buff.update(gps.read())
-                led2(0)
-            # put the buffer into the csv logs
-            if args.verbose:
-                print(buff)
-            csv_writer.writerow(buff)
-            buff = {}
+        led1(1)
+        buff.update(logger.log())
+        led1(0)
+        if not args.disable_gps:
+            led2(1)
+            buff.update(gps.read())
+            led2(0)
+        if args.verbose:
+            print(buff)
+        # put the buffer into the csv logs
+        csv_writer.writerow(buff)
+        buff = {}
 
 
 # def determine_sniff_query():
@@ -242,8 +202,7 @@ if __name__ == "__main__":
     err_count = 0
     logging.warning("Starting logging")
     while 1:
-        do_log(args.sniffing)
-
+        do_log(args.sniffing, args.tesla)
         led1(1)
         led2(1)
         logging.warning("Sleeping for {}s".format(sleep_time))

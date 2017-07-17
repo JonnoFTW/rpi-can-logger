@@ -2,7 +2,15 @@
 import can
 import atexit
 
-bus = can.interface.Bus(channel='can1', bustype='socketcan_native')
+#PCAN
+interface = 'pcan'
+channel = 'PCAN_USBBUS1'
+
+#pican
+# interface = 'can1'
+# channel = 'socketcan_native'
+
+bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)
 while 1:
     try:

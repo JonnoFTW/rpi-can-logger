@@ -241,7 +241,7 @@ _pids = [
     PID(0x010C, 'PID_RPM', Unit.RPM, 'field'),
     PID(0x010D, 'PID_SPEED', Unit.KilometersPerHour, 'field'),
     PID(0x010E, 'PID_TIMING_ADVANCE', Unit.Degrees, 'field'),
-    PID(0x010F, 'PID_INTAKE_TEMP', Unit.Temp, 'field'),
+    PID(0x010F, 'PID_THROTTLE', Unit.Temp, 'field'),
     PID(0x0110, 'PID_MAF_FLOW', Unit.GramsPerSecond, 'field'),
     PID(0x0111, 'PID_THROTTLE', Unit.Percentage, 'field'),
 
