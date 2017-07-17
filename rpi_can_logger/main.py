@@ -47,7 +47,6 @@ if args.conf:
         if type(v) not in [list, str]:
             v = str(v)
         if k in store_bool:
-            if v:
             return (k,)
         else:
             return (k, v)
