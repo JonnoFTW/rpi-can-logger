@@ -1,0 +1,17 @@
+[Unit]
+Description=CAN Bus and GPS Logging Service
+After=syslog.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+Environment="PYTHONPATH={{pwd}}"
+WorkingDirectory={{pwd}}
+ExecStart={{pwd}}/rpi_can_logger.py --conf example_obd_querying_conf.yaml
+StandardOutput=syslog
+StandardError=syslog
+restart=always
+
+[Install]
+WantedBy=multi-user.target

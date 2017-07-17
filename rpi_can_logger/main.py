@@ -31,6 +31,7 @@ parser.add_argument('--gps-port', '-gp', default='/dev/ttyS0', help='GPS serial 
 parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
 parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
+parser.add_argument('--log-bluetooth', action='store_true', help='Log to Bluetooth if Available')
 
 args = parser.parse_args()
 

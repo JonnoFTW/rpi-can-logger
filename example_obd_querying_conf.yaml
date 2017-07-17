@@ -17,3 +17,4 @@ disable-gps: false
 gps-port: /dev/ttyS0
 tesla: false
 sniffing: false
+log-bluetooth: true

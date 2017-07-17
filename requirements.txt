@@ -4,3 +4,4 @@ pynmea2
 pyyaml
 pyserial
 rpi.gpio
+pybluez
