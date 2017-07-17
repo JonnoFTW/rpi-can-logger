@@ -40,7 +40,7 @@ if args.conf:
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
         # should validate the config here...
-    store_bool = set(['--' + action.dest for action in parser._actions if isinstance(action.default, bool)])
+    store_bool = set([action.option_strings[0] for action in parser._actions if isinstance(action.default, bool)])
 
 
     def is_store_true(k, v):
