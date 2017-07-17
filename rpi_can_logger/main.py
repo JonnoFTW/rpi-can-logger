@@ -5,7 +5,11 @@ import logging
 import os
 from yaml import load, dump
 import can
-import RPi.GPIO as GPIO
+
+try:
+    import RPi.GPIO as GPIO
+except RuntimeError:
+    from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger
 
@@ -40,22 +44,32 @@ if args.conf:
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
         # should validate the config here...
-    store_bool = set([action.option_strings[0] for action in parser._actions if isinstance(action.default, bool)])
-
+    store_true_bool = set([action.option_strings[0] for action in parser._actions if action.default == True])
+    store_false_bool = set([action.option_strings[0] for action in parser._actions if action.default == False])
 
     def is_store_true(k, v):
         if type(v) not in [list, str]:
             v = str(v)
-        if k in store_bool:
+        if k in store_true_bool and v == True:
             return (k,)
+        elif k in store_false_bool:
+            return tuple()
         else:
             return (k, v)
 
-
+    out_args = {}
     largs = [item for k in new_args for item in is_store_true('--' + k, new_args[k])]
-
+    for arg in parser._actions:
+        if arg.dest.replace('_', '-') not in new_args:
+            out_args[arg.dest] = arg.default
+        else:
+            out_args[arg.dest] = new_args[arg.dest.replace('_', '-')]
     # args = parser.parse_args(largs)
-    args = new_args
+
+    class ArgStruct:
+        def __init__(self, **entries):
+            self.__dict__.update(entries)
+    args = ArgStruct(**out_args)
 if args.verbose:
     print(dump(args))
 is_tesla = args.tesla
