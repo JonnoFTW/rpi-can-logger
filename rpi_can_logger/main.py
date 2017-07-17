@@ -47,6 +47,7 @@ if args.conf:
         if type(v) not in [list, str]:
             v = str(v)
         if k in store_bool:
+            if v:
             return (k,)
         else:
             return (k, v)
@@ -54,7 +55,8 @@ if args.conf:
 
     largs = [item for k in new_args for item in is_store_true('--' + k, new_args[k])]
 
-    args = parser.parse_args(largs)
+    # args = parser.parse_args(largs)
+    args = new_args
 if args.verbose:
     print(dump(args))
 is_tesla = args.tesla
@@ -96,7 +98,7 @@ else:
     log_pids = args.log_pids
 
 if any([pid not in name2pid for pid in log_pids]):
-    exit("Unrecognised Tesla CAN PID(s) {}".format([pid for pid in log_pids if pid not in name2pid]))
+    exit("Unrecognised CAN PID(s) {}".format([pid for pid in log_pids if pid not in name2pid]))
 pid_ids = set([name2pid[pid] for pid in log_pids])
 
 log_trigger = name2pid[args.log_trigger]
