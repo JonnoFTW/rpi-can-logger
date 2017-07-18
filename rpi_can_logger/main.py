@@ -44,14 +44,14 @@ if args.conf:
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
         # should validate the config here...
-    store_true_bool = set([action.option_strings[0] for action in parser._actions if action.default == True])
-    store_false_bool = set([action.option_strings[0] for action in parser._actions if action.default == False])
+    store_true_bool = set([action.option_strings[0] for action in parser._actions if action.default is True])
+    store_false_bool = set([action.option_strings[0] for action in parser._actions if action.default is False])
 
     def is_store_true(k, v):
         if type(v) not in [list, str]:
             v = str(v)
-        if k in store_true_bool and v == True:
-            return (k,)
+        if k in store_true_bool and v is True:
+            return k,
         elif k in store_false_bool:
             return tuple()
         else:

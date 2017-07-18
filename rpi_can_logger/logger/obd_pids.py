@@ -1,6 +1,8 @@
 from itertools import cycle
 
-toInt = lambda x: x[0] * 256 + x[1]
+
+def toInt(x):
+    return x[0] * 256 + x[1]
 
 
 class Unit:

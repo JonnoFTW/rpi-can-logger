@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
-import serial
-import pynmea2
-import atexit
-import time
-import re
+from io import StringIO
+from rpi_can_logger.gps import GPS
 import sys
 
 # should be ttyUSB0 or 1, tty AMA0
@@ -26,8 +23,7 @@ for i in [
     # s.write(map(lambda x: int(x, 16), i.split(' ')))
     # print("writing", i)
     # time.sleep(0.5)
-from io import StringIO
-from rpi_can_logger.gps import GPS
+
 gps = GPS(port)
 print("Reading from", gps.ser.portstr)
 

@@ -2,14 +2,13 @@ import sys
 import time
 import can
 import atexit
+import re
 
 can.rc['interface'] = 'pcan'
 can.rc['channel'] = 'PCAN_USBBUS1'
 
 bus = can.interface.Bus()
 atexit.register(bus.shutdown)
-
-import re
 
 if len(sys.argv) != 2:
     exit("Please provide a pcan trace file to play back")
@@ -22,7 +21,7 @@ with open(sys.argv[1], 'r') as infile:
         ts = float(row[1])
         if old_ts is None:
             old_ts = ts
-        actual_sleep = (ts-old_ts) / 1000.0
+        actual_sleep = (ts - old_ts) / 1000.0
         # print("sleeping for ", actual_sleep)
         time.sleep(max(actual_sleep, 0))
 

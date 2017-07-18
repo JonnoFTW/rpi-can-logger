@@ -2,11 +2,11 @@
 import can
 import atexit
 
-#PCAN
+# PCAN
 interface = 'pcan'
 channel = 'PCAN_USBBUS1'
 
-#pican
+# pican
 # interface = 'can1'
 # channel = 'socketcan_native'
 

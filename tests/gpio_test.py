@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 import serial
 import atexit
-import time
-import re
 import sys
 
 # should be ttyUSB0 or 1, tty AMA0

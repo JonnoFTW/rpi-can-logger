@@ -18,6 +18,8 @@ Queries are sent on 07df
 Responses are on    07e8
 
 """
+
+
 # plt.ion()
 # from collections import deque
 # import numpy as np
@@ -38,8 +40,10 @@ def get_vin(bus):
     bus.send(vin_request_message)
     # keep receving otherwise timeout
     vin = ""
+
     def makeVin(data):
         return ''.join(map(chr, data))
+
     for i in range(128):
         msg = bus.recv()
         if msg.arbitration_id == 0x07e8 and msg.data[2:4] == bytearray([0x49, 0x02]):
@@ -53,21 +57,22 @@ def get_vin(bus):
             return vin
     return "NO VIN"
 
+
 print(get_vin(bus))
 
 while 1:
     msg = bus.recv()
     print(msg)
 
-        # print(list(map(hex, msg.data)))
-        # if msg.arbitration_id == 0x07e8:
-        #     pid = msg.data[2]
-        #     val = msg.data[3:1+msg.data[0]]
-        #     # print("R>", msg)
-        #     if pid == 0x0c:
-        #         rpm = (val[0]*256 + val[1]) / 4
-        #         ydata.append(rpm)
-        #         line.set_xdata(np.arange(len(ydata)))
-        #         line.set_ydata(ydata)
-        #         plt.draw()
-        #         plt.pause(0.01)
+    # print(list(map(hex, msg.data)))
+    # if msg.arbitration_id == 0x07e8:
+    #     pid = msg.data[2]
+    #     val = msg.data[3:1+msg.data[0]]
+    #     # print("R>", msg)
+    #     if pid == 0x0c:
+    #         rpm = (val[0]*256 + val[1]) / 4
+    #         ydata.append(rpm)
+    #         line.set_xdata(np.arange(len(ydata)))
+    #         line.set_ydata(ydata)
+    #         plt.draw()
+    #         plt.pause(0.01)

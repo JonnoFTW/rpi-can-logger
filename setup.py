@@ -13,7 +13,6 @@ setup(
     description='Program to Log CAN bus and GPS data on a Raspberry Pi'
 )
 
-# TODO a function to install as a systemd service
 # modify the systemd service to replace {{pwd}}
 service_fname = './systemd/rpi-logger.service'
 with open(service_fname, 'r') as service_fd:

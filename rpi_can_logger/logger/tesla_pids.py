@@ -130,8 +130,8 @@ pids = {
     },
     0x0154: {
         'name': 'PID_TESLA_REAR_DRIVE_UNIT_MEASUREMENT',
-        'parse': PID_TESLA_REAR_DRIVE_UNIT_MEASUREMENT}
-    ,
+        'parse': PID_TESLA_REAR_DRIVE_UNIT_MEASUREMENT
+    },
     0x0266: {
         'name': 'PID_TESLA_REAR_DRIVE_UNIT_POWER',
         'parse': PID_TESLA_REAR_DRIVE_UNIT_POWER
