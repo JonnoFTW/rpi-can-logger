@@ -23,13 +23,13 @@ class CSVLogRotator:
         self.max_bytes = maxbytes
         self.fieldnames = fieldnames
         self._make_csv_writer()
-        self._bytes_written = 0
 
     def _make_csv_writer(self):
         """
 
         :return:
         """
+        self._bytes_written = 0
         now = datetime.now()
         self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'), 'w')
         logging.warning("Writing to {} ({} bytes)".format(self._out_csv.name, self.max_bytes))
