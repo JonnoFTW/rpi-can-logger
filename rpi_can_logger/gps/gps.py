@@ -44,10 +44,11 @@ class GPS:
                 break
             buff.write(ins)
         try:
-            msg = pynmea2.parse(buff.getvalue())
-            for key in out:
-                if hasattr(msg, key):
-                    out[key] = getattr(msg, key)
+            if buff.getvalue():
+                msg = pynmea2.parse(buff.getvalue())
+                for key in out:
+                    if hasattr(msg, key):
+                        out[key] = getattr(msg, key)
         except pynmea2.ParseError as e:
             print("Parse error:", e)
         return out

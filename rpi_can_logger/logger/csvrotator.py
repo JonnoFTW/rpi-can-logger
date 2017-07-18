@@ -32,7 +32,7 @@ class CSVLogRotator:
         """
         now = datetime.now()
         self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'), 'w')
-        logging.warning("Writing to " + self._out_csv.name)
+        logging.warning("Writing to {} ({} bytes)".format(self._out_csv.name, self.max_bytes))
         self._out_writer = csv.DictWriter(self._out_csv, fieldnames=self.fieldnames, restval=None)
         self._out_writer.writeheader()
 
@@ -55,6 +55,5 @@ class CSVLogRotator:
             self._out_csv.close()
             self._make_csv_writer()
             out_name = str(Path(self._out_csv.name).absolute())
-            subprocess.Popen(['7zr', 'a', '-m0=lzma', '-mx=9', '-mfb=64', '-md=16m',
-                              out_name + '.7z',
-                              out_name])
+            subprocess.Popen(['7z', 'a', '-t7z', '-m0=lzma', '-mx=9', '-mfb=64', '-md=16m',
+                              out_name + '.7z', out_name])

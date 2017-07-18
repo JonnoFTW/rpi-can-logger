@@ -43,28 +43,13 @@ if args.conf:
 
     with open(args.conf, 'r') as conf_fh:
         new_args = load(conf_fh)
-        # should validate the config here...
-    store_true_bool = set([action.option_strings[0] for action in parser._actions if action.default is True])
-    store_false_bool = set([action.option_strings[0] for action in parser._actions if action.default is False])
-
-    def is_store_true(k, v):
-        if type(v) not in [list, str]:
-            v = str(v)
-        if k in store_true_bool and v is True:
-            return k,
-        elif k in store_false_bool:
-            return tuple()
-        else:
-            return (k, v)
-
+    # should validate the config here...
     out_args = {}
-    largs = [item for k in new_args for item in is_store_true('--' + k, new_args[k])]
     for arg in parser._actions:
         if arg.dest.replace('_', '-') not in new_args:
             out_args[arg.dest] = arg.default
         else:
             out_args[arg.dest] = new_args[arg.dest.replace('_', '-')]
-    # args = parser.parse_args(largs)
 
     class ArgStruct:
         def __init__(self, **entries):
@@ -119,7 +104,7 @@ bytes_per_log = 2 ** 20 * log_size
 
 fields = list(set([val for sublist in [pids[p]['fields'] for p in pid_ids] for val in sublist]))
 gps_fields = GPS.FIELDS
-all_fields = fields + gps_fields
+all_fields = gps_fields + sorted(fields)
 if args.disable_gps:
     all_fields = fields
 
