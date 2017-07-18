@@ -39,10 +39,11 @@ class GPS:
         out = {k: None for k in self.FIELDS}
         while not all(out.values()):
             ins = self.ser.read()
-            ins = re.sub(r'[\x00-\x1F]|\r|\n|\t', '', ins.decode('ASCII'))
+            ins = re.sub(r'[\x00-\x1F]|\r|\n|\t', '', ins.decode('ASCII', 'ignore'))
             if ins == '$':
                 break
-            buff.write(ins)
+            if ins != '':
+                buff.write(ins)
         try:
             if buff.getvalue():
                 msg = pynmea2.parse(buff.getvalue())
