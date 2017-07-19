@@ -7,3 +7,5 @@ rpi.gpio
 pybluez
 onedrivesdk
 requests
+twisted
+pymongo

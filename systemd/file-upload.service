@@ -8,7 +8,7 @@ User=pi
 Group=pi
 Environment="PYTHONPATH={{pwd}}"
 WorkingDirectory={{pwd}}
-ExecStart={{pwd}}/rpi_can_logger/onedrive-upload.py
+ExecStart={{pwd}}/rpi_can_logger/uploaders/mongo_upload.py
 StandardOutput=journal
 StandardError=journal
 Restart=always

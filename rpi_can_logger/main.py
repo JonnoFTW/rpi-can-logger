@@ -36,7 +36,7 @@ parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
 parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
 parser.add_argument('--log-bluetooth', action='store_true', help='Log to Bluetooth if Available')
-
+parser.add_argument('--vid', help='Vehicle Identifier, will try to fetch the VIN, otherwise will a RPi identifier')
 args = parser.parse_args()
 
 if args.conf:
@@ -51,9 +51,12 @@ if args.conf:
         else:
             out_args[arg.dest] = new_args[arg.dest.replace('_', '-')]
 
+
     class ArgStruct:
         def __init__(self, **entries):
             self.__dict__.update(entries)
+
+
     args = ArgStruct(**out_args)
 if args.verbose:
     print(dump(args))
@@ -108,6 +111,8 @@ all_fields = gps_fields + sorted(fields)
 if args.disable_gps:
     all_fields = fields
 
+all_fields += ['vid']
+
 
 def setup_GPIO():
     GPIO.setmode(GPIO.BOARD)
@@ -145,7 +150,12 @@ def get_vin(bus):
         elif msg.arbitration_id == 0x07e8 and msg.data[0] == 0x22:
             vin += makeVin(msg.data[1:])
             return vin
-    return "NO_VIN"
+    return False
+
+
+def get_serial():
+    with open('/proc/cpuinfo', 'r') as cpu_info:
+        return cpu_info.readlines()[-1].strip().split(' ')[-1]
 
 
 def do_log(sniffing, tesla):
@@ -165,6 +175,11 @@ def do_log(sniffing, tesla):
         logger_c = QueryingOBDLogger
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     buff = {}
+    if sniffing or is_tesla:
+        vin = get_serial()
+    else:
+        vin = get_vin(bus)
+    buff['vid'] = vin
     csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields)
     while 1:
         led1(1)
@@ -178,14 +193,7 @@ def do_log(sniffing, tesla):
             print(buff)
         # put the buffer into the csv logs
         csv_writer.writerow(buff)
-        buff = {}
-
-
-# def determine_sniff_query():
-#     # try sending a regular old query for standard RPM
-#     bus = can.interface.Bus()
-#     bus.shutdown()
-#     return True
+        buff = {'vid': vin}
 
 
 def shutdown():
