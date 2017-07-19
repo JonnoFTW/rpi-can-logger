@@ -17,7 +17,8 @@ client = pymongo.MongoClient(mongo_uri, w=0)
 rpi_readings_collection = client[mongo_database][mongo_collection]
 
 # start putting everything we've seen in the db
-for fname in glob(log_dir+'/*.csv'):
+for fname in sorted(glob(log_dir+'/*.csv'))[:-1]:
+    # make sure this file isn't open by another process
     with open(fname, 'r') as data_fh:
         reader = csv.DictReader(data_fh)
         trip_id = os.split(fname)[-1].split('.')[0]
