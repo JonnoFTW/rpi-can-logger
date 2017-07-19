@@ -10,7 +10,7 @@ Wrapper for the NMEA GPS device
 
 
 class GPS:
-    FIELDS = ['timetamp', 'lat', 'lon', 'altitude', 'spd_over_grnd_kmph']
+    FIELDS = ['timestamp', 'lat', 'lon', 'altitude', 'spd_over_grnd_kmph']
 
     def __init__(self, port, baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                  bytesize=serial.EIGHTBITS, timeout=1):

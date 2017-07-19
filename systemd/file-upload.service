@@ -1,5 +1,5 @@
 [Unit]
-Description=Attempt to Upload Remaining Log Files to OneDrive
+Description=Attempt to Upload Remaining Log Files to MongoDB
 After=syslog.target
 
 [Service]
@@ -16,3 +16,4 @@ RestartSec=15m
 
 [Install]
 WantedBy=multi-user.target
+WantedBy=network-online.target
