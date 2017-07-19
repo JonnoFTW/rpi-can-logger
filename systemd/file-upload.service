@@ -8,11 +8,11 @@ User=pi
 Group=pi
 Environment="PYTHONPATH={{pwd}}"
 WorkingDirectory={{pwd}}
-ExecStart={{pwd}}/onedrive-upload.py
-StandardOutput=syslog
-StandardError=syslog
+ExecStart={{pwd}}/rpi_can_logger/onedrive-upload.py
+StandardOutput=journal
+StandardError=journal
 Restart=always
-RestartSec=1800s
+RestartSec=15m
 
 [Install]
 WantedBy=multi-user.target

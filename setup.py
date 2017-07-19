@@ -17,21 +17,24 @@ with open('requirements.txt', 'r') as reqs:
 for fname in glob('./systemd/*.service'):
     # modify the systemd service to replace {{pwd}}
     service_fname = fname # './systemd/rpi-logger.service'
+    service = os.path.split(service_fname)[-1]
     print("Installing", service_fname)
     with open(service_fname, 'r') as service_fd:
         txt = service_fd.read()
 
-    txt.replace('{{pwd}}', os.getcwd())
-    with open(service_fname, 'w') as service_fd:
+    txt = txt.replace('{{pwd}}', os.getcwd())
+    print(txt)
+    service_dir = '/lib/systemd/system/'
+    service_fname_dest = service_dir + service
+
+    with open(service_fname_dest, 'w') as service_fd:
+        print("Writing to", service_fd.name)
         service_fd.write(txt)
 
-    service_dir = '/lib/systemd/system/'
-    service_fname_dest = service_dir + service_fname
     for i in [
-        ['sudo', 'cp', '-f', service_fname, service_fname_dest],
         ['sudo', 'chmod', '644', service_fname_dest],
         ['sudo', 'systemctl', 'daemon-reload'],
-        ['sudo', 'systemctl', 'enable', os.path.split(service_fname_dest)[-1]],
+        ['sudo', 'systemctl', 'enable', service],
 
     ]:
         print(i, subprocess.check_output(i))
