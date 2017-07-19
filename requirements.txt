@@ -5,3 +5,5 @@ pyyaml
 pyserial
 rpi.gpio
 pybluez
+onedrivesdk
+requests

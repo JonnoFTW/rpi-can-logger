@@ -1,5 +1,5 @@
 [Unit]
-Description=CAN Bus and GPS Logging Service
+Description=Attempt to Upload Remaining Log Files to OneDrive
 After=syslog.target
 
 [Service]
@@ -8,10 +8,11 @@ User=pi
 Group=pi
 Environment="PYTHONPATH={{pwd}}"
 WorkingDirectory={{pwd}}
-ExecStart={{pwd}}/main.py --conf example_obd_querying_conf.yaml
+ExecStart={{pwd}}/onedrive-upload.py
 StandardOutput=syslog
 StandardError=syslog
 Restart=always
+RestartSec=1800s
 
 [Install]
 WantedBy=multi-user.target
