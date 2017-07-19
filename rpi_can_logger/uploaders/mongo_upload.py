@@ -21,7 +21,7 @@ for fname in sorted(glob(log_dir+'/*.csv'))[:-1]:
     # make sure this file isn't open by another process
     with open(fname, 'r') as data_fh:
         reader = csv.DictReader(data_fh)
-        trip_id = os.split(fname)[-1].split('.')[0]
+        trip_id = os.path.split(fname)[-1].split('.')[0]
         rpi_readings_collection.remove({'trip_id': trip_id})
         print("Importing", trip_id)
         for row in reader:
