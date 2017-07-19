@@ -1,5 +1,5 @@
 import can
-
+import logging
 
 class BaseLogger:
     def __init__(self, bus, pids2log, pids, trigger):
@@ -58,9 +58,12 @@ class QueryingOBDLogger(BaseOBDLogger):
         # send a message asking for those requested pids
         out = {}
         for m in self.pids2log:
+            out_msg = self.make_msg(m)
+            logging.debug("S> {}".format(out_msg))
             self.bus.send(self.make_msg(m))
             # receive the pid back, (hoping it's the right one)
             msg = self.bus.recv()
+            logging.debug("R> {}".format(msg))
             pid, obd_data = self.separate_can_msg(msg)
             # try and receive
             if pid in self.pids2log:
