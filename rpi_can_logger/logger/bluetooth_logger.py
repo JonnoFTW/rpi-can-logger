@@ -7,7 +7,7 @@ import queue
 class BluetoothLogger(threading.Thread):
     uuid = "08be0e96-6ab4-11e7-907b-a6006ad3dba0"
 
-    def __init__(self, queue_size=512):
+    def __init__(self, queue_size=512, fields=[]):
         """
         This should be in its own thread
         """
@@ -15,6 +15,7 @@ class BluetoothLogger(threading.Thread):
         server_sock = bt.BluetoothSocket(bt.RFCOMM)
         server_sock.bind(("", bt.PORT_ANY))
         server_sock.listen(1)
+        self.fields = fields
         self.queue = queue.Queue(maxsize=queue_size)
         self.port = server_sock.getsockname()[1]
         self.queue_lock = threading.Lock()
@@ -34,6 +35,8 @@ class BluetoothLogger(threading.Thread):
         print("Waiting for connection on RFCOMM channel {}".format(self.port))
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
+
+        self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
         while 1:
             if not self._is_connected():
                 return
@@ -52,6 +55,7 @@ class BluetoothLogger(threading.Thread):
     def send(self, msg):
         if not self._is_connected():
             return
+        print("putting message:", msg)
         self.queue_lock.acquire()
         self.queue.put(msg)
         self.queue_lock.release()
@@ -64,17 +68,14 @@ if __name__ == "__main__":
     from math import sin, pi
     from itertools import cycle
 
-    btl = BluetoothLogger()
+    btl = BluetoothLogger(fields=["speed", "rpm", "soc"])
     btl.start()
 
     # generate some data and send it
-
-    btl.send("#speed,rpm,soc")
-
     x = range(1000)
     y = map(lambda v: sin(v * pi / 45) * 5000 + 5000, x)
     speeds = cycle(y)
-
+    print("Sending dummy data")
     while 1:
         try:
             row = map(str, [next(speeds), 5000, 50])
