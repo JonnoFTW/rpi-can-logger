@@ -38,12 +38,12 @@ class BluetoothLogger(threading.Thread):
 
         self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
         while 1:
-            if not self._is_connected():
-                return
             self.queue_lock.acquire()
             msg = self.queue.get()
             self.queue_lock.release()
-            self.client_sock.send("{}!\n".format(msg))
+            if self._is_connected():
+                print("S>", msg)
+                self.client_sock.send("{}!\n".format(msg))
 
     def _is_connected(self):
         try:
@@ -53,9 +53,6 @@ class BluetoothLogger(threading.Thread):
             return False
 
     def send(self, msg):
-        if not self._is_connected():
-            return
-        print("putting message:", msg)
         self.queue_lock.acquire()
         self.queue.put(msg)
         self.queue_lock.release()
