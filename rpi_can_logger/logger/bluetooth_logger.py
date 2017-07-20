@@ -46,7 +46,7 @@ class BluetoothLogger(threading.Thread):
         try:
             self.client_sock.getpeername()
             return True
-        except bt.BluetoothError:
+        except (bt.BluetoothError, AttributeError):
             return False
 
     def send(self, msg):
