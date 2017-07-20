@@ -35,12 +35,23 @@ class BluetoothLogger(threading.Thread):
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
         while 1:
+            if not self._is_connected():
+                return
             self.queue_lock.acquire()
             msg = self.queue.get()
             self.queue_lock.release()
             self.client_sock.send("{}!\n".format(msg))
 
+    def _is_connected(self):
+        try:
+            self.client_sock.getpeername()
+            return True
+        except bt.BluetoothError:
+            return False
+
     def send(self, msg):
+        if not self._is_connected():
+            return
         self.queue_lock.acquire()
         self.queue.put(msg)
         self.queue_lock.release()
