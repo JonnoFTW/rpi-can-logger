@@ -1,28 +1,28 @@
 from rpi_can_logger.logger import BluetoothLogger
-from itertools import cycle
 from math import sin, pi
-
+from itertools import cycle
+import time
 
 def test_send():
-    # make a new BluetoothLogger and send some OBD data
-    btl = BluetoothLogger()
-    btl.accept()
+
+    btl = BluetoothLogger(fields=["speed", "rpm", "soc"])
+    btl.start()
 
     # generate some data and send it
-
-    btl.send("#speed,rpm,soc")
-
     x = range(1000)
     y = map(lambda v: sin(v * pi / 45) * 5000 + 5000, x)
     speeds = cycle(y)
-
+    print("Sending dummy data")
     while 1:
         try:
-            row = map(str, [next(speeds), 5000, 50])
+            row = map(str, [round(next(speeds), 2), 5000, 50])
             btl.send(",".join(row))
+            time.sleep(1)
         except KeyboardInterrupt:
             print("Terminating")
             break
+    btl.join()
+
 
 if __name__ == "__main__":
     test_send()

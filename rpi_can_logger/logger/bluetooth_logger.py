@@ -2,7 +2,6 @@ import bluetooth as bt
 import logging
 import threading
 import queue
-import time
 
 
 class BluetoothLogger(threading.Thread):
@@ -45,7 +44,6 @@ class BluetoothLogger(threading.Thread):
                 msg = self.queue.get()
             self.queue_lock.release()
             if msg and self._is_connected():
-#                print("S>", msg)
                 self.client_sock.send("{}!\n".format(msg))
 
     def _is_connected(self):
@@ -62,26 +60,3 @@ class BluetoothLogger(threading.Thread):
 
     def close(self):
         self.join()
-
-
-if __name__ == "__main__":
-    from math import sin, pi
-    from itertools import cycle
-
-    btl = BluetoothLogger(fields=["speed", "rpm", "soc"])
-    btl.start()
-
-    # generate some data and send it
-    x = range(1000)
-    y = map(lambda v: sin(v * pi / 45) * 5000 + 5000, x)
-    speeds = cycle(y)
-    print("Sending dummy data")
-    while 1:
-        try:
-            row = map(str, [round(next(speeds), 2), 5000, 50])
-            btl.send(",".join(row))
-            time.sleep(1)
-        except KeyboardInterrupt:
-            print("Terminating")
-            break
-    btl.join()
