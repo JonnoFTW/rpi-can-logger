@@ -1,4 +1,4 @@
-import bluetooth
+import bluetooth as bt
 import logging
 from twisted.internet import abstract, fdesc
 
@@ -8,16 +8,16 @@ class BluetoothLogger:
 
     def __init__(self):
 
-        server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        server_sock.bind(("", bluetooth.PORT_ANY))
+        server_sock = bt.BluetoothSocket(bt.RFCOMM)
+        server_sock.bind(("", bt.PORT_ANY))
         server_sock.listen(1)
 
         port = server_sock.getsockname()[1]
 
-        bluetooth.advertise_service(server_sock, "RPi-Logger",
+        bt.advertise_service(server_sock, "RPi-Logger",
                                     service_id=self.uuid,
-                                    service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
-                                    profiles=[bluetooth.SERIAL_PORT_PROFILE],
+                                    service_classes=[self.uuid, bt.SERIAL_PORT_CLASS],
+                                    profiles=[bt.SERIAL_PORT_PROFILE],
                                     )
 
         print("Waiting for connection on RFCOMM channel {}".format(port))
@@ -54,7 +54,7 @@ class BluezSocket(abstract.FileDescriptor):
 
         abstract.FileDescriptor.__init__(self, reactor)
 
-        self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+        self.sock = bt.BluetoothSocket(bt.RFCOMM)
         self.sock.connect((self.device_id, 1))
         self.connected = True
         self.sock.setblocking(0)
@@ -76,3 +76,25 @@ class BluezSocket(abstract.FileDescriptor):
         self.sock.close()
         self.connected = False
         self.protocol.connectionLost(reason)
+
+if __name__ == "__main__":
+    from math import sin, pi
+    from itertools import cycle
+    btl = BluetoothLogger()
+    btl.accept()
+
+    # generate some data and send it
+
+    btl.send("#speed,rpm,soc")
+
+    x = range(1000)
+    y = map(lambda v: sin(v * pi / 45) * 5000 + 5000, x)
+    speeds = cycle(y)
+
+    while 1:
+        try:
+            row = map(str, [next(speeds), 5000, 50])
+            btl.send(",".join(row))
+        except KeyboardInterrupt:
+            print("Terminating")
+            break

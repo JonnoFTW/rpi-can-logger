@@ -1,3 +1,4 @@
+# coding=utf-8
 from itertools import cycle
 
 
@@ -212,7 +213,7 @@ class Unit:
 
 
 class PID:
-    def __init__(self, pid: int, name: str, dtype, fields=None):
+    def __init__(self, pid, name, dtype, fields=None):
         self.pid = pid
         self.name = name
         self.dtype = dtype()
