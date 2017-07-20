@@ -2,6 +2,7 @@ import bluetooth as bt
 import logging
 import threading
 import queue
+import time
 
 
 class BluetoothLogger(threading.Thread):
@@ -37,12 +38,14 @@ class BluetoothLogger(threading.Thread):
         logging.warning("Accepted connection from: {}".format(client_info))
 
         self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
+        print(self._is_connected())
         while 1:
             self.queue_lock.acquire()
-            msg = self.queue.get()
+            if not self.queue.empty():
+                msg = self.queue.get()
             self.queue_lock.release()
-            if self._is_connected():
-                print("S>", msg)
+            if msg and self._is_connected():
+#                print("S>", msg)
                 self.client_sock.send("{}!\n".format(msg))
 
     def _is_connected(self):
@@ -77,6 +80,7 @@ if __name__ == "__main__":
         try:
             row = map(str, [round(next(speeds), 2), 5000, 50])
             btl.send(",".join(row))
+            time.sleep(1)
         except KeyboardInterrupt:
             print("Terminating")
             break
