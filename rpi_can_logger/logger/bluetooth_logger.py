@@ -12,7 +12,7 @@ class BluetoothLogger:
         server_sock.bind(("", bt.PORT_ANY))
         server_sock.listen(1)
 
-        port = server_sock.getsockname()[1]
+        self.port = server_sock.getsockname()[1]
 
         bt.advertise_service(server_sock, "RPi-Logger",
                                     service_id=self.uuid,
@@ -20,10 +20,10 @@ class BluetoothLogger:
                                     profiles=[bt.SERIAL_PORT_PROFILE],
                                     )
 
-        print("Waiting for connection on RFCOMM channel {}".format(port))
         self.server_sock = server_sock
 
     def accept(self):
+        print("Waiting for connection on RFCOMM channel {}".format(self.port))
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
 
