@@ -78,7 +78,7 @@ if __name__ == "__main__":
     print("Sending dummy data")
     while 1:
         try:
-            row = map(str, [next(speeds), 5000, 50])
+            row = map(str, [round(next(speeds), 2), 5000, 50])
             btl.send(",".join(row))
         except KeyboardInterrupt:
             print("Terminating")
