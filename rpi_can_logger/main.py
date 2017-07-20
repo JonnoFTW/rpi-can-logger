@@ -11,7 +11,7 @@ try:
 except RuntimeError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
-from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger
+from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, BluetoothLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
@@ -60,6 +60,8 @@ if args.conf:
     args = ArgStruct(**out_args)
 if args.verbose:
     print(dump(args))
+
+log_bluetooth = args.log_bluetooth
 is_tesla = args.tesla
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
@@ -160,10 +162,16 @@ def get_serial():
 
 def do_log(sniffing, tesla):
     try:
+        logging.warning("Waiting for CAN Bus channel={} interface={}".format(args.channel, args.interface))
+        led1(1)
+        led2(1)
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface)
         gps = GPS(args.gps_port)
         led2(0)
         led1(0)
+        if log_bluetooth:
+            btl = BluetoothLogger()
+            btl.start()
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
@@ -192,7 +200,10 @@ def do_log(sniffing, tesla):
         if args.verbose:
             print(buff)
         # put the buffer into the csv logs
-        csv_writer.writerow(buff)
+        row_txt = csv_writer.writerow(buff)
+        if log_bluetooth:
+            btl.send(row_txt)
+
         buff = {'vid': vin}
 
 

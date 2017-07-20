@@ -57,3 +57,4 @@ class CSVLogRotator:
             out_name = str(Path(self._out_csv.name).absolute())
             subprocess.Popen(['7z', 'a', '-t7z', '-m0=lzma', '-mx=9', '-mfb=64', '-md=16m',
                               out_name + '.7z', out_name])
+        return ','.join(self._out_writer._dict_to_list(row))
