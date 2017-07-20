@@ -75,7 +75,7 @@ if __name__ == "__main__":
     y = map(lambda v: sin(v * pi / 45) * 5000 + 5000, x)
     speeds = cycle(y)
 
-    for i in range(1000):
+    while 1:
         try:
             row = map(str, [next(speeds), 5000, 50])
             btl.send(",".join(row))
