@@ -38,7 +38,7 @@ class BluetoothLogger(threading.Thread):
         print("Waiting for connection on RFCOMM channel {}".format(self.port))
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
-        self.client_sock.settimeout(0.1)
+        self.client_sock.settimeout(0.3)
         self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
         while 1:
             connected = self._is_connected()
@@ -54,7 +54,10 @@ class BluetoothLogger(threading.Thread):
                     self.recv_queue.append(received)
                 while len(self.queue) > 0:
                     msg = self.queue.popleft()
-                    self.client_sock.send("{}!\n".format(msg))
+                    try:
+                        self.client_sock.send("{}!\n".format(msg))
+                    except bt.BluetoothError as e:
+                        pass
             else:
                 print("Disconnected from {}".format(client_info))
 
