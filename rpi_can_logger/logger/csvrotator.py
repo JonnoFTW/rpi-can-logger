@@ -44,7 +44,8 @@ class CSVLogRotator:
         self._out_csv.close()
 
     conv = {
-        datetime.time: lambda x: x.strftime("%H:%M:%S.%f")
+        datetime.time: lambda x: x.strftime("%H:%M:%S.%f"),
+        type(None): lambda x: ""
     }
 
     def writerow(self, row):
