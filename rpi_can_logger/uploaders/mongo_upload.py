@@ -5,7 +5,9 @@ import yaml
 from glob import glob
 import csv
 import os
-import netifaces as ni
+from datetime import datetime
+
+from rpi_can_logger.util import get_serial, get_ip
 
 with open('./mongo_conf.yaml', 'r') as conf_fd:
     conf = yaml.load(conf_fd)
@@ -18,18 +20,14 @@ client = pymongo.MongoClient(mongo_uri, w=0)
 
 rpi_readings_collection = client[mongo_database][mongo_collection]
 rpi_info = client[mongo_database]['rpi-info']
-from datetime import datetime
-def get_serial():
-    with open('/proc/cpuinfo', 'r') as cpu_info:
-        return cpu_info.readlines()[-1].strip().split(' ')[-1]
 
-serial =  get_serial()
-info = {'ip':ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr'],'ts':datetime.now(), 'serial': serial}
-import yaml
+serial = get_serial()
+info = {'ip': get_ip(), 'ts': datetime.now(), 'serial': serial}
+
 print(yaml.dump(info, default_flow_style=False))
 rpi_info.insert_one(info)
 # start putting everything we've seen in the db
-for fname in sorted(glob(log_dir+'/*.csv'))[:-1]:
+for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
     # make sure this file isn't open by another process
     with open(fname, 'r') as data_fh:
         reader = csv.DictReader(data_fh)
@@ -45,4 +43,3 @@ for fname in sorted(glob(log_dir+'/*.csv'))[:-1]:
         rpi_readings_collection.insert_many(rows, ordered=False)
     # delete the file
     os.remove(fname)
-

@@ -11,6 +11,7 @@ try:
 except RuntimeError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
+from rpi_can_logger.util import get_serial, get_ip
 from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, BluetoothLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
@@ -155,9 +156,6 @@ def get_vin(bus):
     return False
 
 
-def get_serial():
-    with open('/proc/cpuinfo', 'r') as cpu_info:
-        return cpu_info.readlines()[-1].strip().split(' ')[-1]
 
 
 def do_log(sniffing, tesla):
@@ -207,6 +205,11 @@ def do_log(sniffing, tesla):
         if log_bluetooth:
             led2(1)
             btl.send(row_txt)
+            recvd = btl.read()
+            for i in recvd:
+                print(i)
+                if i == "$ip":
+                    btl.send("$ip={}".format(get_ip()))
             led2(0)
 
         buff = {'vid': vin}
