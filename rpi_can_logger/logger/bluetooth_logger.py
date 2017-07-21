@@ -40,10 +40,8 @@ class BluetoothLogger(threading.Thread):
         print(self._is_connected())
         while 1:
             msg = None
-            self.queue_lock.acquire()
             if not self.queue.empty():
                 msg = self.queue.get()
-            self.queue_lock.release()
 
             if msg and self._is_connected():
                 self.client_sock.send("{}!\n".format(msg))
@@ -56,9 +54,7 @@ class BluetoothLogger(threading.Thread):
             return False
 
     def send(self, msg):
-        self.queue_lock.acquire()
         self.queue.put(msg)
-        self.queue_lock.release()
 
     def close(self):
         self.join()
