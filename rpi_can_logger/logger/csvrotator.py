@@ -29,7 +29,8 @@ class CSVLogRotator:
 
         :return:
         """
-        self._reset_buffer()
+        self._buffer = StringIO()
+
         self._bytes_written = 0
         now = datetime.now()
         self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'), 'w')
@@ -40,7 +41,9 @@ class CSVLogRotator:
         self._reset_buffer()
 
     def _reset_buffer(self):
-        self._buffer = StringIO()
+        self._buffer.truncate(0)
+        self._buffer.seek(0)
+
 
     def close(self):
         """
