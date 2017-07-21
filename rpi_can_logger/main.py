@@ -224,7 +224,7 @@ def do_log(sniffing, tesla):
                 try:
                     bt_reply = bt_commands.get(pieces[0].lower().strip(), None)(*pieces[1:])
                     if bt_reply is not None:
-                        btl.send("{}={}".format(i, bt_reply))
+                        btl.send("{}={}".format(pieces[0], bt_reply))
                 except TypeError as e:
                     print(e)
                     btl.send("{}=INVALID_ARG".format(pieces[0]))
