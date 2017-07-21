@@ -43,6 +43,10 @@ class CSVLogRotator:
         """
         self._out_csv.close()
 
+    conv = {
+        datetime.time: lambda x: x.strftime("%H:%M:%S.%f")
+    }
+
     def writerow(self, row):
         """
 
@@ -57,4 +61,6 @@ class CSVLogRotator:
             out_name = str(Path(self._out_csv.name).absolute())
             subprocess.Popen(['7z', 'a', '-t7z', '-m0=lzma', '-mx=9', '-mfb=64', '-md=16m',
                               out_name + '.7z', out_name])
+
+        row = {k: self.conv.get(type(v), lambda x: "{}".format(x))(v) for k, v in row.items()}
         return ','.join(self._out_writer._dict_to_list(row))
