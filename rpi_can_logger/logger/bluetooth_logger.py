@@ -37,7 +37,6 @@ class BluetoothLogger(threading.Thread):
         logging.warning("Accepted connection from: {}".format(client_info))
 
         self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
-        print(self._is_connected())
         while 1:
             msg = None
             if not self.queue.empty():
@@ -45,6 +44,8 @@ class BluetoothLogger(threading.Thread):
 
             if msg and self._is_connected():
                 self.client_sock.send("{}!\n".format(msg))
+            else:
+                print("Disconnected from {}", format(client_info))
 
     def _is_connected(self):
         try:
