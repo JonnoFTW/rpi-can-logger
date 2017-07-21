@@ -162,9 +162,9 @@ def btlog(opt):
     bt_log = opt == 'on'
     return "{}".format(bt_log)
 bt_commands = {
-    '$ip': lambda x: get_ip(),
-    '$serial': lambda x: get_serial(),
-    '$list_log': lambda x: list_log(log_folder),
+    '$ip': get_ip,
+    '$serial': get_serial,
+    '$list_log': lambda: list_log(log_folder),
     '$echo': lambda x: x,
     '$btlog': btlog
 }
