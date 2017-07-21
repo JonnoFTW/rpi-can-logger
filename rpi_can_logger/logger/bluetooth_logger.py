@@ -42,7 +42,7 @@ class BluetoothLogger(threading.Thread):
             if not self.queue.empty():
                 msg = self.queue.get()
 
-            if msg and self._is_connected():
+            if msg: # and self._is_connected():
                 self.client_sock.send("{}!\n".format(msg))
             else:
                 print("Disconnected from {}", format(client_info))
