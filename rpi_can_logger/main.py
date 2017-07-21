@@ -11,8 +11,9 @@ try:
 except RuntimeError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
-from rpi_can_logger.util import get_serial, get_ip
-from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, BluetoothLogger
+from rpi_can_logger.util import get_serial, get_ip, list_log
+from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
+    BluetoothLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
@@ -156,6 +157,12 @@ def get_vin(bus):
     return False
 
 
+bt_commands = {
+    '$ip': lambda x: get_ip(),
+    '$serial': lambda x: get_serial(),
+    '$list_log': lambda x: list_log(log_folder),
+    '$echo': lambda x: x
+}
 
 
 def do_log(sniffing, tesla):
@@ -207,9 +214,13 @@ def do_log(sniffing, tesla):
             btl.send(row_txt)
             recvd = btl.read()
             for i in recvd:
-                print(i)
-                if i == "$ip":
-                    btl.send("$ip={}".format(get_ip()))
+                pieces = i.split('=')
+                try:
+                    bt_reply = bt_commands.get(i.lower().strip(), None)(*pieces)
+                    if bt_reply is not None:
+                        btl.send("{}={}".format(i, bt_reply))
+                except TypeError:
+                    btl.send("{}=INVALID_ARG".format(i))
             led2(0)
 
         buff = {'vid': vin}

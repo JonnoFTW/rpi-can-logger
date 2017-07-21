@@ -57,7 +57,7 @@ class BluetoothLogger(threading.Thread):
                     msg = self.queue.popleft()
                     if msg:
                         try:
-                            self.client_sock.send("{}!\n".format(msg))
+                            self.client_sock.send("{}!\n".format(msg.strip()))
                         except bt.BluetoothError as e:
                             pass
             else:

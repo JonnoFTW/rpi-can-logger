@@ -1,4 +1,5 @@
 import netifaces as ni
+from glob import glob
 
 
 def get_serial():
@@ -8,3 +9,7 @@ def get_serial():
 
 def get_ip():
     return ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+
+
+def list_log(log_dir):
+    return ", ".join(sorted(glob(log_dir + "/*.csv")))
