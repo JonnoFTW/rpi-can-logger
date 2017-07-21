@@ -170,8 +170,9 @@ def do_log(sniffing, tesla):
         led2(0)
         led1(0)
         if log_bluetooth:
-            btl = BluetoothLogger()
+            btl = BluetoothLogger(fields=all_fields)
             btl.start()
+            atexit.register(btl.join)
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
@@ -195,7 +196,9 @@ def do_log(sniffing, tesla):
         led1(0)
         if not args.disable_gps:
             led2(1)
-            buff.update(gps.read())
+            gps_data = gps.read()
+            if gps_data is not None:
+                buff.update(gps_data)
             led2(0)
         if args.verbose:
             print(buff)

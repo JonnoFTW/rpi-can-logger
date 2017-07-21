@@ -1,0 +1,10 @@
+[Unit]
+Description=Set permission of /var/run/sdp
+
+[Install]
+RequiredBy=var-run-sdp.path
+
+[Service]
+Type=simple
+ExecStart=/bin/chgrp bluetooth /var/run/sdp
+ExecStartPost=/bin/chmod 662 /var/run/sdp

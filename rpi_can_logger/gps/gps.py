@@ -52,6 +52,7 @@ class GPS:
                         out[key] = getattr(msg, key)
         except pynmea2.ParseError as e:
             print("Parse error:", e)
+            return None
         return out
 
     def readline(self):
