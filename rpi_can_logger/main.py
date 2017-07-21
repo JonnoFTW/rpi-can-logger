@@ -225,8 +225,9 @@ def do_log(sniffing, tesla):
                     bt_reply = bt_commands.get(i.lower().strip(), None)(*pieces)
                     if bt_reply is not None:
                         btl.send("{}={}".format(i, bt_reply))
-                except TypeError:
-                    btl.send("{}=INVALID_ARG".format(i))
+                except TypeError as e:
+                    print(e)
+                    btl.send("{}=INVALID_ARG".format(pieces[0]))
             led2(0)
 
         buff = {'vid': vin}
