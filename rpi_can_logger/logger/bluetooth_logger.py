@@ -45,7 +45,7 @@ class BluetoothLogger(threading.Thread):
             if msg and self._is_connected():
                 self.client_sock.send("{}!\n".format(msg))
             else:
-                print("Disconnected from {} msg={} connected={}", format(client_info, msg, self.client_sock.connected))
+                print("Disconnected from {} msg={} connected={}", format(client_info, msg, self.server_sock.connected))
 
     def _is_connected(self):
         try:
