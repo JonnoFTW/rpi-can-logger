@@ -156,12 +156,17 @@ def get_vin(bus):
             return vin
     return False
 
-
+bt_log = True
+def btlog(opt):
+    global bt_log
+    bt_log = opt == 'on'
+    return "{}".format(bt_log)
 bt_commands = {
     '$ip': lambda x: get_ip(),
     '$serial': lambda x: get_serial(),
     '$list_log': lambda x: list_log(log_folder),
-    '$echo': lambda x: x
+    '$echo': lambda x: x,
+    '$btlog': btlog
 }
 
 
@@ -211,7 +216,8 @@ def do_log(sniffing, tesla):
         row_txt = csv_writer.writerow(buff)
         if log_bluetooth:
             led2(1)
-            btl.send(row_txt)
+            if bt_log:
+                btl.send(row_txt)
             recvd = btl.read()
             for i in recvd:
                 pieces = i.split('=')
