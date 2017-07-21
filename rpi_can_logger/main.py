@@ -172,7 +172,7 @@ def do_log(sniffing, tesla):
         if log_bluetooth:
             btl = BluetoothLogger(fields=all_fields)
             btl.start()
-            atexit.register(btl.join)
+            # atexit.register(btl.join)
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
@@ -205,7 +205,9 @@ def do_log(sniffing, tesla):
         # put the buffer into the csv logs
         row_txt = csv_writer.writerow(buff)
         if log_bluetooth:
+            led2(1)
             btl.send(row_txt)
+            led2(0)
 
         buff = {'vid': vin}
 
