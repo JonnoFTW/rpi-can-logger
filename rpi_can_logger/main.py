@@ -179,7 +179,9 @@ def do_log(sniffing, tesla):
         gps = GPS(args.gps_port)
         led2(0)
         led1(0)
+        logging.warning("Connected CAN Bus and GPS")
         if log_bluetooth:
+            logging.warning("Starting BT")
             btl = BluetoothLogger(fields=all_fields)
             btl.start()
             # atexit.register(btl.join)

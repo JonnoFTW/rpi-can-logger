@@ -1,5 +1,5 @@
 [Unit]
-Descrption=Monitor /var/run/sdp
+Description=Monitor /var/run/sdp
 
 [Install]
 WantedBy=bluetooth.service
