@@ -44,7 +44,11 @@ class BluetoothLogger(threading.Thread):
             connected = self._is_connected()
             if connected:
                 # Try and receive for a little bit
-                received = self.client_sock.recv(512)
+                received = None
+                try:
+                    received = self.client_sock.recv(512)
+                except bt.BluetoothError as e:
+                    pass
                 if received:
                     print("BTR>", received)
                     self.recv_queue.append(received)
