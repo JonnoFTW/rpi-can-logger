@@ -2,6 +2,8 @@ import bluetooth as bt
 import logging
 import threading
 import queue
+import time
+from collections import deque
 
 
 class BluetoothLogger(threading.Thread):
@@ -16,7 +18,7 @@ class BluetoothLogger(threading.Thread):
         server_sock.bind(("", bt.PORT_ANY))
         server_sock.listen(1)
         self.fields = fields
-        self.queue = queue.Queue(maxsize=queue_size)
+        self.queue = deque(maxlen=queue_size) # queue.Queue(maxsize=queue_size)
         self.port = server_sock.getsockname()[1]
         self.queue_lock = threading.Lock()
         bt.advertise_service(server_sock, "RPi-Logger",
@@ -39,9 +41,11 @@ class BluetoothLogger(threading.Thread):
         self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
         while 1:
             msg = None
-            if not self.queue.empty():
-                msg = self.queue.get()
-
+            if len(self.queue) > 0:
+                msg = self.queue.popleft()
+            else:
+                time.sleep(0.01)
+                continue
             if msg and self._is_connected():
                 self.client_sock.send("{}!\n".format(msg))
             else:
@@ -55,7 +59,7 @@ class BluetoothLogger(threading.Thread):
             return False
 
     def send(self, msg):
-        self.queue.put(msg)
+        self.queue.append(msg)
 
     def close(self):
         self.join()
