@@ -50,6 +50,7 @@ class BluetoothLogger(threading.Thread):
                 except bt.BluetoothError as e:
                     pass
                 if received:
+                    received = received.decode('ascii', 'ignore')
                     print("BTR>", received)
                     self.recv_queue.append(received)
                 while len(self.queue) > 0:
