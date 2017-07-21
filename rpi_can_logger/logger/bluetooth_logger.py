@@ -54,10 +54,11 @@ class BluetoothLogger(threading.Thread):
                     self.recv_queue.append(received)
                 while len(self.queue) > 0:
                     msg = self.queue.popleft()
-                    try:
-                        self.client_sock.send("{}!\n".format(msg))
-                    except bt.BluetoothError as e:
-                        pass
+                    if msg:
+                        try:
+                            self.client_sock.send("{}!\n".format(msg))
+                        except bt.BluetoothError as e:
+                            pass
             else:
                 print("Disconnected from {}".format(client_info))
 
