@@ -25,6 +25,7 @@ serial = get_serial()
 info = {'ip': get_ip(), 'ts': datetime.now(), 'serial': serial}
 
 print(yaml.dump(info, default_flow_style=False))
+rpi_info.delete_many({'serial': serial})
 rpi_info.insert_one(info)
 # start putting everything we've seen in the db
 for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
