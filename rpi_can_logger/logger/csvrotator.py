@@ -3,7 +3,7 @@ from datetime import datetime
 import subprocess
 from pathlib import Path
 import logging
-
+from io import StringIO
 
 class CSVLogRotator:
     """
@@ -29,12 +29,18 @@ class CSVLogRotator:
 
         :return:
         """
+        self._reset_buffer()
         self._bytes_written = 0
         now = datetime.now()
         self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'), 'w')
         logging.warning("Writing to {} ({} bytes)".format(self._out_csv.name, self.max_bytes))
-        self._out_writer = csv.DictWriter(self._out_csv, fieldnames=self.fieldnames, restval=None)
+        self._out_writer = csv.DictWriter(self._buffer, fieldnames=self.fieldnames, restval=None)
         self._out_writer.writeheader()
+        self._out_csv.write(self._buffer.getvalue())
+        self._reset_buffer()
+
+    def _reset_buffer(self):
+        self._buffer = StringIO()
 
     def close(self):
         """
@@ -43,11 +49,6 @@ class CSVLogRotator:
         """
         self._out_csv.close()
 
-    conv = {
-        datetime.time: lambda x: x.strftime("%H:%M:%S.%f"),
-        type(None): lambda x: ""
-    }
-
     def writerow(self, row):
         """
 
@@ -55,6 +56,9 @@ class CSVLogRotator:
         :return:
         """
         self._bytes_written += self._out_writer.writerow(row)
+        row_txt = self._buffer.getvalue()
+        self._out_csv.write(row_txt)
+        self._reset_buffer()
         self._out_csv.flush()
         if self._bytes_written > self.max_bytes:
             self._out_csv.close()
@@ -63,5 +67,4 @@ class CSVLogRotator:
             subprocess.Popen(['7z', 'a', '-t7z', '-m0=lzma', '-mx=9', '-mfb=64', '-md=16m',
                               out_name + '.7z', out_name])
 
-        row = {k: self.conv.get(type(v), lambda x: "{}".format(x))(v) for k, v in row.items()}
-        return ','.join(self._out_writer._dict_to_list(row))
+        return row_txt
