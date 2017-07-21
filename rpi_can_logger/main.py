@@ -222,7 +222,7 @@ def do_log(sniffing, tesla):
             for i in recvd:
                 pieces = i.split('=')
                 try:
-                    bt_reply = bt_commands.get(i.lower().strip(), None)(*pieces)
+                    bt_reply = bt_commands.get(pieces[0].lower().strip(), None)(*pieces)
                     if bt_reply is not None:
                         btl.send("{}={}".format(i, bt_reply))
                 except TypeError as e:
