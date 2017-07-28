@@ -14,21 +14,8 @@ class BluetoothLogger(threading.Thread):
         This should be in its own thread
         """
         threading.Thread.__init__(self)
-        server_sock = bt.BluetoothSocket(bt.RFCOMM)
-        server_sock.bind(("", bt.PORT_ANY))
-        server_sock.listen(1)
         self.fields = fields
-        self.recv_queue = deque(maxlen=queue_size)
-        self.queue = deque(maxlen=queue_size) # queue.Queue(maxsize=queue_size)
-        self.port = server_sock.getsockname()[1]
-        self.queue_lock = threading.Lock()
-        bt.advertise_service(server_sock, "RPi-Logger",
-                             service_id=self.uuid,
-                             service_classes=[self.uuid, bt.SERIAL_PORT_CLASS],
-                             profiles=[bt.SERIAL_PORT_PROFILE],
-                             )
-
-        self.server_sock = server_sock
+        self.queue_size = queue_size
         self._finished = False
 
     def run(self):
@@ -38,6 +25,22 @@ class BluetoothLogger(threading.Thread):
             self._accept_and_send()
 
     def _accept_and_send(self):
+        server_sock = bt.BluetoothSocket(bt.RFCOMM)
+        server_sock.bind(("", bt.PORT_ANY))
+        server_sock.listen(1)
+
+        self.fields = self.fields
+        self.recv_queue = deque(maxlen=self.queue_size)
+        self.queue = deque(maxlen=self.queue_size) # queue.Queue(maxsize=queue_size)
+        self.port = server_sock.getsockname()[1]
+        self.queue_lock = threading.Lock()
+        bt.advertise_service(server_sock, "RPi-Logger",
+                             service_id=self.uuid,
+                             service_classes=[self.uuid, bt.SERIAL_PORT_CLASS],
+                             profiles=[bt.SERIAL_PORT_PROFILE],
+                             )
+
+        self.server_sock = server_sock
         print("Waiting for connection on RFCOMM channel {}".format(self.port))
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
