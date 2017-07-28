@@ -172,6 +172,11 @@ bt_commands = {
 
 def do_log(sniffing, tesla):
     try:
+        if log_bluetooth:
+            logging.warning("Starting BT")
+            btl = BluetoothLogger(fields=all_fields)
+            btl.start()
+            btl.send("$ip={}".format(get_ip()))
         logging.warning("Waiting for CAN Bus channel={} interface={}".format(args.channel, args.interface))
         led1(1)
         led2(1)
@@ -180,11 +185,7 @@ def do_log(sniffing, tesla):
         led2(0)
         led1(0)
         logging.warning("Connected CAN Bus and GPS")
-        if log_bluetooth:
-            logging.warning("Starting BT")
-            btl = BluetoothLogger(fields=all_fields)
-            btl.start()
-            # atexit.register(btl.join)
+
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
