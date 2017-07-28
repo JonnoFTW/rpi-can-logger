@@ -4,7 +4,7 @@ import threading
 import queue
 import time
 from collections import deque
-
+from rpi_can_logger.util import get_ip
 
 class BluetoothLogger(threading.Thread):
     uuid = "08be0e96-6ab4-11e7-907b-a6006ad3dba0"
@@ -43,6 +43,7 @@ class BluetoothLogger(threading.Thread):
         logging.warning("Accepted connection from: {}".format(client_info))
         self.client_sock.settimeout(0.3)
         self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
+        self.send("$ip={}".format(get_ip()))
         while 1:
             connected = self._is_connected()
             if self._finished:

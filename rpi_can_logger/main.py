@@ -176,7 +176,6 @@ def do_log(sniffing, tesla):
             logging.warning("Starting BT")
             btl = BluetoothLogger(fields=all_fields)
             btl.start()
-            btl.send("$ip={}".format(get_ip()))
         logging.warning("Waiting for CAN Bus channel={} interface={}".format(args.channel, args.interface))
         led1(1)
         led2(1)
