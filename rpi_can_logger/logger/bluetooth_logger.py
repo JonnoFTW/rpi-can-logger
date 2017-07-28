@@ -29,7 +29,7 @@ class BluetoothLogger(threading.Thread):
                              )
 
         self.server_sock = server_sock
-        self._fishied = False
+        self._finished = False
 
     def run(self):
         while 1:
