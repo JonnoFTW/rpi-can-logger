@@ -1,6 +1,8 @@
 [Unit]
 Description=Attempt to Upload Remaining Log Files to MongoDB
 After=syslog.target
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=simple
