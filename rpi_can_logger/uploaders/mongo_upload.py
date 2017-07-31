@@ -16,7 +16,7 @@ mongo_uri = conf['mongo_uri']
 mongo_database = conf['mongo_database']
 mongo_collection = conf['mongo_collection']
 log_dir = conf['log_dir']
-client = pymongo.MongoClient(mongo_uri, w=0)
+client = pymongo.MongoClient(mongo_uri, w=0, ssl=True)
 
 rpi_readings_collection = client[mongo_database][mongo_collection]
 rpi_info = client[mongo_database]['rpi-info']

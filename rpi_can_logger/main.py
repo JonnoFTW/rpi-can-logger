@@ -170,6 +170,10 @@ bt_commands = {
 }
 
 
+def init_sniff(bus):
+    bus.send(can.Message(extended_id=False, data=[2,1,0], arbitration_id=OBD_REQUEST))
+
+
 def do_log(sniffing, tesla):
     try:
         if log_bluetooth:
@@ -194,6 +198,7 @@ def do_log(sniffing, tesla):
         logger_c = SniffingOBDLogger
     else:
         logger_c = QueryingOBDLogger
+        init_sniff(bus)
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     buff = {}
     if sniffing or is_tesla:
