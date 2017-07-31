@@ -1,7 +1,12 @@
+#!/usr/bin/env python3
+import os
+print(os.environ['PYTHONPATH'])
+
 from rpi_can_logger.logger import BluetoothLogger
 from math import sin, pi
 from itertools import cycle
 import time
+
 
 def test_send():
 

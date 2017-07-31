@@ -46,7 +46,10 @@ class TeslaSniffingLogger(BaseSnifferLogger):
 class BaseOBDLogger(BaseLogger):
     @staticmethod
     def separate_can_msg(msg):
-        return ((msg.data[1] - 0x40) * 256) + msg.data[2], msg.data[3:]
+        try:
+            return ((msg.data[1] - 0x40) * 256) + msg.data[2], msg.data[3:]
+        except:
+            return False, False
 
 
 class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
@@ -62,12 +65,17 @@ class QueryingOBDLogger(BaseOBDLogger):
             logging.debug("S> {}".format(out_msg))
             self.bus.send(self.make_msg(m))
             # receive the pid back, (hoping it's the right one)
-            msg = self.bus.recv()
-            logging.debug("R> {}".format(msg))
-            pid, obd_data = self.separate_can_msg(msg)
-            # try and receive
-            if pid in self.pids2log:
-                out.update(self.pids[pid]['parse'](obd_data))
+            for i in range(128):
+                msg = self.bus.recv()
+                if msg.arbitration_id != 0x7e8:
+                    continue
+                logging.debug("R> {}".format(msg))
+                pid, obd_data = self.separate_can_msg(msg)
+                
+                # try and receive
+                if pid in self.pids2log and pid == m:
+                    out.update(self.pids[pid]['parse'](obd_data))
+                    break
         return out
 
     @staticmethod

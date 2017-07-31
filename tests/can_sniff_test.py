@@ -22,7 +22,9 @@ atexit.register(bus.shutdown)
 print("Sniffing CAN:", bus)
 while 1:
     try:
-        print(bus.recv())
+        msg = bus.recv()
+#        if msg.arbitration_id in [0x7df, 0x7e8]:
+        print(msg)
     except KeyboardInterrupt:
         print("Terminating")
         break

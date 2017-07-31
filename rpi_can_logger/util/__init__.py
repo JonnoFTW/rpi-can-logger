@@ -8,7 +8,10 @@ def get_serial():
 
 
 def get_ip():
-    return ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+    try:
+        return ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
+    except:
+        return "ERROR"
 
 
 def list_log(log_dir):
