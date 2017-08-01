@@ -1,6 +1,9 @@
 import netifaces as ni
 from glob import glob
 
+OBD_REQUEST = 0x07DF
+OBD_RESPONSE = 0x07E8
+
 
 def get_serial():
     with open('/proc/cpuinfo', 'r') as cpu_info:

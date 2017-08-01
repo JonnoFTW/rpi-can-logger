@@ -11,7 +11,7 @@ try:
 except RuntimeError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
-from rpi_can_logger.util import get_serial, get_ip, list_log
+from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE
 from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
     BluetoothLogger
 
@@ -93,8 +93,7 @@ logging.getLogger().addHandler(logging.StreamHandler())
 # log file size in MB
 log_size = args.log_size
 
-OBD_REQUEST = 0x07DF
-OBD_RESPONSE = 0x07E8
+
 
 # pids to log
 if type(args.log_pids[0]) is list:
@@ -199,6 +198,7 @@ def do_log(sniffing, tesla):
     else:
         logger_c = QueryingOBDLogger
         init_sniff(bus)
+
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     buff = {}
     if sniffing or is_tesla:
