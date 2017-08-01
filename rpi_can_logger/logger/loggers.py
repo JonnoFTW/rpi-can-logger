@@ -104,6 +104,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                 logging.warning("Could not determine PIDs in time")
                 self.responds_to = None
         logging.warning("Supported PIDs are: {}".format([obd_pids[x]['name'] for x in sorted(self.responds_to)]))
+        self.pids2log = self.pids2log & self.responds_to
 
     def log(self):
         # send a message asking for those requested pids
@@ -117,7 +118,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         # receive the pid back, (hoping it's the right one)
         #
         count = 0
-        while count < 1000:
+        while count < 500:
             count += 1
             msg = self.bus.recv(timeout=0.1)
             if msg is None:
@@ -131,6 +132,9 @@ class QueryingOBDLogger(BaseOBDLogger):
             # try and receive
             if pid in self.pids2log:
                 out.update(self.pids[pid]['parse'](obd_data))
+
+            if len(out) == len(self.pids2log):
+                break
         return out
 
     @staticmethod
