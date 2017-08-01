@@ -81,13 +81,16 @@ class QueryingOBDLogger(BaseOBDLogger):
         self.responds_to = set()
         support_check = [0, 32, 64, 96, 128]
         for i in support_check:
-            self.bus.send(can.Message(extended_id=0, data=[2, 1, i, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
+            msg = can.Message(extended_id=0, data=[2, 1, i, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST)
+            self.bus.send(msg)
+            logging.warning("S> {}".format(msg))
         # read in the responses until you get them all
         logging.warning("Determining supported PIDs")
         count = 0
         while support_check:
 
             msg = self.bus.recv()
+            logging.warning("R> {}".format(msg))
             count += 1
             if msg.arbitration_id == OBD_RESPONSE and msg.data[:2] == [6, 0x41] and msg.data[2] in support_check:
                 self._parse_support_frame(msg)

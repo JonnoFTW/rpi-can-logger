@@ -6,6 +6,7 @@ import time
 from collections import deque
 from rpi_can_logger.util import get_ip
 
+
 class BluetoothLogger(threading.Thread):
     uuid = "08be0e96-6ab4-11e7-907b-a6006ad3dba0"
 
@@ -31,7 +32,7 @@ class BluetoothLogger(threading.Thread):
 
         self.fields = self.fields
         self.recv_queue = deque(maxlen=self.queue_size)
-        self.queue = deque(maxlen=self.queue_size) # queue.Queue(maxsize=queue_size)
+        self.queue = deque(maxlen=self.queue_size)  # queue.Queue(maxsize=queue_size)
         self.port = server_sock.getsockname()[1]
         self.queue_lock = threading.Lock()
         bt.advertise_service(server_sock, "RPi-Logger",
@@ -96,3 +97,16 @@ class BluetoothLogger(threading.Thread):
     def close(self):
         self._finished = True
         self.join()
+
+
+class BluetoothReceiver(threading.Thread):
+    def __init__(self, sock):
+        super().__init__()
+        self._finished = False
+        self._sock = sock
+
+    def run(self):
+        while not self._finished:
+            msg = self._sock.recv()
+    def close(self):
+        self._finished = True
