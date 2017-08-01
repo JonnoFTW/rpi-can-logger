@@ -96,7 +96,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             count += 1
             if msg.arbitration_id == OBD_RESPONSE and list(msg.data[:2]) == [6, 0x41] and msg.data[2] in support_check:
                 self._parse_support_frame(msg)
-                logging.warning("support={} recv=".format(support_check, msg.data[2]))
+                # logging.warning("support={} recv={}".format(support_check, msg.data[2]))
                 support_check.remove(msg.data[2])
             if count > 500:
                 logging.warning("Could not determine PIDs in time")
