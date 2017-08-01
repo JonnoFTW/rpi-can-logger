@@ -40,7 +40,7 @@ class CSVLogRotator:
         self._out_writer.writeheader()
         self._out_csv.write(self._buffer.getvalue())
         self._reset_buffer()
-        self.writerow({'vin': self.vin})
+        self.writerow({'vid': self.vin})
 
     def _reset_buffer(self):
         self._buffer.truncate(0)
