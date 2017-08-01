@@ -2,6 +2,7 @@ import can
 import logging
 from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
 
+
 class BaseLogger:
     def __init__(self, bus, pids2log, pids, trigger):
         """
@@ -58,7 +59,6 @@ class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
 
 
 class QueryingOBDLogger(BaseOBDLogger):
-
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
         self._determine_pids()
@@ -70,7 +70,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             bits = format(data, '08b')
             for idx, v in enumerate(bits):
                 if v == '1':
-                    self.responds_to.add(0x0100 + base + idx + 1 + by*8)
+                    self.responds_to.add(0x0100 + base + idx + 1 + by * 8)
             by += 1
 
     def _determine_pids(self):
@@ -81,7 +81,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         self.responds_to = set()
         support_check = [0, 32, 64, 96, 128]
         for i in support_check:
-            self.bus.send(can.Message(extended_id=0, data=[2, 1, i], arbitration_id=OBD_REQUEST))
+            self.bus.send(can.Message(extended_id=0, data=[2, 1, i, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
         # read in the responses until you get them all
         logging.warning("Determining supported PIDs")
         count = 0
