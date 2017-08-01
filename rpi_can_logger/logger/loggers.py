@@ -71,7 +71,9 @@ class QueryingOBDLogger(BaseOBDLogger):
             bits = format(data, '08b')
             for idx, v in enumerate(bits):
                 if v == '1':
-                    self.responds_to.add(0x0100 + base + idx + 1 + by * 8)
+                    pid = 0x0100 + base + idx + 1 + by * 8
+                    if pid in obd_pids:
+                        self.responds_to.add(pid)
             by += 1
 
     def _determine_pids(self):
