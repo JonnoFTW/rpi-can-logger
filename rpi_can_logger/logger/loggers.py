@@ -59,8 +59,8 @@ class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
 
 class QueryingOBDLogger(BaseOBDLogger):
 
-    def __init__(self):
-        super()
+    def __init__(self, bus, pids2log, pids, trigger):
+        super().__init__(bus, pids2log, pids, trigger)
         self._determine_pids()
 
     def _parse_support_frame(self, msg):
