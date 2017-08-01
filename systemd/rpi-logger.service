@@ -8,6 +8,7 @@ User=pi
 Group=pi
 Environment="PYTHONPATH={{pwd}}"
 WorkingDirectory={{pwd}}
+ExecStartPre=/bin/sleep 5
 ExecStart={{pwd}}/rpi_can_logger/main.py --conf {{pwd}}/example_obd_querying_conf.yaml
 StandardOutput=journal
 StandardError=journal
