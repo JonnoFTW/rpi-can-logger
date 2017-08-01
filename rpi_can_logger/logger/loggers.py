@@ -129,7 +129,6 @@ class QueryingOBDLogger(BaseOBDLogger):
             # try and receive
             if pid in self.pids2log:
                 out.update(self.pids[pid]['parse'](obd_data))
-                break
         return out
 
     @staticmethod
