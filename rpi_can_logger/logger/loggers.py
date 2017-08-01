@@ -119,7 +119,9 @@ class QueryingOBDLogger(BaseOBDLogger):
         count = 0
         while count < 1000:
 
-            msg = self.bus.recv(timeout=0.5)
+            msg = self.bus.recv(timeout=0.2)
+            if msg is None:
+                continue
             logging.debug("R> {}".format(msg))
             if msg.arbitration_id != OBD_RESPONSE:
                 continue
