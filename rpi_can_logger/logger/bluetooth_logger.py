@@ -35,11 +35,16 @@ class BluetoothLogger(threading.Thread):
         self.queue = deque(maxlen=self.queue_size)  # queue.Queue(maxsize=queue_size)
         self.port = server_sock.getsockname()[1]
         self.queue_lock = threading.Lock()
-        bt.advertise_service(server_sock, "RPi-Logger",
-                             service_id=self.uuid,
-                             service_classes=[self.uuid, bt.SERIAL_PORT_CLASS],
-                             profiles=[bt.SERIAL_PORT_PROFILE],
-                             )
+        try:
+            bt.advertise_service(server_sock, "RPi-Logger",
+                                 service_id=self.uuid,
+                                 service_classes=[self.uuid, bt.SERIAL_PORT_CLASS],
+                                 profiles=[bt.SERIAL_PORT_PROFILE],
+                                 )
+        except bt.BluetoothError as e:
+            logging.warning("Failed to start bluetooth: {}".format(e))
+            import _thread
+            _thread.interrupt_main()
 
         self.server_sock = server_sock
         print("Waiting for connection on RFCOMM channel {}".format(self.port))
@@ -108,5 +113,6 @@ class BluetoothReceiver(threading.Thread):
     def run(self):
         while not self._finished:
             msg = self._sock.recv()
+
     def close(self):
         self._finished = True

@@ -39,6 +39,7 @@ parser.add_argument('--conf', default=False, type=str,
 parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
 parser.add_argument('--log-bluetooth', action='store_true', help='Log to Bluetooth if Available')
 parser.add_argument('--vid', help='Vehicle Identifier, will try to fetch the VIN, otherwise will a RPi identifier')
+parser.add_argument('--log-level', '-ll', help='Logging level', default='warning', choices=['warning', 'debug'])
 args = parser.parse_args()
 
 if args.conf:
@@ -64,6 +65,7 @@ if args.verbose:
     print(dump(args))
 
 log_bluetooth = args.log_bluetooth
+log_level = args.log_level
 is_tesla = args.tesla
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
@@ -83,9 +85,13 @@ for p in [log_messages, log_folder]:
         os.makedirs(p)
         print("Created log folder", p)
 
+log_levels = {
+    'warning': logging.WARNING,
+    'debug': logging.DEBUG
+}
 logging.basicConfig(
     filename=log_messages + '/messages.log',
-    level=logging.WARNING,
+    level=log_levels.get(log_level, logging.WARNING),
     filemode='a',
     format='%(asctime)s:%(levelname)s: %(message)s'
 )

@@ -87,14 +87,14 @@ class QueryingOBDLogger(BaseOBDLogger):
             msg = can.Message(extended_id=0, data=[2, 1, i, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST)
             self.bus.send(msg)
             time.sleep(0.5)
-            logging.warning("S> {}".format(msg))
+            logging.debug("S> {}".format(msg))
         # read in the responses until you get them all
         logging.warning("Determining supported PIDs")
         count = 0
         while support_check:
 
             msg = self.bus.recv()
-            logging.warning("R> {}".format(msg))
+            logging.debug("R> {}".format(msg))
             count += 1
             if msg.arbitration_id == OBD_RESPONSE and list(msg.data[:2]) == [6, 0x41] and msg.data[2] in support_check:
                 self._parse_support_frame(msg)
@@ -116,11 +116,14 @@ class QueryingOBDLogger(BaseOBDLogger):
 
         # receive the pid back, (hoping it's the right one)
         #
-        for i in range(128):
+        count = 0
+        while count < 1000:
+
             msg = self.bus.recv()
-            if msg.arbitration_id != 0x7e8:
-                continue
             logging.debug("R> {}".format(msg))
+            if msg.arbitration_id != OBD_RESPONSE:
+                continue
+
             pid, obd_data = self.separate_can_msg(msg)
 
             # try and receive

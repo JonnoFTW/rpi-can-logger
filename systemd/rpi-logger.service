@@ -12,6 +12,7 @@ ExecStart={{pwd}}/rpi_can_logger/main.py --conf {{pwd}}/example_obd_querying_con
 StandardOutput=journal
 StandardError=journal
 Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
