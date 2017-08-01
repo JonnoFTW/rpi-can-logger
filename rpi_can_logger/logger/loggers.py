@@ -1,5 +1,6 @@
 import can
 import logging
+import time
 from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
 
 
@@ -79,10 +80,11 @@ class QueryingOBDLogger(BaseOBDLogger):
         :return:
         """
         self.responds_to = set()
-        support_check = [0, 32, 64, 96, 128]
+        support_check = [0, 32, 64, 96]
         for i in support_check:
             msg = can.Message(extended_id=0, data=[2, 1, i, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST)
             self.bus.send(msg)
+            time.sleep(0.5)
             logging.warning("S> {}".format(msg))
         # read in the responses until you get them all
         logging.warning("Determining supported PIDs")
