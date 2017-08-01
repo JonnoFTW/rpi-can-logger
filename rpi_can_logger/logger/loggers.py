@@ -123,7 +123,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             logging.debug("R> {}".format(msg))
             if msg.arbitration_id != OBD_RESPONSE:
                 continue
-
+            count += 1
             pid, obd_data = self.separate_can_msg(msg)
 
             # try and receive
