@@ -10,7 +10,7 @@ class CSVLogRotator:
 
     """
 
-    def __init__(self, log_folder, maxbytes, fieldnames):
+    def __init__(self, log_folder, maxbytes, fieldnames, vin):
         """
 
         :param log_folder:
@@ -22,6 +22,7 @@ class CSVLogRotator:
         self.log_folder = log_folder
         self.max_bytes = maxbytes
         self.fieldnames = fieldnames
+        self.vin = vin
         self._make_csv_writer()
 
     def _make_csv_writer(self):
@@ -39,6 +40,7 @@ class CSVLogRotator:
         self._out_writer.writeheader()
         self._out_csv.write(self._buffer.getvalue())
         self._reset_buffer()
+        self.writerow({'vin': self.vin})
 
     def _reset_buffer(self):
         self._buffer.truncate(0)

@@ -211,8 +211,7 @@ def do_log(sniffing, tesla):
         vin = get_serial()
     else:
         vin = get_vin(bus)
-    buff['vid'] = vin
-    csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields)
+    csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vin)
     while 1:
         led1(1)
         buff.update(logger.log())
@@ -243,7 +242,7 @@ def do_log(sniffing, tesla):
                     btl.send("{}=INVALID_ARG".format(pieces[0]))
             led2(0)
 
-        buff = {'vid': vin}
+        buff = {}
 
 
 def shutdown():
