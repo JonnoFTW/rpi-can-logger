@@ -102,9 +102,9 @@ class QueryingOBDLogger(BaseOBDLogger):
         out = {}
         for m in self.pids2log:
             if self.responds_to is not None and m in self.responds_to:
-            out_msg = self.make_msg(m)
-            logging.debug("S> {}".format(out_msg))
-            self.bus.send(self.make_msg(m))
+                out_msg = self.make_msg(m)
+                logging.debug("S> {}".format(out_msg))
+                self.bus.send(self.make_msg(m))
 
         # receive the pid back, (hoping it's the right one)
         #
