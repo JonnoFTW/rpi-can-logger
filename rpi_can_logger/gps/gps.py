@@ -53,6 +53,9 @@ class GPS:
         except pynmea2.ParseError as e:
             print("Parse error:", e)
             return {}
+        for f in ['lat','lon']:
+            if type(out[f]) == float:
+                out[f] /= 100
         return out
 
     def readline(self):

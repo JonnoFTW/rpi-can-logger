@@ -18,4 +18,4 @@ gps-port: /dev/ttyS0
 tesla: false
 sniffing: false
 log-bluetooth: true
-log-level: debug
+log-level: warning

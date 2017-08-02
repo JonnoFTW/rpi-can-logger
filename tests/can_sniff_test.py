@@ -2,7 +2,7 @@
 import can
 import atexit
 import sys
-
+import time
 if len(sys.argv) > 1:
     arg = sys.argv[1].lower()
     if arg == 'pcan':
@@ -19,15 +19,20 @@ if len(sys.argv) > 1:
 bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)
 print("Sniffing CAN:", bus)
-for i in [0, 32, 64, 96, 128]:
-    msg = can.Message(extended_id=0, data=[2, 1, i, 0, 0, 0, 0, 0], arbitration_id=0x07DF)
-    bus.send(msg)
-    print("S>", msg)
+rcvd = [0,0x20,0x40]
 while 1:
     try:
-        msg = bus.recv()
-        #        if msg.arbitration_id in [0x7df, 0x7e8]:
-        print("R>", msg)
+        while len(rcvd):
+            time.sleep(0.1)
+            msg = can.Message(extended_id=0, data=[2, 1, rcvd[0], 0, 0, 0, 0, 0], arbitration_id=0x07DF)
+            bus.send(msg)
+            print("S>", msg)
+            for i in range(100):
+                msg = bus.recv()
+                if msg.arbitration_id in [0x7df, 0x7e8]:
+                    print("R>", msg)
+                    rcvd.remove(msg.data[2])
+                    break
     except KeyboardInterrupt:
         print("Terminating")
         break
