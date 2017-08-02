@@ -217,6 +217,9 @@ def do_log(sniffing, tesla):
     while 1:
         led1(1)
         buff.update(logger.log())
+        for k,v in buff:
+            if type(v) is float:
+                buff[k] = round(v, 2)
         led1(0)
         if not args.disable_gps:
             led2(1)
