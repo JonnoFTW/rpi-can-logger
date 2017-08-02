@@ -10,16 +10,21 @@ from rpi_can_logger.util import get_ip
 class BluetoothLogger(threading.Thread):
     uuid = "08be0e96-6ab4-11e7-907b-a6006ad3dba0"
 
-    def __init__(self, queue_size=512, fields=[]):
+    def __init__(self, queue_size=512, fields=[], bt_commands={}):
         """
         This should be in its own thread
         """
         threading.Thread.__init__(self)
         self.fields = fields
         self.queue_size = queue_size
+        self.bt_commands = bt_commands
         self._finished = False
 
     def run(self):
+        self.recv_queue = deque(maxlen=self.queue_size)
+        self.queue = deque(maxlen=self.queue_size)  # queue.Queue(maxsize=queue_size)
+        self._recv_thread = BluetoothReceiver(self.recv_queue, bt_commands=self.bt_commands, btl=self)
+        self._recv_thread.start()
         while 1:
             if self._finished:
                 break
@@ -31,8 +36,7 @@ class BluetoothLogger(threading.Thread):
         server_sock.listen(1)
 
         self.fields = self.fields
-        self.recv_queue = deque(maxlen=self.queue_size)
-        self.queue = deque(maxlen=self.queue_size)  # queue.Queue(maxsize=queue_size)
+
         self.port = server_sock.getsockname()[1]
         self.queue_lock = threading.Lock()
         try:
@@ -86,33 +90,37 @@ class BluetoothLogger(threading.Thread):
         except (bt.BluetoothError, AttributeError):
             return False
 
-    def read(self):
-        """
-
-        :return: All the elements the bluetooth devices sent to the rpi
-        """
-        out = []
-        while len(self.recv_queue) > 0:
-            out.append(self.recv_queue.popleft())
-        return out
-
     def send(self, msg):
         self.queue.append(msg)
 
     def close(self):
         self._finished = True
+        self._recv_thread.close()
         self.join()
 
 
 class BluetoothReceiver(threading.Thread):
-    def __init__(self, sock):
+
+    def __init__(self, recv_queue, bt_commands, btl):
         super().__init__()
+        self.btl = btl
+        self.bt_commands = bt_commands
         self._finished = False
-        self._sock = sock
+        self.recv_queue = recv_queue
 
     def run(self):
         while not self._finished:
-            msg = self._sock.recv()
+            while len(self.recv_queue) > 0:
+                cmd = self.recv_queue.popleft()
+                pieces = cmd.split('=')
+                try:
+                    bt_reply = self.bt_commands.get(pieces[0].lower().strip(), None)(*pieces[1:])
+                    if bt_reply is not None:
+                        self.btl.send("{}={}".format(pieces[0], bt_reply))
+                except TypeError as e:
+                    print(e)
+                    self.btl.send("{}=INVALID_ARG".format(pieces[0]))
+            time.sleep(1)
 
     def close(self):
         self._finished = True

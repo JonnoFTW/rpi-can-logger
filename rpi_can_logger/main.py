@@ -162,10 +162,13 @@ def get_vin(bus):
     return False
 
 bt_log = True
+
+
 def btlog(opt):
     global bt_log
     bt_log = opt == 'on'
     return "{}".format(bt_log)
+
 bt_commands = {
     '$ip': get_ip,
     '$serial': get_serial,
@@ -174,16 +177,15 @@ bt_commands = {
     '$btlog': btlog
 }
 
-
 def init_sniff(bus):
-    bus.send(can.Message(extended_id=False, data=[2,1,0], arbitration_id=OBD_REQUEST))
+    bus.send(can.Message(extended_id=False, data=[2, 1, 0, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
 
 
 def do_log(sniffing, tesla):
     try:
         if log_bluetooth:
             logging.warning("Starting BT")
-            btl = BluetoothLogger(fields=all_fields)
+            btl = BluetoothLogger(fields=all_fields, bt_commands=bt_commands)
             btl.start()
         logging.warning("Waiting for CAN Bus channel={} interface={}".format(args.channel, args.interface))
         led1(1)
@@ -230,16 +232,7 @@ def do_log(sniffing, tesla):
             led2(1)
             if bt_log:
                 btl.send(row_txt)
-            recvd = btl.read()
-            for i in recvd:
-                pieces = i.split('=')
-                try:
-                    bt_reply = bt_commands.get(pieces[0].lower().strip(), None)(*pieces[1:])
-                    if bt_reply is not None:
-                        btl.send("{}={}".format(pieces[0], bt_reply))
-                except TypeError as e:
-                    print(e)
-                    btl.send("{}=INVALID_ARG".format(pieces[0]))
+
             led2(0)
 
         buff = {}

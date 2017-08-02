@@ -5,6 +5,7 @@ from datetime import datetime
 from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
 from rpi_can_logger.logger import obd_pids
 
+
 class BaseLogger:
     def __init__(self, bus, pids2log, pids, trigger):
         """
@@ -106,9 +107,10 @@ class QueryingOBDLogger(BaseOBDLogger):
             if count > 500 or (datetime.now() - start).total_seconds() > max_wait_sec:
                 logging.warning("Could not determine PIDs in time")
                 self.responds_to = None
+                return
         logging.warning("Supported PIDs are: {}".format([obd_pids[x]['name'] for x in sorted(self.responds_to)]))
         self.pids2log = self.pids2log & self.responds_to
-        logging.warning("Only logging: {}".format(self.pids2log))
+        logging.warning("Only logging: {}".format([obd_pids[x]['name'] for x in sorted(self.pids2log)]))
 
     def log(self):
         # send a message asking for those requested pids
