@@ -108,9 +108,9 @@ class QueryingOBDLogger(BaseOBDLogger):
                 logging.warning("Could not determine PIDs in time")
                 self.responds_to = None
                 return
-        logging.warning("Supported PIDs are: {}".format([obd_pids[x]['name'] for x in sorted(self.responds_to)]))
+        logging.warning("Supported PIDs are: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.responds_to)])))
         self.pids2log = self.pids2log & self.responds_to
-        logging.warning("Only logging: {}".format([obd_pids[x]['name'] for x in sorted(self.pids2log)]))
+        logging.warning("Only logging: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.pids2log)])))
 
     def log(self):
         # send a message asking for those requested pids
