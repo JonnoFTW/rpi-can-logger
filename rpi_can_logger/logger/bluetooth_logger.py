@@ -70,7 +70,7 @@ class BluetoothLogger(threading.Thread):
                     pass
                 if received:
                     received = received.decode('ascii', 'ignore')
-                    print("BTR>", received)
+                    logging.warning("BTR> {}".format(received))
                     self.recv_queue.append(received)
                 while len(self.queue) > 0:
                     msg = self.queue.popleft()

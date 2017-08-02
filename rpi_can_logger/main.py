@@ -232,7 +232,6 @@ def do_log(sniffing, tesla):
             led2(1)
             if bt_log:
                 btl.send(row_txt)
-
             led2(0)
 
         buff = {}
