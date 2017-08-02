@@ -1,6 +1,7 @@
 import can
 import logging
 import time
+from datetime import datetime
 from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
 from rpi_can_logger.logger import obd_pids
 
@@ -91,6 +92,8 @@ class QueryingOBDLogger(BaseOBDLogger):
         # read in the responses until you get them all
         logging.warning("Determining supported PIDs")
         count = 0
+        max_wait_sec = 15
+        start = datetime.now()
         while support_check:
 
             msg = self.bus.recv()
@@ -100,11 +103,12 @@ class QueryingOBDLogger(BaseOBDLogger):
                 self._parse_support_frame(msg)
                 # logging.warning("support={} recv={}".format(support_check, msg.data[2]))
                 support_check.remove(msg.data[2])
-            if count > 500:
+            if count > 500 or (datetime.now() - start).total_seconds() > max_wait_sec:
                 logging.warning("Could not determine PIDs in time")
                 self.responds_to = None
         logging.warning("Supported PIDs are: {}".format([obd_pids[x]['name'] for x in sorted(self.responds_to)]))
         self.pids2log = self.pids2log & self.responds_to
+        logging.warning("Only logging: {}".format(self.pids2log))
 
     def log(self):
         # send a message asking for those requested pids
@@ -118,7 +122,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         # receive the pid back, (hoping it's the right one)
         #
         count = 0
-        while count < 500:
+        while count < 100:
             count += 1
             msg = self.bus.recv(timeout=0.1)
             if msg is None:
