@@ -217,7 +217,7 @@ def do_log(sniffing, tesla):
     while 1:
         led1(1)
         buff.update(logger.log())
-        for k,v in buff:
+        for k,v in buff.items():
             if type(v) is float:
                 buff[k] = round(v, 2)
         led1(0)
