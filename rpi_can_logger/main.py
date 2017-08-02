@@ -229,7 +229,9 @@ def do_log(sniffing, tesla):
         led1(0)
         if not args.disable_gps:
             led2(1)
+#            logging.warning("Reading gps")
             gps_data = gps.read()
+ #           logging.warning("read gps")
             if gps_data is not None:
                 buff.update(gps_data)
             led2(0)

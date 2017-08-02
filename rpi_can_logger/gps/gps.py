@@ -1,3 +1,5 @@
+from datetime import datetime
+import logging
 import serial
 import pynmea2
 import re
@@ -37,8 +39,12 @@ class GPS:
         # read until the next $ and check if its a GPGGA
         buff = StringIO()
         out = {k: None for k in self.FIELDS}
+        start = datetime.now()
         while not all(out.values()):
-            ins = self.ser.read()
+            ins = self.ser.read(96)
+            logging.warning("Read from GPS> {}".format(ins.decode('ascii','ignore')))
+            if (datetime.now() - start).total_seconds() > self.timeout:
+                break
             ins = re.sub(r'[\x00-\x1F]|\r|\n|\t', '', ins.decode('ASCII', 'ignore'))
             if ins == '$':
                 break
@@ -52,7 +58,7 @@ class GPS:
                         out[key] = getattr(msg, key)
         except pynmea2.ParseError as e:
             print("Parse error:", e)
-            return {}
+            return None
         for f in ['lat','lon']:
             if type(out[f]) == float:
                 out[f] /= 100

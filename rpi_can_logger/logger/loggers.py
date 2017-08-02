@@ -66,6 +66,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         super().__init__(bus, pids2log, pids, trigger)
 #        self._determine_pids()
         self.responds_to = None
+        self.first_log = True
 
     def _parse_support_frame(self, msg):
         by = 0
@@ -97,7 +98,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             while 1:
                 recvd = self.bus.recv()
                 if recvd.arbitration_id == OBD_RESPONSE:
-#                    logging.warning("R> {}".format(recvd))
+                    logging.warning("R> {}".format(recvd))
                     break
                 if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[2] in support_check:
                     self._parse_support_frame(msg)
@@ -113,31 +114,46 @@ class QueryingOBDLogger(BaseOBDLogger):
     def log(self):
         # send a message asking for those requested pids
         out = {}
+        pids_responded = []
+
         for m in self.pids2log:
             #if self.responds_to is not None and m in self.responds_to:
                 out_msg = self.make_msg(m)
-                logging.debug("S> {}".format(out_msg))
+                logging.warning("S> {}".format(out_msg))
                 self.bus.send(self.make_msg(m))
 
         # receive the pid back, (hoping it's the right one)
         #
                 count = 0
-                while count < 128:
+                start = datetime.now()
+                while count < 64:
                     count += 1
-                    msg = self.bus.recv(timeout=0.1)
+                    msg = self.bus.recv(0.1)
                     if msg is None:
+                        logging.warning("No message")
+                        if (datetime.now() - start).total_seconds() > 1:
+                            break
+
                         continue
                     if msg.arbitration_id == OBD_RESPONSE:
-                        logging.warning("R> {}".format(msg))
+ #                       logging.warning("R> {}".format(msg))
      
                         pid, obd_data = self.separate_can_msg(msg)
-    
+#                        logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
                         # try and receive
                         if pid in self.pids2log:
                             out.update(self.pids[pid]['parse'](obd_data))
-    
+                            pids_responded.append(pid)
+ #                           logging.warning(out)
                         if len(out) == len(self.pids2log):
                             break
+  #      logging.warning(out)
+#        logging.warning("finished log loop")
+        if self.first_log:
+            # only log those that get a response
+            self.pids2log = set(pids_responded)
+            logging.warning("Setting PIDs to {}".format(self.pids2log))
+            self.first_log = False
         return out
 
     @staticmethod
