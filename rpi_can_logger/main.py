@@ -3,6 +3,7 @@ import argparse
 import atexit
 import logging
 import os
+import subprocess
 from yaml import load, dump
 import can
 
@@ -89,8 +90,9 @@ log_levels = {
     'warning': logging.WARNING,
     'debug': logging.DEBUG
 }
+log_file = log_messages + '/messages.log'
 logging.basicConfig(
-    filename=log_messages + '/messages.log',
+    filename=log_file,
     level=log_levels.get(log_level, logging.WARNING),
     filemode='a',
     format='%(asctime)s:%(levelname)s: %(message)s'
@@ -169,12 +171,16 @@ def btlog(opt):
     bt_log = opt == 'on'
     return "{}".format(bt_log)
 
+def get_error():
+    return subprocess.check_output(['tail', '-n', '20', log_file])
+
 bt_commands = {
     '$ip': get_ip,
     '$serial': get_serial,
     '$list_log': lambda: list_log(log_folder),
     '$echo': lambda x: x,
-    '$btlog': btlog
+    '$btlog': btlog,
+    '$err': get_error
 }
 
 def init_sniff(bus):
