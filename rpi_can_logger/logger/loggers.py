@@ -130,7 +130,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                     count += 1
                     msg = self.bus.recv(0.1)
                     if msg is None:
-                        logging.warning("No message")
+                        # logging.warning("No message")
                         if (datetime.now() - start).total_seconds() > 1:
                             break
 
