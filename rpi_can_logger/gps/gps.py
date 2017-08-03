@@ -41,8 +41,8 @@ class GPS:
         out = {k: None for k in self.FIELDS}
         start = datetime.now()
         while not all(out.values()):
-            ins = self.ser.read(96)
-            logging.warning("Read from GPS> {}".format(ins.decode('ascii','ignore')))
+            ins = self.ser.read()
+            # logging.warning("Read from GPS> {}".format(ins.decode('ascii', 'ignore')))
             if (datetime.now() - start).total_seconds() > self.timeout:
                 break
             ins = re.sub(r'[\x00-\x1F]|\r|\n|\t', '', ins.decode('ASCII', 'ignore'))
@@ -50,16 +50,16 @@ class GPS:
                 break
             if ins != '':
                 buff.write(ins)
-        try:
-            if buff.getvalue():
-                msg = pynmea2.parse(buff.getvalue())
-                for key in out:
-                    if hasattr(msg, key):
-                        out[key] = getattr(msg, key)
-        except pynmea2.ParseError as e:
-            print("Parse error:", e)
-            return None
-        for f in ['lat','lon']:
+            try:
+                if buff.getvalue():
+                    msg = pynmea2.parse(buff.getvalue())
+                    for key in out:
+                        if hasattr(msg, key):
+                            out[key] = getattr(msg, key)
+            except pynmea2.ParseError as e:
+                print("Parse error:", e)
+                return None
+        for f in ['lat', 'lon']:
             if type(out[f]) == float:
                 out[f] /= 100
         return out

@@ -14,7 +14,7 @@ ExecStart={{pwd}}/rpi_can_logger/uploaders/mongo_upload.py
 StandardOutput=journal
 StandardError=journal
 Restart=always
-RestartSec=300
+RestartSec=30
 
 [Install]
 WantedBy=multi-user.target

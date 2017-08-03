@@ -36,7 +36,7 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
         trip_id = os.path.split(fname)[-1].split('.')[0]
         rpi_readings_collection.remove({'trip_id': trip_id})
         # read up all the docs
-        print("Importing", trip_id, end='')
+        print("Importing", trip_id)
         rows = []
         vid = serial
         for row in reader:
