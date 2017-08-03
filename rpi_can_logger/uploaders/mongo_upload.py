@@ -6,6 +6,7 @@ from glob import glob
 import csv
 import os
 from datetime import datetime
+from io import StringIO
 
 from rpi_can_logger.util import get_serial, get_ip
 
@@ -31,23 +32,28 @@ rpi_info.insert_one(info)
 for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
     # make sure this file isn't open by another process
     first_row = True
+
     with open(fname, 'r') as data_fh:
-        reader = csv.DictReader(data_fh)
-        trip_id = os.path.split(fname)[-1].split('.')[0]
-        rpi_readings_collection.remove({'trip_id': trip_id})
-        # read up all the docs
-        print("Importing", trip_id)
-        rows = []
-        vid = vin_fallback
-        for row in reader:
-            if first_row:
-                if 'vid' in row and row['vid'] != 'False':
-                    vid = row['vid']
-                first_row = False
-            to_insert = {'trip_id': trip_id, 'vid': vid}
-            to_insert.update(row)
-            rows.append(to_insert)
-        if len(rows):
-            rpi_readings_collection.insert_many(rows, ordered=False)
+        all_data = data_fh.read().replace('\x00', '')
+    all_data_fh = StringIO(all_data)
+    del all_data
+
+    reader = csv.DictReader(all_data_fh)
+    trip_id = os.path.split(fname)[-1].split('.')[0]
+    rpi_readings_collection.remove({'trip_id': trip_id})
+    # read up all the docs
+    print("Importing", trip_id)
+    rows = []
+    vid = vin_fallback
+    for row in reader:
+        if first_row:
+            if 'vid' in row and row['vid'] != 'False':
+                vid = row['vid']
+            first_row = False
+        to_insert = {'trip_id': trip_id, 'vid': vid}
+        to_insert.update(row)
+        rows.append(to_insert)
+    if len(rows):
+        rpi_readings_collection.insert_many(rows, ordered=False)
     # delete the file
     os.remove(fname)
