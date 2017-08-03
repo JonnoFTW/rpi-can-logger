@@ -17,7 +17,7 @@ mongo_database = conf['mongo_database']
 mongo_collection = conf['mongo_collection']
 log_dir = conf['log_dir']
 client = pymongo.MongoClient(mongo_uri, w=0)
-
+vin_fallback = conf['vin_fallback']
 rpi_readings_collection = client[mongo_database][mongo_collection]
 rpi_info = client[mongo_database]['rpi-info']
 
@@ -38,10 +38,10 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
         # read up all the docs
         print("Importing", trip_id)
         rows = []
-        vid = serial
+        vid = vin_fallback
         for row in reader:
             if first_row:
-                if 'vid' in row:
+                if 'vid' in row and row['vid'] != 'False':
                     vid = row['vid']
                 first_row = False
             to_insert = {'trip_id': trip_id, 'vid': vid}
