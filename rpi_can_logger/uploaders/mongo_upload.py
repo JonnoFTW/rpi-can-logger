@@ -47,6 +47,7 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
             to_insert = {'trip_id': trip_id, 'vid': vid}
             to_insert.update(row)
             rows.append(to_insert)
-        rpi_readings_collection.insert_many(rows, ordered=False)
+        if len(rows):
+            rpi_readings_collection.insert_many(rows, ordered=False)
     # delete the file
     os.remove(fname)
