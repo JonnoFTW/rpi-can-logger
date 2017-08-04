@@ -6,6 +6,7 @@ from glob import glob
 import csv
 import os
 from datetime import datetime
+from dateutil.parser import parse
 from io import StringIO
 
 from rpi_can_logger.util import get_serial, get_ip
@@ -74,6 +75,7 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
             del row['latitude']
             del row['longitude']
         row = {k: convert(v) for k, v in row.items()}
+        row['timestamp'] = parse(row['timestamp'])
         to_insert.update(row)
         rows.append(to_insert)
     if len(rows):
