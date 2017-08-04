@@ -33,16 +33,20 @@ rpi_info.insert_one(info)
 
 
 def convert(val):
+    if type(val)  not in [str,type(None)]:
+        return val
     try:
         if '.' in val:
             return float(val)
     except ValueError:
-        try:
-            return int(val)
-        except ValueError:
-            return val
+        pass
+    try:
+        return int(val)
+    except ValueError:
+        return val
 
-for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
+
+for fname in sorted(glob(log_dir + '/*.csv')):
     # make sure this file isn't open by another process
     first_row = True
 
@@ -61,24 +65,36 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
     row_count = 0
     for row in reader:
         if first_row:
+            first_row = False
             if 'vid' in row and row['vid'] != 'False':
                 vid = row['vid']
-            first_row = False
-        to_insert = {'trip_id': trip_id, 'vid': vid, 'trip_sequence': row_count}
+            else:
+                print("Using fallback vin: {}".format(vid))
+        to_insert = {'trip_id': trip_id, 'vid': vid, 'trip_sequence': row_count, 'pos': None}
         row_count += 1
-
-        if row['latitude'] != '' and row['longitude'] != '':
-            row['pos'] = {
-                'type': 'Point',
-                'coordinates': [float(row['longitude']), float(row['latitude'])]
-            }
-            del row['latitude']
-            del row['longitude']
+        del row['vid']
+        if row['latitude'] is not None and row['longitude'] is not None:
+            try:
+                row['pos'] = {
+                    'type': 'Point',
+                    'coordinates': [float(row['longitude']), float(row['latitude'])]
+                }
+                del row['latitude']
+                del row['longitude']
+            except:
+                pass
         row = {k: convert(v) for k, v in row.items()}
-        row['timestamp'] = parse(row['timestamp'])
+        if row['timestamp'] is not None:
+            try:
+                row['timestamp'] = parse(row['timestamp'])
+            except:
+                pass
+        
         to_insert.update(row)
+        
+        print (to_insert)
         rows.append(to_insert)
     if len(rows):
         rpi_readings_collection.insert_many(rows, ordered=False)
     # delete the file
-    os.remove(fname)
+    #os.remove(fname)
