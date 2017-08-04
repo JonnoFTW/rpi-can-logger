@@ -41,28 +41,40 @@ class GPS:
         out = {k: None for k in self.FIELDS}
         start = datetime.now()
         while not all(out.values()):
-            ins = self.ser.read()
+            line = self._readline()
             # logging.warning("Read from GPS> {}".format(ins.decode('ascii', 'ignore')))
             if (datetime.now() - start).total_seconds() > self.timeout:
                 break
-            ins = re.sub(r'[\x00-\x1F]|\r|\n|\t', '', ins.decode('ASCII', 'ignore'))
-            if ins == '$':
-                break
-            if ins != '':
-                buff.write(ins)
+            line = re.sub(r'[\x00-\x1F]|\r|\n|\t', "", line.decode('ASCII', 'ignore'))
+            #if ins == '$':
+            #    break
+            #if ins != '':
+            #    buff.write(ins)
             try:
-                if buff.getvalue():
-                    msg = pynmea2.parse(buff.getvalue())
-                    for key in out:
-                        if hasattr(msg, key):
+                #if buff.getvalue():
+                msg = pynmea2.parse(line)                    
+                for key in out:
+                    if hasattr(msg, key):
                             out[key] = getattr(msg, key)
             except pynmea2.ParseError as e:
                 print("Parse error:", e)
-                return None
+                
         for f in ['lat', 'lon']:
             if type(out[f]) == float:
-                out[f] /= 100
+                out[f] /= 100.
         return out
 
+    def _readline(self, eol=b'\r'):
+        leneol = len(eol)
+        line = bytearray()
+        while True:
+            c = self.ser.read(1)
+            if c:
+                line += c
+                if line[-leneol:] == eol:
+                    break
+            else:
+                break
+        return bytes(line)
     def readline(self):
         return self.ser.readline().decode('ascii').strip()
