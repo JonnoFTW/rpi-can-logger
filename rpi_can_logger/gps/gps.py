@@ -58,11 +58,10 @@ B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
             line = self.readline()
             if (datetime.now() - start).total_seconds() > self.timeout:
                 break
-            line = re.sub(r'[\x00-\x1F]|\r|\n|\t', "", line)
-            if not line.startswith('$'):
-                line = '$'+line
+            line = re.sub(r'[\x00-\x1F]|\r|\n|\t|\$', "", line)
+
             cmd = line.split(',')[0]
-            if cmd not in ['$GNGGA', '$GNRMC']:
+            if cmd not in ['GNGGA', 'GNRMC']:
                 continue
             try:
                 msg = pynmea2.parse(line)

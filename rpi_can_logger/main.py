@@ -174,7 +174,13 @@ def btlog(opt):
 
 def get_error():
     return subprocess.check_output(['tail', '-n', '20', log_file])
-
+def reset():
+    return subprocess.check_output('sudo shutdown -r now'.split())
+def reset_wifi():
+    out = ''
+    for cmd in ['down', 'up']:
+        out += subprocess.check_output(['sudo', 'ifconfig', 'wlan0', cmd])
+    return out
 bt_commands = {
     '$ip': get_ip,
     '$serial': get_serial,
@@ -182,7 +188,9 @@ bt_commands = {
     '$echo': lambda x: x,
     '$btlog': btlog,
     '$err': get_error,
-    '$systime': lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    '$systime': lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+    '$reset': reset,
+    '$resetwifi': reset_wifi
 }
 
 def init_sniff(bus):
