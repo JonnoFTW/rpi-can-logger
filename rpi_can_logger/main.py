@@ -240,7 +240,7 @@ def do_log(sniffing, tesla):
                 shutdown_msg = "Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
-                os.system('sudo shutdown - h now')
+                logging.warning(subprocess.check_output('sudo shutdown -h now'.split()))
         else:
             err_count = 0
         buff.update(new_log)
