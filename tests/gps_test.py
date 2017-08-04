@@ -15,7 +15,7 @@ print("Reading from", gps.ser.portstr)
 buff = StringIO()
 while 1:
     try:
-        print("R>", pynmea2.parse(gps.readline()))
+        print("R>", gps.read())
     except KeyboardInterrupt:
         print("\nTerminating")
         break

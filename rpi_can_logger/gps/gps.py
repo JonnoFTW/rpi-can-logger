@@ -55,10 +55,10 @@ B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
         out = {k: None for k in self.FIELDS + self.EXTRA_FIELD}
         start = datetime.now()
         while not all(out.values()):
-            line = self._readline()
+            line = self.readline()
             if (datetime.now() - start).total_seconds() > self.timeout:
                 break
-            line = re.sub(r'[\x00-\x1F]|\r|\n|\t', "", line.decode('ascii', 'ignore'))
+            line = re.sub(r'[\x00-\x1F]|\r|\n|\t', "", line)
             cmd = line.split(',')[0]
             if cmd not in ['$GNGGA', '$GNRMC']:
                 continue
