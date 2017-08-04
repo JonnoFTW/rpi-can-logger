@@ -46,7 +46,7 @@ class GPS:
 24 45 49 47 50 51 2c 52 4d 43 2a 33 41 0d 0a b5 62 06 01 03 00 f0 04 01 ff 18
 B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
 """.splitlines():
-            self.ser.write(map(lambda x: int(x, 16), msg.split(' ')))
+            self.ser.write(bytes(map(lambda x: int(x, 16), msg.split(' '))))
             time.sleep(0.1)
 
     def close(self):
