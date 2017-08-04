@@ -79,6 +79,9 @@ B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
             del out['datestamp']
         if out[self.FIELDS[-1]] is not None:
             out[self.FIELDS[-1]] *= self.KNOTS_PER_KMPH
+        for f in ['latitude', 'longitude']:
+            if out[f] == 0.0:
+                out[f] = None
         return out
 
     def _readline(self, eol=b'\r'):
