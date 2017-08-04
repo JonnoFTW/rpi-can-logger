@@ -66,21 +66,14 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
         to_insert = {'trip_id': trip_id, 'vid': vid, 'trip_sequence': row_count}
         row_count += 1
 
-        if row['datestamp'] != '' and row['timestamp']:
-            try:
-                row['timestamp'] = datetime.strptime(row['datestamp']+' '+row['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
-                del row['datestamp']
-            except ValueError as e:
-                print("Error parsing datestamp: {}".format(e))
-                pass
-        if row['lat'] != '' and row['lon'] != '':
+        if row['latitude'] != '' and row['longitude'] != '':
             row['pos'] = {
                 'type': 'Point',
-                'coordinates': [float(row['lon']), float(row['lat'])]
+                'coordinates': [float(row['longitude']), float(row['latitude'])]
             }
-            del row['lat']
-            del row['lon']
-        row = {k:convert(k, v) for k, v in row.items()}
+            del row['latitude']
+            del row['longitude']
+        row = {k: convert(v) for k, v in row.items()}
         to_insert.update(row)
         rows.append(to_insert)
     if len(rows):

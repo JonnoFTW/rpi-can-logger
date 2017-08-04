@@ -12,8 +12,8 @@ Wrapper for the NMEA GPS device
 
 
 class GPS:
-    FIELDS = ['timestamp', 'datestamp', 'lat', 'lon', 'altitude', 'spd_over_grnd_kmph']
-
+    FIELDS = ['timestamp', 'latitude', 'longitude', 'altitude', 'spd_over_grnd_kmph']
+    EXTRA_FIELD = ['datestamp']
     def __init__(self, port, baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                  bytesize=serial.EIGHTBITS, timeout=1):
         self.port = port
@@ -38,7 +38,7 @@ class GPS:
     def read(self):
         # read until the next $ and check if its a GPGGA
         buff = StringIO()
-        out = {k: None for k in self.FIELDS}
+        out = {k: None for k in self.FIELDS + self.EXTRA_FIELD}
         start = datetime.now()
         while not all(out.values()):
             line = self._readline()
@@ -59,9 +59,9 @@ class GPS:
             except pynmea2.ParseError as e:
                 print("Parse error:", e)
 
-        for f in ['lat', 'lon']:
-            if type(out[f]) == float:
-                out[f] /= 100.
+        if out['datestamp'] is not None and out['timestamp'] is not None:
+            out['timestamp'] = datetime.combine(out['datestamp'], out['timestamp'])
+            del out['datestamp']
         return out
 
     def _readline(self, eol=b'\r'):

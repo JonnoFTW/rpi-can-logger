@@ -233,8 +233,10 @@ def do_log(sniffing, tesla):
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
                 os.system('sudo shutdown - h now')
+        else:
+            err_count = 0
         buff.update(new_log)
-        for k,v in buff.items():
+        for k, v in buff.items():
             if type(v) is float:
                 buff[k] = round(v, 2)
         led1(0)
