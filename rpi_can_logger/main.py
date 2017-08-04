@@ -178,8 +178,8 @@ def reset():
     return subprocess.check_output('sudo shutdown -r now'.split())
 def reset_wifi():
     out = ''
-    for cmd in ['down', 'up']:
-        out += subprocess.check_output(['sudo', 'ifconfig', 'wlan0', cmd])
+    for cmd in ['ifdown', 'ifup']:
+        out += subprocess.check_output(['sudo', cmd, 'wlan0'])
     return out
 bt_commands = {
     '$ip': get_ip,
