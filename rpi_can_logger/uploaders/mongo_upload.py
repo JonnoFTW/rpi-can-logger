@@ -29,6 +29,18 @@ print(yaml.dump(info, default_flow_style=False))
 rpi_info.delete_many({'serial': serial})
 rpi_info.insert_one(info)
 # start putting everything we've seen in the db
+
+
+def convert(val):
+    try:
+        if '.' in val:
+            return float(val)
+    except ValueError:
+        try:
+            return int(val)
+        except ValueError:
+            return val
+
 for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
     # make sure this file isn't open by another process
     first_row = True
@@ -45,12 +57,30 @@ for fname in sorted(glob(log_dir + '/*.csv'))[:-1]:
     print("Importing", trip_id)
     rows = []
     vid = vin_fallback
+    row_count = 0
     for row in reader:
         if first_row:
             if 'vid' in row and row['vid'] != 'False':
                 vid = row['vid']
             first_row = False
-        to_insert = {'trip_id': trip_id, 'vid': vid}
+        to_insert = {'trip_id': trip_id, 'vid': vid, 'trip_sequence': row_count}
+        row_count += 1
+
+        if row['datestamp'] != '' and row['timestamp']:
+            try:
+                row['timestamp'] = datetime.strptime(row['datestamp']+' '+row['timestamp'], '%Y-%m-%d %H:%M:%S.%f')
+                del row['datestamp']
+            except ValueError as e:
+                print("Error parsing datestamp: {}".format(e))
+                pass
+        if row['lat'] != '' and row['lon'] != '':
+            row['pos'] = {
+                'type': 'Point',
+                'coordinates': [float(row['lon']), float(row['lat'])]
+            }
+            del row['lat']
+            del row['lon']
+        row = {k:convert(k, v) for k, v in row.items()}
         to_insert.update(row)
         rows.append(to_insert)
     if len(rows):
