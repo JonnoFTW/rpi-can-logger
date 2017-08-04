@@ -74,8 +74,8 @@ B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
         if out['datestamp'] is not None and out['timestamp'] is not None:
             out['timestamp'] = datetime.combine(out['datestamp'], out['timestamp'])
             del out['datestamp']
-        if out['speed_over_grnd'] is not None:
-            out['speed_over_grnd'] *= self.KNOTS_PER_KMPH
+        if out[self.FIELDS[-1]] is not None:
+            out[self.FIELDS[-1]] *= self.KNOTS_PER_KMPH
         return out
 
     def _readline(self, eol=b'\r'):
