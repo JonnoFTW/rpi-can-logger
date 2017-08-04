@@ -4,6 +4,7 @@ import atexit
 import logging
 import os
 import subprocess
+from datetime import datetime
 from yaml import load, dump
 import can
 
@@ -180,7 +181,8 @@ bt_commands = {
     '$list_log': lambda: list_log(log_folder),
     '$echo': lambda x: x,
     '$btlog': btlog,
-    '$err': get_error
+    '$err': get_error,
+    '$systime': lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 }
 
 def init_sniff(bus):
@@ -220,9 +222,18 @@ def do_log(sniffing, tesla):
     else:
         vin = get_vin(bus)
     csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vin)
+    err_count = 0
     while 1:
         led1(1)
-        buff.update(logger.log())
+        new_log = logger.log()
+        if not new_log:
+            err_count += 1
+            if err_count == 5:
+                shutdown_msg = "Shutting down after failing to get OBD data"
+                logging.warning(shutdown_msg)
+                btl.send(shutdown_msg)
+                os.system('sudo shutdown - h now')
+        buff.update(new_log)
         for k,v in buff.items():
             if type(v) is float:
                 buff[k] = round(v, 2)

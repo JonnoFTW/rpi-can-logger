@@ -12,7 +12,7 @@ Wrapper for the NMEA GPS device
 
 
 class GPS:
-    FIELDS = ['timestamp', 'lat', 'lon', 'altitude', 'spd_over_grnd_kmph']
+    FIELDS = ['timestamp', 'datestamp', 'lat', 'lon', 'altitude', 'spd_over_grnd_kmph']
 
     def __init__(self, port, baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
                  bytesize=serial.EIGHTBITS, timeout=1):
@@ -46,19 +46,19 @@ class GPS:
             if (datetime.now() - start).total_seconds() > self.timeout:
                 break
             line = re.sub(r'[\x00-\x1F]|\r|\n|\t', "", line.decode('ASCII', 'ignore'))
-            #if ins == '$':
+            # if ins == '$':
             #    break
-            #if ins != '':
+            # if ins != '':
             #    buff.write(ins)
             try:
-                #if buff.getvalue():
-                msg = pynmea2.parse(line)                    
+                # if buff.getvalue():
+                msg = pynmea2.parse(line)
                 for key in out:
                     if hasattr(msg, key):
-                            out[key] = getattr(msg, key)
+                        out[key] = getattr(msg, key)
             except pynmea2.ParseError as e:
                 print("Parse error:", e)
-                
+
         for f in ['lat', 'lon']:
             if type(out[f]) == float:
                 out[f] /= 100.
@@ -76,5 +76,6 @@ class GPS:
             else:
                 break
         return bytes(line)
+
     def readline(self):
         return self.ser.readline().decode('ascii').strip()
