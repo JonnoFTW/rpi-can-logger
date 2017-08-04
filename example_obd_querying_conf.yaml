@@ -6,11 +6,9 @@ log-size: 32
 log-pids:
   - PID_ENGINE_LOAD
   - PID_THROTTLE
-  - PID_ENGINE_FUEL_RATE
   - PID_INTAKE_MAP
   - PID_RPM
   - PID_SPEED
-  - PID_HYBRID_BATTERY_PERCENTAGE
   - PID_MAF_FLOW
 log-trigger: PID_MAF_FLOW
 disable-gps: false
