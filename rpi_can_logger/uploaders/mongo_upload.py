@@ -33,7 +33,7 @@ rpi_info.insert_one(info)
 
 
 def convert(val):
-    if type(val)  not in [str,type(None)]:
+    if type(val) not in [str, type(None)]:
         return val
     try:
         if '.' in val:

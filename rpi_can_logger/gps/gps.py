@@ -55,6 +55,7 @@ B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
     def read(self):
         out = {k: None for k in self.FIELDS + self.EXTRA_FIELD}
         start = datetime.now()
+        self.ser.reset_input_buffer()
         while not all(out.values()):
             line = self.readline()
             if (datetime.now() - start).total_seconds() > self.timeout:
