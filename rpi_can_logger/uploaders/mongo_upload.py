@@ -35,6 +35,8 @@ rpi_info.insert_one(info)
 def convert(val):
     if type(val) not in [str, type(None)]:
         return val
+    if val == '':
+        return None
     try:
         if '.' in val:
             return float(val)
@@ -70,6 +72,7 @@ for fname in sorted(glob(log_dir + '/*.csv')):
                 vid = row['vid']
             else:
                 print("Using fallback vin: {}".format(vid))
+            continue
         to_insert = {'trip_id': trip_id, 'vid': vid, 'trip_sequence': row_count, 'pos': None}
         row_count += 1
         del row['vid']
@@ -79,10 +82,10 @@ for fname in sorted(glob(log_dir + '/*.csv')):
                     'type': 'Point',
                     'coordinates': [float(row['longitude']), float(row['latitude'])]
                 }
-                del row['latitude']
-                del row['longitude']
             except:
                 pass
+        del row['latitude']
+        del row['longitude']
         row = {k: convert(v) for k, v in row.items()}
         if row['timestamp'] is not None:
             try:
@@ -92,7 +95,7 @@ for fname in sorted(glob(log_dir + '/*.csv')):
         
         to_insert.update(row)
         
-        print (to_insert)
+        print(to_insert)
         rows.append(to_insert)
     if len(rows):
         rpi_readings_collection.insert_many(rows, ordered=False)
