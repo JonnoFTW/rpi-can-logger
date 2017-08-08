@@ -4,12 +4,10 @@ import pynmea2
 import re
 import atexit
 import time
-import pytz
 
 """
 Wrapper for the NMEA GPS device
 """
-tz = pytz.timezone('Australia/Adelaide')
 
 class GPS:
     FIELDS = ['timestamp', 'latitude', 'longitude', 'altitude', 'spd_over_grnd']
@@ -74,7 +72,7 @@ B5 62 06 08 06 00 C8 00 01 00 01 00 DE 6A B5 62 06 08 00 00 0E 30
                 print("Parse error:", e)
 
         if out['datestamp'] is not None and out['timestamp'] is not None:
-            timestamp = datetime.combine(out['datestamp'], out['timestamp']).replace(tzinfo=timezone.utc).astimezone(tz=tz)
+            timestamp = datetime.combine(out['datestamp'], out['timestamp']).replace(tzinfo=timezone.utc)
             out['timestamp'] = timestamp.isoformat()
 
             del out['datestamp']
