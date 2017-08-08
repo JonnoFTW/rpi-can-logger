@@ -188,6 +188,7 @@ def set_vid(val):
     data['vin_fallback'] = val
     with open(fname, 'w') as outf:
         dump(data, outf)
+    return val
 
 bt_commands = {
     '$ip': get_ip,
