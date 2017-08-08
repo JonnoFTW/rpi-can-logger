@@ -181,6 +181,14 @@ def reset_wifi():
     for cmd in ['ifdown', 'ifup']:
         out += subprocess.check_output(['sudo', cmd, 'wlan0'])
     return out
+def set_vid(val):
+    fname = './mongo_conf.yaml'
+    with open(fname, 'r') as inf:
+        data = load(inf)
+    data['vin_fallback'] = val
+    with open(fname, 'w') as outf:
+        dump(data, outf)
+
 bt_commands = {
     '$ip': get_ip,
     '$serial': get_serial,
@@ -190,7 +198,8 @@ bt_commands = {
     '$err': get_error,
     '$systime': lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
     '$reset': reset,
-    '$resetwifi': reset_wifi
+    '$resetwifi': reset_wifi,
+    '$setvid': set_vid
 }
 
 def init_sniff(bus):
