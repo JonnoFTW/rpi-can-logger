@@ -236,7 +236,7 @@ def do_log(sniffing, tesla):
         new_log = logger.log()
         if not new_log:
             err_count += 1
-            if err_count == 5:
+            if err_count == 3:
                 shutdown_msg = "Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
