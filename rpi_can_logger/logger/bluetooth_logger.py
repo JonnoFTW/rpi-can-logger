@@ -116,7 +116,8 @@ class BluetoothReceiver(threading.Thread):
                 try:
                     bt_reply = self.bt_commands.get(pieces[0].lower().strip(), None)(*pieces[1:])
                     if bt_reply is not None:
-                        self.btl.send("{}={}".format(pieces[0], bt_reply))
+                        for line in bt_reply.splitlines():
+                            self.btl.send("{}={}".format(pieces[0], line))
                 except TypeError as e:
                     print(e)
                     self.btl.send("{}=INVALID_ARG".format(pieces[0]))
