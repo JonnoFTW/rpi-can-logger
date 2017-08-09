@@ -10,7 +10,7 @@ Wrapper for the NMEA GPS device
 """
 
 class GPS:
-    FIELDS = ['timestamp', 'latitude', 'longitude', 'altitude', 'spd_over_grnd']
+    FIELDS = ['timestamp', 'latitude', 'longitude', 'altitude', 'spd_over_grnd', 'true_course']
     EXTRA_FIELD = ['datestamp']
     KNOTS_PER_KMPH = 1.852
 
