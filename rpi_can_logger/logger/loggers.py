@@ -100,7 +100,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             logging.warning("S> {}".format(msg))
             self.bus.send(msg)
             while 1:
-                recvd = self.bus.recv()
+                recvd = self.bus.recv(0.5)
                 if recvd.arbitration_id == OBD_RESPONSE:
                     logging.warning("R> {}".format(recvd))
                     break
