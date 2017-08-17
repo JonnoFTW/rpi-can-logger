@@ -95,12 +95,11 @@ class QueryingOBDLogger(BaseOBDLogger):
         count = 0
         max_wait_sec = 2
         while len(support_check):
-            time.sleep(0.1)
             msg = can.Message(extended_id=0, data=[2, 1, support_check[0], 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST)
             logging.warning("S> {}".format(msg))
             self.bus.send(msg)
             while 1:
-                recvd = self.bus.recv(0.5)
+                recvd = self.bus.recv(0.2)
                 if recvd is None:
                     if (datetime.now() - start).total_seconds() > max_wait_sec:
                         logging.warning("Could not determine PIDs in time")
