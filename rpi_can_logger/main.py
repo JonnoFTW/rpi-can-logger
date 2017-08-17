@@ -193,7 +193,7 @@ def set_vid(val):
         data = load(inf)
     data['vin_fallback'] = val
     with open(fname, 'w') as outf:
-        dump(data, outf)
+        dump(data, outf, default_flow_style=False)
     return val
 
 

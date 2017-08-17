@@ -140,7 +140,7 @@ class Unit:
             return bs[0]
 
     class FuelAirRatio:
-        units = ['[0,2)']
+        units = ['ratio']
 
         def __call__(self, bs):
             return (2 / 65536) * toInt(bs)

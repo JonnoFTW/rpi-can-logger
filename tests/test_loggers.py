@@ -6,6 +6,9 @@ OBD_RESPONSE = 0x07E8
 
 
 class Bus:
+    """
+    Custom bus
+    """
     def __init__(self, msgs):
         self.msgs = msgs
 

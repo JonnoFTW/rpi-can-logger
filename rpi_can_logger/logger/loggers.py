@@ -70,6 +70,9 @@ class QueryingOBDLogger(BaseOBDLogger):
         self._determine_pids()
         self.responds_to = set()
         self.first_log = True
+        self.log_timeout_first = 4
+        self.log_timeout = self.log_timeout_first
+        self.log_timeout_tail = 1.5
 
     def _parse_support_frame(self, msg):
         by = 0
@@ -119,7 +122,6 @@ class QueryingOBDLogger(BaseOBDLogger):
         # send a message asking for those requested pids
         out = {}
         pids_responded = []
-
         for m in self.pids2log:
             #if self.responds_to is not None and m in self.responds_to:
                 out_msg = self.make_msg(m)
@@ -135,7 +137,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                     msg = self.bus.recv(0.1)
                     if msg is None:
                         # logging.warning("No message")
-                        if (datetime.now() - start).total_seconds() > 1:
+                        if (datetime.now() - start).total_seconds() > self.log_timeout:
                             break
 
                         continue
@@ -154,10 +156,11 @@ class QueryingOBDLogger(BaseOBDLogger):
   #      logging.warning(out)
 #        logging.warning("finished log loop")
         if self.first_log:
-            # only log those that get a response
+            # only log those that get a response the first time around
             self.pids2log = set(pids_responded)
-            logging.warning("Setting PIDs to {}".format(self.pids2log))
+            logging.warning("Setting PIDs to {}".format(self.pids[p]['name'] for p in self.pids2log))
             self.first_log = False
+            self.log_timeout = self.log_timeout_tail
         return out
 
     @staticmethod
