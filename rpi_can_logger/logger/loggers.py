@@ -109,6 +109,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                     logging.warning("R> {}".format(recvd))
                     self._parse_support_frame(msg)
                     support_check.remove(msg.data[2])
+                    break
 
         logging.warning("Supported PIDs are: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.responds_to)])))
         # self.pids2log = self.pids2log & self.responds_to
