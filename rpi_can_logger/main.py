@@ -310,7 +310,10 @@ if __name__ == "__main__":
     err_count = 0
     logging.warning("Starting logging")
     while 1:
-        do_log(args.sniffing, args.tesla)
+        try:
+            do_log(args.sniffing, args.tesla)
+        except Exception as e:
+            logging.error(e, exc_info=True)
         led1(1)
         led2(1)
         logging.warning("Sleeping for {}s".format(sleep_time))
