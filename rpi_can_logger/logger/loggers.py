@@ -2,6 +2,8 @@ import can
 import logging
 import time
 from datetime import datetime
+import subprocess
+
 from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
 from rpi_can_logger.logger import obd_pids
 
@@ -18,6 +20,7 @@ class BaseLogger:
         self.pids2log = pids2log
         self.pids = pids
         self.trigger = trigger
+        self.responds_to = []
 
     def _make_buff(self):
         return {k: None for k in self.pids2log}
@@ -64,8 +67,8 @@ class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
 class QueryingOBDLogger(BaseOBDLogger):
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
-#        self._determine_pids()
-        self.responds_to = None
+        self._determine_pids()
+        self.responds_to = set()
         self.first_log = True
 
     def _parse_support_frame(self, msg):
@@ -90,6 +93,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         logging.warning("Determining supported PIDs")
         start = datetime.now()
         count = 0
+        max_wait_sec = 2
         while len(support_check):
             time.sleep(0.5)
             msg = can.Message(extended_id=0, data=[2, 1, support_check[0], 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST)
@@ -108,8 +112,8 @@ class QueryingOBDLogger(BaseOBDLogger):
                     self.responds_to = None
                     return
         logging.warning("Supported PIDs are: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.responds_to)])))
-        self.pids2log = self.pids2log & self.responds_to
-        logging.warning("Only logging: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.pids2log)])))
+        # self.pids2log = self.pids2log & self.responds_to
+        # logging.warning("Only logging: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.pids2log)])))
 
     def log(self):
         # send a message asking for those requested pids
@@ -168,3 +172,17 @@ class QueryingOBDLogger(BaseOBDLogger):
             data=[2, mode, pid, 0, 0, 0, 0, 0],
             extended_id=False
         )
+
+class FMSLogger(BaseLogger):
+    def __init__(self, bus, pids2log, pids, trigger):
+        super().__init__(bus, pids2log, pids, trigger)
+        # put the CAN loggers in 250k mode
+        # need to use extended ID
+        for i in ['can0', 'can1']:
+            print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split()))
+            print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split()))
+
+    def log(self):
+        out = {}
+        # pids will use extended id format
+        return out

@@ -102,8 +102,6 @@ logging.getLogger().addHandler(logging.StreamHandler())
 # log file size in MB
 log_size = args.log_size
 
-
-
 # pids to log
 if type(args.log_pids[0]) is list:
     log_pids = args.log_pids[0]
@@ -164,6 +162,7 @@ def get_vin(bus):
             return vin
     return False
 
+
 bt_log = True
 
 
@@ -172,15 +171,22 @@ def btlog(opt):
     bt_log = opt == 'on'
     return "{}".format(bt_log)
 
+
 def get_error():
     return subprocess.check_output(['tail', '-n', '20', log_file])
+
+
 def reset():
     return subprocess.check_output('sudo shutdown -r now'.split())
+
+
 def reset_wifi():
     out = ''
     for cmd in ['ifdown', 'ifup']:
         out += subprocess.check_output(['sudo', cmd, 'wlan0'])
     return out
+
+
 def set_vid(val):
     fname = './mongo_conf.yaml'
     with open(fname, 'r') as inf:
@@ -189,6 +195,14 @@ def set_vid(val):
     with open(fname, 'w') as outf:
         dump(data, outf)
     return val
+
+
+responds_to = set()
+
+
+def get_responds():
+    return ','.join([pids[x]['name'] for x in sorted(responds_to)])
+
 
 bt_commands = {
     '$ip': get_ip,
@@ -200,8 +214,10 @@ bt_commands = {
     '$systime': lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
     '$reset': reset,
     '$resetwifi': reset_wifi,
-    '$setvid': set_vid
+    '$setvid': set_vid,
+    '$respondsto': get_responds
 }
+
 
 def init_sniff(bus):
     bus.send(can.Message(extended_id=False, data=[2, 1, 0, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
@@ -232,8 +248,8 @@ def do_log(sniffing, tesla):
     else:
         logger_c = QueryingOBDLogger
         init_sniff(bus)
-
     logger = logger_c(bus, pid_ids, pids, log_trigger)
+    responds_to.update(logger.responds_to)
     buff = {}
     if sniffing or is_tesla:
         vin = get_serial()
@@ -260,9 +276,9 @@ def do_log(sniffing, tesla):
         led1(0)
         if not args.disable_gps:
             led2(1)
-#            logging.warning("Reading gps")
+            #            logging.warning("Reading gps")
             gps_data = gps.read()
- #           logging.warning("read gps")
+            #           logging.warning("read gps")
             if gps_data is not None:
                 buff.update(gps_data)
             led2(0)
