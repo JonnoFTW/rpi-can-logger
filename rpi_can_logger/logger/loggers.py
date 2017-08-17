@@ -109,7 +109,6 @@ class QueryingOBDLogger(BaseOBDLogger):
                     continue
                 if recvd.arbitration_id == OBD_RESPONSE:
                     logging.warning("R> {}".format(recvd))
-                    break
                 if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[2] in support_check:
                     self._parse_support_frame(msg)
                     support_check.remove(msg.data[2])
