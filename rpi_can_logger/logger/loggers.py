@@ -107,8 +107,8 @@ class QueryingOBDLogger(BaseOBDLogger):
                     continue
                 if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[2] in support_check:
                     logging.warning("R> {}".format(recvd))
-                    self._parse_support_frame(msg)
-                    support_check.remove(msg.data[2])
+                    self._parse_support_frame(recvd)
+                    support_check.remove(recvd.data[2])
                     break
 
         logging.warning("Supported PIDs are: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.responds_to)])))
