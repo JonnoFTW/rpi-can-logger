@@ -261,7 +261,7 @@ _pids = [
     PID(0x011F, 'PID_RUNTIME', Unit.Seconds, 'field'),
     PID(0x0121, 'PID_DISTANCE_WITH_MIL', Unit.Kilometers, 'field'),
     PID(0x0122, 'PID_FUEL_RAIL_PRESSURE', Unit.FuelRailPressure, 'fuel'),
-    PID(0x0122, 'PID_FUEL_RAIL_GAUGE_PRESSURE', Unit.FuelRailGaugePressure, 'fuel'),
+    PID(0x0123, 'PID_FUEL_RAIL_GAUGE_PRESSURE', Unit.FuelRailGaugePressure, 'fuel'),
     PID(0x012C, 'PID_COMMANDED_EGR', Unit.Percentage, 'field'),
     PID(0x012D, 'PID_EGR_ERROR', Unit.PercentageHigh, 'field'),
     PID(0x012E, 'PID_COMMANDED_EVAPORATIVE_PURGE', Unit.Percentage, 'field'),
