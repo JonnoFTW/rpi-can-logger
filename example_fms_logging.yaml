@@ -1,0 +1,22 @@
+interface: socketcan_native
+channel: can1
+log-messages: /home/pi/log/can-log/messages/
+log-folder: /home/pi/log/can-log/
+log-size: 32
+log-pids:
+  - FMS_FUEL_CONSUMPTION
+  - FMS_TACHOGRAPH
+  - FMS_HIGH_RESOLUTION_DISTANCE
+  - FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION
+  - FMS_DASH_DISPLAY
+  - FMS_ELECTRONIC_ENGINE_CONTROLLER_1
+  - FMS_FUEL_ECONOMY
+  - FMS_TIME_DATE
+log-trigger: FMS_TACHOGRAPH
+disable-gps: false
+gps-port: /dev/ttyS0
+tesla: false
+sniffing: false
+log-bluetooth: true
+log-level: warning
+fms: true
