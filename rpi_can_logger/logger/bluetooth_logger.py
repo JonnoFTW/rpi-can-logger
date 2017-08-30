@@ -1,4 +1,7 @@
-import bluetooth as bt
+try:
+    import bluetooth as bt
+except ImportError:
+    bt = None
 import logging
 import threading
 import queue

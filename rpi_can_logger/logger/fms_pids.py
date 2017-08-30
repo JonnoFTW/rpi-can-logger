@@ -11,7 +11,15 @@ http://www.fms-standard.com/Bus/down_load/fms_document_ver03_vers_14_09_2012.pdf
 
 
 class FMSPID:
+
     def __init__(self, pid: int, name: str, parser: Callable, fields: [list, str]):
+        """
+        A class representing an FMSPID and its conversion
+        :param pid: The PID
+        :param name:  A friendly name of this PID
+        :param parser: a function that turns a byte array of at most length 8 into one or more readable values
+        :param fields: the friendly name of the outputs of this PID eg. 'RPM'
+        """
         self.pid = pid
         self.name = name
         self.parser = parser
@@ -31,6 +39,15 @@ class FMSPID:
 
 
 def _fms(msg, gain, offset, sbyte, ebyte=None):
+    """
+    Extract a number from a series of bytes, a number 1,2,4 bytes long
+    :param msg: the series of bytes
+    :param gain: the  value to multiply the value by
+    :param offset: the offset of the value
+    :param sbyte:  the start byte of the value (indexed from 1)
+    :param ebyte:  the end byte of the value (indexed from 1), if None, assume the value is 1 byte long
+    :return:
+    """
     if ebyte is None:
         return msg[sbyte - 1] * gain + offset
     if ebyte is None:
@@ -114,15 +131,14 @@ def at1t1i(msg):
 
 conds = {
     x: c for x, c in [
-    ((0, 0, 0), 'off'),
-    ((0, 0, 1), 'Cond_red'),
-    ((0, 1, 0), 'Cond_yellow'),
-    ((0, 1, 1), 'Cond_info'),
-    ((1, 0, 0), 'reserved'),
-    ((1, 0, 1), 'reserved'),
-    ((1, 1, 0), 'reserved'),
-    ((1, 1, 1), 'not_available')
-]
+        ((0, 0, 0), 'off'),
+        ((0, 0, 1), 'Cond_red'),
+        ((0, 1, 0), 'Cond_yellow'),
+        ((0, 1, 1), 'Cond_info'),
+        ((1, 0, 0), 'reserved'),
+        ((1, 0, 1), 'reserved'),
+        ((1, 1, 0), 'reserved'),
+        ((1, 1, 1), 'not_available')]
 }
 
 
@@ -171,7 +187,7 @@ def door_control_2(msg):
 
 def time_date(msg):
     if msg == b'\xff\xff\xff\xff\xff\xff\xff\xff':
-         return 'err'
+        return 'err'
     return datetime(
         year=msg[5] + 1985,
         month=msg[3],
@@ -182,6 +198,7 @@ def time_date(msg):
         tzinfo=timezone.utc
 
     ).isoformat()
+
 
 def alternator_speed(msg):
     return bin(msg[3])[2:]

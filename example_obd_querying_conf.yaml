@@ -10,14 +10,6 @@ log-pids:
   - PID_RPM
   - PID_SPEED
   - PID_MAF_FLOW
-  - PID_OXYGEN_SENSOR_1_FUEL
-  - PID_OXYGEN_SENSOR_2_FUEL
-  - PID_OXYGEN_SENSOR_3_FUEL
-  - PID_OXYGEN_SENSOR_4_FUEL
-  - PID_OXYGEN_SENSOR_5_FUEL
-  - PID_OXYGEN_SENSOR_6_FUEL
-  - PID_OXYGEN_SENSOR_7_FUEL
-  - PID_OXYGEN_SENSOR_8_FUEL
   - PID_AIR_FUEL_EQUIV_RATIO
   - PID_ENGINE_FUEL_RATE
 log-trigger: PID_ENGINE_FUEL_RATE
@@ -27,3 +19,4 @@ tesla: false
 sniffing: false
 log-bluetooth: true
 log-level: warning
+vehicle-id: rocco_4wd

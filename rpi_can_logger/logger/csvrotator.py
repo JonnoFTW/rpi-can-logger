@@ -4,11 +4,14 @@ import subprocess
 from pathlib import Path
 import logging
 from io import StringIO
+import string
+import random
 
 class CSVLogRotator:
     """
 
     """
+
 
     def __init__(self, log_folder, maxbytes, fieldnames, vin):
         """
@@ -24,6 +27,9 @@ class CSVLogRotator:
         self.fieldnames = fieldnames
         self.vin = vin
         self._make_csv_writer()
+    def make_random(self, nchars):
+        alphabet = string.ascii_letters + string.digits
+        return ''.join(random.choice(alphabet) for _ in range(nchars))
 
     def _make_csv_writer(self):
         """
@@ -34,7 +40,7 @@ class CSVLogRotator:
 
         self._bytes_written = 0
         now = datetime.now()
-        self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'), 'w')
+        self._out_csv = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S.csv'.format(self.make_random(6))), 'w')
         logging.warning("Writing to {} ({} bytes)".format(self._out_csv.name, self.max_bytes))
         self._out_writer = csv.DictWriter(self._buffer, fieldnames=self.fieldnames, restval=None)
         self._out_writer.writeheader()

@@ -1,4 +1,7 @@
-import netifaces as ni
+try:
+    import netifaces as ni
+except ImportError:
+    ni = None
 from glob import glob
 
 OBD_REQUEST = 0x07DF

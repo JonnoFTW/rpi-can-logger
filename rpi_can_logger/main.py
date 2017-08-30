@@ -7,6 +7,7 @@ import subprocess
 from datetime import datetime
 from yaml import load, dump
 import can
+import pathlib
 
 try:
     import RPi.GPIO as GPIO
@@ -14,7 +15,7 @@ except RuntimeError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE
-from rpi_can_logger.logger import CSVLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
+from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
     BluetoothLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
@@ -42,6 +43,7 @@ parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on t
 parser.add_argument('--log-bluetooth', action='store_true', help='Log to Bluetooth if Available')
 parser.add_argument('--vid', help='Vehicle Identifier, will try to fetch the VIN, otherwise will a RPi identifier')
 parser.add_argument('--log-level', '-ll', help='Logging level', default='warning', choices=['warning', 'debug'])
+parser.add_argument('--vehicle-id', '-vh', help='Unique identifier for the vehicle')
 args = parser.parse_args()
 
 if args.conf:
@@ -125,6 +127,7 @@ all_fields += ['vid']
 
 
 def setup_GPIO():
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(7, GPIO.OUT)
     GPIO.setup(37, GPIO.OUT)
@@ -188,10 +191,12 @@ def reset_wifi():
 
 
 def set_vid(val):
-    fname = './mongo_conf.yaml'
+    if not args.conf:
+        return "no conf file"
+    fname = args.conf
     with open(fname, 'r') as inf:
         data = load(inf)
-    data['vin_fallback'] = val
+    data['vehicle-id'] = val
     with open(fname, 'w') as outf:
         dump(data, outf, default_flow_style=False)
     return val
@@ -250,19 +255,32 @@ def do_log(sniffing, tesla):
         init_sniff(bus)
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     responds_to.update(logger.responds_to)
-    buff = {}
-    if sniffing or is_tesla:
-        vin = get_serial()
-    else:
-        vin = get_vin(bus)
-    csv_writer = CSVLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vin)
+    trip_sequence = 0
+    vid = args['vehicle-id']
+    json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid)
+    trip_id = '{}_{}'.format(pathlib.Path(json_writer._out_fh.name).name, vid)
+
+    def make_buff():
+        return {
+            'vid': vid,
+            'trip_id': trip_id,
+            'trip_sequence': trip_sequence
+        }
+
+    # if sniffing or is_tesla:
+    #     vin = get_serial()
+    # else:
+    #     vin = get_vin(bus)
+
     err_count = 0
     while 1:
+        buff = make_buff()
         led1(1)
         new_log = logger.log()
         if not new_log:
             err_count += 1
             if err_count == 3:
+                shutdown()
                 shutdown_msg = "Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
@@ -276,23 +294,20 @@ def do_log(sniffing, tesla):
         led1(0)
         if not args.disable_gps:
             led2(1)
-            #            logging.warning("Reading gps")
             gps_data = gps.read()
-            #           logging.warning("read gps")
             if gps_data is not None:
                 buff.update(gps_data)
             led2(0)
         if args.verbose:
             print(buff)
-        # put the buffer into the csv logs
-        row_txt = csv_writer.writerow(buff)
+        # put the buffer into the logs
+        row_txt = json_writer.writerow(buff)
+        trip_sequence += 1
         if log_bluetooth:
             led2(1)
             if bt_log:
                 btl.send(row_txt)
             led2(0)
-
-        buff = {}
 
 
 def shutdown():

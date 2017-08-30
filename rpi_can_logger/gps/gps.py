@@ -77,11 +77,16 @@ B5 62 06 08 06 00 64 00 01 00 01 00 7A 12 B5 62 06 08 00 00 0E 30
 
         if out[self.FIELDS[-1]] is not None:
             out[self.FIELDS[-1]] *= self.KNOTS_PER_KMPH
-        for f in ['latitude', 'longitude']:
-            if out[f] == 0.0:
-                out[f] = None
+        if out.get('latitude') is not None and out.get('longitude') is not None:
+            out['pos'] = {
+                'type': 'Point',
+                'coordinates': [out['longitude'], out['latitude']]
+            }
+            del out['latitude']
+            del out['longitude']
         for f in self.EXTRA_FIELD:
             del out[f]
+
         return out
 
     def _readline(self, eol=b'\r'):

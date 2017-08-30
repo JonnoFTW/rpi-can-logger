@@ -19,6 +19,10 @@ if len(sys.argv) > 1:
 bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)
 print("Sniffing CAN:", bus)
+
+while 1:
+    print(bus.recv())
+
 rcvd = [0,0x20,0x40]
 while 1:
     try:
