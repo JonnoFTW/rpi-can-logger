@@ -13,23 +13,26 @@ not_from_std = set()
 with open('../example_fms_logging.yaml', 'r') as conf:
     conf = yaml.load(conf)
 filters = conf['log-pids']
-filters = fms_name2pid.keys()
+# filters = fms_name2pid.keys()
 print("Filtering:")
 for i in filters:
-    print("\t", i, hex(fms_name2pid[i]))
+    print("\t", hex(fms_name2pid[i]), i)
 filters = set([fms_name2pid[i] for i in filters])
 flatten = lambda l: [item for sublist in l for item in sublist]
+
 with open(sys.argv[1] + '.csv', 'w') as outcsv:
     headers = flatten([fms_pids[f]['fieldnames'] for f in filters])
     writer = csv.DictWriter(outcsv, fieldnames=headers)
     writer.writeheader()
-
+    lc = 0
     for line in lines:
         pieces = re.split(r'\s+', line.strip())
         pid = (int("0x{}".format(pieces[3]), 16) >> 8) & 0xffff
         msg = bytes(map(lambda x: int(x, 16), pieces[5:]))
+        lc += 1
         if pid not in fms_pids:
             not_from_std.add(pieces[3])
+            # print(lc, hex(int("0x"+pieces[3],16)), msg,', '.join([hex(i) for i in msg]))
         else:
             try:
                 parsed = fms_pids[pid]['parse'](msg)

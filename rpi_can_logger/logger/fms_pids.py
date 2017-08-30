@@ -1,6 +1,6 @@
 from typing import Callable
 from itertools import cycle
-from datetime import datetime
+from datetime import datetime, timezone
 import struct
 
 """
@@ -20,7 +20,7 @@ class FMSPID:
         else:
             self.fields = fields
         self.fieldnames = ['{} ({})'.format(name, unit) for pid_name, unit in
-                zip(cycle([self.name]), self.fields)]
+                           zip(cycle([self.name]), self.fields)]
 
     def __call__(self, msg):
         parsed = self.parser(msg)
@@ -32,6 +32,8 @@ class FMSPID:
 
 def _fms(msg, gain, offset, sbyte, ebyte=None):
     if ebyte is None:
+        return msg[sbyte - 1] * gain + offset
+    if ebyte is None:
         ebyte = sbyte + 1
     sbyte -= 1
     # interpret bytes as n-byte unsigned int,
@@ -42,8 +44,7 @@ def _fms(msg, gain, offset, sbyte, ebyte=None):
         2: '<H',
         4: '<I'
     }
-    # if byte_len == 1:
-    #     return msg[sbyte] * gain + offset
+
     return struct.unpack(fmt[byte_len], msg[sbyte: ebyte])[0] * gain + offset
 
 
@@ -54,8 +55,9 @@ def fuel_consumption(msg):
 def dash_display(msg):
     return msg[1] * 0.4
 
+
 def eec1(msg):
-    return _fms(msg, 1, -125, 3), _fms(msg, 1, 0, 4, 5)//8
+    return _fms(msg, 1, -125, 3), _fms(msg, 1, 0, 4, 5) // 8
 
 
 def engine_hours(msg):
@@ -71,7 +73,7 @@ def hr_distance(msg):
 
 
 def tachograph(msg):
-    return _fms(msg, 1 / 256., 0, 7, 8)
+    return _fms(msg, 1, 0, 7, 8) // 256
 
 
 def engine_temp(msg):
@@ -79,7 +81,7 @@ def engine_temp(msg):
 
 
 def eec2(msg):
-    return _fms(msg, 0.4, 0, 2), _fms(msg, 1, 0, 3)
+    return _fms(msg, 0.4, 0, 2)
 
 
 def vw(msg):
@@ -168,15 +170,18 @@ def door_control_2(msg):
 
 
 def time_date(msg):
+    if msg == b'\xff\xff\xff\xff\xff\xff\xff\xff':
+         return 'err'
     return datetime(
         year=msg[5] + 1985,
         month=msg[3],
-        day=msg[4]//4 + 1,
+        day=msg[4] // 4 + 1,
         hour=msg[2],
         minute=msg[1],
-        second=msg[0]//4
-    ).isoformat()
+        second=msg[0] // 4,
+        tzinfo=timezone.utc
 
+    ).isoformat()
 
 def alternator_speed(msg):
     return bin(msg[3])[2:]
@@ -192,9 +197,9 @@ def etc2(msg):
 
 _pids = [
     FMSPID(0x00FEE9, 'FMS_FUEL_CONSUMPTION', fuel_consumption, 'L'),
-    FMSPID(0x00FEFC, 'FMS_DASH_DISPLAY', dash_display, '%'),
-    FMSPID(0x00F004, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_1', eec1, ['%', 'RPM']),
-    FMSPID(0x00FEF1, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_2', eec2, '%'),
+    FMSPID(0x00FEFC, 'FMS_DASH_DISPLAY', dash_display, 'FuelLvl%'),
+    FMSPID(0x00F004, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_1', eec1, ['EngineTorque%', 'RPM']),
+    FMSPID(0x00F003, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_2', eec2, 'AccPedalPos%'),
     FMSPID(0x00FEE5, 'FMS_ENGINE_HOURS', engine_hours, 'H'),
     FMSPID(0x00FEEC, 'FMS_VEHICLE_IDENTIFICATION', vehicle_id, ''),
     FMSPID(0x00FEC1, 'FMS_HIGH_RESOLUTION_DISTANCE', hr_distance, 'm'),
@@ -212,13 +217,12 @@ _pids = [
     FMSPID(0x00FEC0, 'FMS_SERVICE_INFORMATION', serv, 'km'),
     FMSPID(0x00FDA4, 'FMS_PTO_DRIVE_ENGAGEMENT', ptode, 'bits'),
     FMSPID(0x00FE70, 'FMS_COMBINATION_VEHICLE_WEIGHT', cvw, 'kg'),
-    FMSPID(0x00F000, 'FMS_ELECTRONIC_RETARDER_CONTROLLER_1', erc1, '% Torque'),
-    FMSPID(0x00F003, 'FMS_ACCELERATOR_PEDAL_POSITION', acc_ped_pos, '%'),
+    FMSPID(0x00F000, 'FMS_ELECTRONIC_RETARDER_CONTROLLER_1', erc1, 'RetarderTorque%'),
     FMSPID(0x00FE4E, 'FMS_DOOR_CONTROL_1', door_control_1, 'bytes'),
     FMSPID(0x00FDA5, 'FMS_DOOR_CONTROL_2', door_control_2, 'bytes'),
-    FMSPID(0x00FEE6, 'FMS_TIME_DATE', time_date, 'timestamp'),
+    FMSPID(0x00FEE6, 'FMS_TIME_DATE', time_date, 'datetime'),
     FMSPID(0x00FED5, 'FMS_ALTERNATOR_SPEED', alternator_speed, 'str'),
-    FMSPID(0x00F005, 'FMS_ELECTRONIC_TRANSMISSION_CONTROL_2', etc2, ['selected', 'current']),
+    FMSPID(0x00F005, 'FMS_ELECTRONIC_TRANSMISSION_CONTROL_2', etc2, ['SelectedGear', 'CurrentGear']),
     FMSPID(0x00FE58, 'FMS_AIR_SUSPENSION_CONTROL_4', asc4, ['Bellow Pressure Front Axle Left',
                                                             'Bellow Pressure Front Axle Left',
                                                             'Bellow Pressure Front Axle Right',
