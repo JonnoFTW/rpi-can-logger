@@ -10,6 +10,9 @@ log-pids:
   - PID_TESLA_DC_DC_CONVERTER_STATUS
 log-trigger: PID_TESLA_BATTERY_STATE_OF_CHARGE
 gps-port: /dev/ttyS0
+disable-gps: false
 tesla: true
 sniffing: true
-verbose: true
+log-bluetooth: true
+log-level: warning
+vehicle-id: tesla_1

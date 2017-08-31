@@ -108,13 +108,15 @@ class QueryingOBDLogger(BaseOBDLogger):
                         logging.warning("Could not determine PIDs in time")
                         return
                     continue
-                if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[2] in support_check:
+                if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[
+                    2] in support_check:
                     logging.warning("R> {}".format(recvd))
                     self._parse_support_frame(recvd)
                     support_check.remove(recvd.data[2])
                     break
 
-        logging.warning("Supported PIDs are: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.responds_to)])))
+        logging.warning(
+            "Supported PIDs are: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.responds_to)])))
         # self.pids2log = self.pids2log & self.responds_to
         # logging.warning("Only logging: {}".format(','.join([obd_pids[x]['name'] for x in sorted(self.pids2log)])))
 
@@ -123,38 +125,38 @@ class QueryingOBDLogger(BaseOBDLogger):
         out = {}
         pids_responded = []
         for m in self.pids2log:
-            #if self.responds_to is not None and m in self.responds_to:
-                out_msg = self.make_msg(m)
-                # logging.warning("S> {}".format(out_msg))
-                self.bus.send(self.make_msg(m))
+            # if self.responds_to is not None and m in self.responds_to:
+            out_msg = self.make_msg(m)
+            # logging.warning("S> {}".format(out_msg))
+            self.bus.send(self.make_msg(m))
 
-        # receive the pid back, (hoping it's the right one)
-        #
-                count = 0
-                start = datetime.now()
-                while count < 64:
-                    count += 1
-                    msg = self.bus.recv(0.1)
-                    if msg is None:
-                        # logging.warning("No message")
-                        if (datetime.now() - start).total_seconds() > self.log_timeout:
-                            break
+            # receive the pid back, (hoping it's the right one)
+            #
+            count = 0
+            start = datetime.now()
+            while count < 64:
+                count += 1
+                msg = self.bus.recv(0.1)
+                if msg is None:
+                    # logging.warning("No message")
+                    if (datetime.now() - start).total_seconds() > self.log_timeout:
+                        break
 
-                        continue
-                    if msg.arbitration_id == OBD_RESPONSE:
- #                       logging.warning("R> {}".format(msg))
-     
-                        pid, obd_data = self.separate_can_msg(msg)
-#                        logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
-                        # try and receive
-                        if pid in self.pids2log:
-                            out.update(self.pids[pid]['parse'](obd_data))
-                            pids_responded.append(pid)
- #                           logging.warning(out)
-                        if len(out) == len(self.pids2log):
-                            break
-  #      logging.warning(out)
-#        logging.warning("finished log loop")
+                    continue
+                if msg.arbitration_id == OBD_RESPONSE:
+                    #                       logging.warning("R> {}".format(msg))
+
+                    pid, obd_data = self.separate_can_msg(msg)
+                    #                        logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
+                    # try and receive
+                    if pid in self.pids2log:
+                        out.update(self.pids[pid]['parse'](obd_data))
+                        pids_responded.append(pid)
+                        #                           logging.warning(out)
+                    if len(out) == len(self.pids2log):
+                        break
+                        #      logging.warning(out)
+                    #        logging.warning("finished log loop")
         if self.first_log:
             # only log those that get a response the first time around
             self.pids2log = set(pids_responded)
@@ -176,7 +178,12 @@ class QueryingOBDLogger(BaseOBDLogger):
             extended_id=False
         )
 
-class FMSLogger(BaseLogger):
+
+class FMSLogger(BaseSnifferLogger):
+    @staticmethod
+    def separate_can_msg(msg):
+        return (msg.arbitration_id >> 8) & 0xffff, msg.data
+
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
         # put the CAN loggers in 250k mode
@@ -184,8 +191,3 @@ class FMSLogger(BaseLogger):
         for i in ['can0', 'can1']:
             print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split()))
             print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split()))
-
-    def log(self):
-        out = {}
-        # pids will use extended id format
-        return out

@@ -32,6 +32,8 @@ class FMSPID:
 
     def __call__(self, msg):
         parsed = self.parser(msg)
+        # if parsed is None:
+        #     return None
         if type(parsed) not in [tuple, list]:
             parsed = (parsed,)
         return {'{} ({})'.format(pid_name, unit): val for pid_name, val, unit in
@@ -82,7 +84,7 @@ def engine_hours(msg):
 
 
 def vehicle_id(msg):
-    return "NOT IMPLEMENTED"
+    return msg.decode('ascii')
 
 
 def hr_distance(msg):
@@ -212,35 +214,63 @@ def etc2(msg):
     return _fms(msg, 1, -125, 1), _fms(msg, 1, -125, 4)
 
 
+def fms_sw(msg):
+    return "{}{}.{}{}".format(*msg[1:5].decode('ascii'))
+
+
+vin_len = None
+vin_packets = None
+vin_str = ""
+
+
+def vehicle_id_bam(msg):
+    global vin_len, vin_packets, vin_str
+    vin_len = msg[1]
+    vin_packets = msg[3]
+    vin_str = ""
+
+
+def vehicle_id_part(msg):
+    global vin_str
+    if vin_len is not None:
+        if msg[0] == vin_packets:
+            vin_str += msg[1:vin_len - len(vin_str) + 1].decode('ascii')
+            return vin_str
+        else:
+            vin_str += msg[1:].decode('ascii')
+
 _pids = [
-    FMSPID(0x00FEE9, 'FMS_FUEL_CONSUMPTION', fuel_consumption, 'L'),
-    FMSPID(0x00FEFC, 'FMS_DASH_DISPLAY', dash_display, 'FuelLvl%'),
-    FMSPID(0x00F004, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_1', eec1, ['EngineTorque%', 'RPM']),
-    FMSPID(0x00F003, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_2', eec2, 'AccPedalPos%'),
-    FMSPID(0x00FEE5, 'FMS_ENGINE_HOURS', engine_hours, 'H'),
-    FMSPID(0x00FEEC, 'FMS_VEHICLE_IDENTIFICATION', vehicle_id, ''),
-    FMSPID(0x00FEC1, 'FMS_HIGH_RESOLUTION_DISTANCE', hr_distance, 'm'),
-    FMSPID(0x00FE6C, 'FMS_TACHOGRAPH', tachograph, 'km/h'),
-    FMSPID(0x00FEEE, 'FMS_ENGINE_TEMP', engine_temp, '°C'),
-    FMSPID(0x00FEF5, 'FMS_AMBIENT_CONDITIONS', ambient_conditions, '°C'),
-    FMSPID(0x00FE6B, 'FMS_DRIVER_IDENTIFICATION', driver_id, ''),
-    FMSPID(0x00FEF2, 'FMS_FUEL_ECONOMY', fuel_economy, ['L/h', 'km/L']),
-    FMSPID(0x00FEAE, 'FMS_AIR_SUPPLY_PRESSURE', air_supply_pressure, ['kPa', 'kPa']),
-    FMSPID(0x00FD09, 'FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION', hr_fuel_consumption, 'L'),
-    FMSPID(0x00FE56, 'FMS_AFTERTREATMENT_1_DIESEL_EXHAUST_FLUID_TANK_1_INFORMATION', at1t1i, '%'),
-    FMSPID(0x00FD7D, 'FMS_TELL_TALE_STATUS', tts, [f'TTS_{i}' for i in range(16)]),
-    FMSPID(0x00FEF1, 'FMS_CRUISE_CONTROL_VEHICLE_SPEED', ccvs, 'km/h'),
-    FMSPID(0x00FEEA, 'FMS_VEHICLE_WEIGHT', vw, 'kg'),
-    FMSPID(0x00FEC0, 'FMS_SERVICE_INFORMATION', serv, 'km'),
-    FMSPID(0x00FDA4, 'FMS_PTO_DRIVE_ENGAGEMENT', ptode, 'bits'),
-    FMSPID(0x00FE70, 'FMS_COMBINATION_VEHICLE_WEIGHT', cvw, 'kg'),
-    FMSPID(0x00F000, 'FMS_ELECTRONIC_RETARDER_CONTROLLER_1', erc1, 'RetarderTorque%'),
-    FMSPID(0x00FE4E, 'FMS_DOOR_CONTROL_1', door_control_1, 'bytes'),
-    FMSPID(0x00FDA5, 'FMS_DOOR_CONTROL_2', door_control_2, 'bytes'),
-    FMSPID(0x00FEE6, 'FMS_TIME_DATE', time_date, 'datetime'),
-    FMSPID(0x00FED5, 'FMS_ALTERNATOR_SPEED', alternator_speed, 'str'),
-    FMSPID(0x00F005, 'FMS_ELECTRONIC_TRANSMISSION_CONTROL_2', etc2, ['SelectedGear', 'CurrentGear']),
-    FMSPID(0x00FE58, 'FMS_AIR_SUSPENSION_CONTROL_4', asc4, ['Bellow Pressure Front Axle Left',
+    FMSPID(0xFEE9, 'FMS_FUEL_CONSUMPTION', fuel_consumption, 'L'),
+    FMSPID(0xFEFC, 'FMS_DASH_DISPLAY', dash_display, 'FuelLvl%'),
+    FMSPID(0xF004, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_1', eec1, ['EngineTorque%', 'RPM']),
+    FMSPID(0xF003, 'FMS_ELECTRONIC_ENGINE_CONTROLLER_2', eec2, 'AccPedalPos%'),
+    FMSPID(0xFEE5, 'FMS_ENGINE_HOURS', engine_hours, 'H'),
+    FMSPID(0xFEEC, 'FMS_VEHICLE_IDENTIFICATION', vehicle_id, ''),
+    FMSPID(0xFEC1, 'FMS_HIGH_RESOLUTION_DISTANCE', hr_distance, 'm'),
+    FMSPID(0xFE6C, 'FMS_TACHOGRAPH', tachograph, 'km/h'),
+    FMSPID(0xFEEE, 'FMS_ENGINE_TEMP', engine_temp, '°C'),
+    FMSPID(0xFEF5, 'FMS_AMBIENT_CONDITIONS', ambient_conditions, '°C'),
+    FMSPID(0xFE6B, 'FMS_DRIVER_IDENTIFICATION', driver_id, ''),
+    FMSPID(0xFEF2, 'FMS_FUEL_ECONOMY', fuel_economy, ['L/h', 'km/L']),
+    FMSPID(0xFEAE, 'FMS_AIR_SUPPLY_PRESSURE', air_supply_pressure, ['kPa', 'kPa']),
+    FMSPID(0xFD09, 'FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION', hr_fuel_consumption, 'L'),
+    FMSPID(0xFE56, 'FMS_AFTERTREATMENT_1_DIESEL_EXHAUST_FLUID_TANK_1_INFORMATION', at1t1i, '%'),
+    FMSPID(0xFD7D, 'FMS_TELL_TALE_STATUS', tts, [f'TTS_{i}' for i in range(16)]),
+    FMSPID(0xFEF1, 'FMS_CRUISE_CONTROL_VEHICLE_SPEED', ccvs, 'km/h'),
+    FMSPID(0xFEEA, 'FMS_VEHICLE_WEIGHT', vw, 'kg'),
+    FMSPID(0xFEC0, 'FMS_SERVICE_INFORMATION', serv, 'km'),
+    FMSPID(0xFDA4, 'FMS_PTO_DRIVE_ENGAGEMENT', ptode, 'bits'),
+    FMSPID(0xFE70, 'FMS_COMBINATION_VEHICLE_WEIGHT', cvw, 'kg'),
+    FMSPID(0xF000, 'FMS_ELECTRONIC_RETARDER_CONTROLLER_1', erc1, 'RetarderTorque%'),
+    FMSPID(0xFE4E, 'FMS_DOOR_CONTROL_1', door_control_1, 'bytes'),
+    FMSPID(0xFDA5, 'FMS_DOOR_CONTROL_2', door_control_2, 'bytes'),
+    FMSPID(0xFEE6, 'FMS_TIME_DATE', time_date, 'datetime'),
+    FMSPID(0xFDD1, 'FMS_CAPABILITIES', fms_sw,'SWvers'),
+    FMSPID(0xFED5, 'FMS_ALTERNATOR_SPEED', alternator_speed, 'str'),
+    FMSPID(0xECFF, 'FMS_BAM', vehicle_id_bam, ''),
+    FMSPID(0xEBFF, 'FMS_VEHICLE_ID', vehicle_id_part, 'str'),
+    FMSPID(0xF005, 'FMS_ELECTRONIC_TRANSMISSION_CONTROL_2', etc2, ['SelectedGear', 'CurrentGear']),
+    FMSPID(0xFE58, 'FMS_AIR_SUSPENSION_CONTROL_4', asc4, ['Bellow Pressure Front Axle Left',
                                                             'Bellow Pressure Front Axle Left',
                                                             'Bellow Pressure Front Axle Right',
                                                             'Bellow Pressure Front Axle Right',
