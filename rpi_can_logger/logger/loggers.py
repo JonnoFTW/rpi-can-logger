@@ -160,7 +160,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         if self.first_log:
             # only log those that get a response the first time around
             self.pids2log = set(pids_responded)
-            logging.warning("Setting PIDs to {}".format(self.pids[p]['name'] for p in self.pids2log))
+            logging.warning("Setting PIDs to {}".format(",".join(self.pids[p]['name'] for p in self.pids2log)))
             self.first_log = False
             self.log_timeout = self.log_timeout_tail
         return out
