@@ -19,4 +19,4 @@ tesla: false
 sniffing: false
 log-bluetooth: true
 log-level: warning
-vehicle-id: rocco_4wd
+vehicle-id: 'Flinders Hilux'
