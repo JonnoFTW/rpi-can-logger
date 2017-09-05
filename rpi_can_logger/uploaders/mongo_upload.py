@@ -60,8 +60,13 @@ for fname in sorted(glob(log_dir + '/*.json')):
             print(e)
 
     if len(rows):
-        rpi_readings_collection.remove({'trip_id': trip_id})
-        rpi_readings_collection.insert_many(rows, ordered=False)
-    # delete the file
+        try:
+            rpi_readings_collection.remove({'trip_id': trip_id})
+            rpi_readings_collection.insert_many(rows, ordered=False)
+            # delete the file
+            os.remove(fname)
+        except Exception as e:
+            print("Err", e)
 
-    os.remove(fname)
+
+

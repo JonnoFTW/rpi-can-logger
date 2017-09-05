@@ -256,7 +256,7 @@ def do_log(sniffing, tesla):
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     responds_to.update(logger.responds_to)
     trip_sequence = 0
-    vid = args['vehicle-id']
+    vid = args.vehicle_id
     json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid)
     trip_id = '{}_{}'.format(pathlib.Path(json_writer._out_fh.name).name, vid)
 
