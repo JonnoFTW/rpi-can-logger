@@ -7,6 +7,7 @@ Type=simple
 User=pi
 Group=pi
 Environment="PYTHONPATH={{pwd}}"
+Environment=PATH=/home/pi/.pyenv/versions/3.6.1/bin:$PATH
 WorkingDirectory={{pwd}}
 ExecStartPre=/bin/sleep 5
 ExecStart={{pwd}}/rpi_can_logger/main.py --conf {{pwd}}/example_obd_querying_conf.yaml
