@@ -258,7 +258,7 @@ def do_log(sniffing, tesla):
     trip_sequence = 0
     vid = args.vehicle_id
     json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid)
-    trip_id = '{}_{}'.format(pathlib.Path(json_writer._out_fh.name).name, vid)
+    trip_id = '{}_{}'.format(pathlib.Path(json_writer._out_fh.name).stem, vid)
 
     def make_buff():
         return {
