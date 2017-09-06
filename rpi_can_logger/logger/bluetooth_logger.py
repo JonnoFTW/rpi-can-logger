@@ -125,7 +125,7 @@ class BluetoothReceiver(threading.Thread):
                     if pieces[0] == "$login":
                         if pieces[1] == self.btl.password:
                             self.btl.identified = True
-                            self.btl.send("$login=IDENTIFIED!")
+                            self.btl.send("$login=IDENTIFIED")
                             self.btl.send("$fields={}!".format(','.join(self.btl.fields)))
                         else:
                             self.btl.send("$login=INVALID_PASS")

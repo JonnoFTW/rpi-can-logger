@@ -220,8 +220,8 @@ def export_files(sock):
             json_zipped_bytes = outgzip.read()
             msg = '$export={}={}.gz!'.format(len(json_zipped_bytes), pathlib.Path(fname).name)
             print(msg)
-            sock.write(msg)
-            sock.write(json_zipped_bytes)
+            sock.send(msg)
+            sock.send(json_zipped_bytes)
 
 
 bt_commands = {
@@ -236,7 +236,8 @@ bt_commands = {
     '$resetwifi': reset_wifi,
     '$setvid': set_vid,
     '$respondsto': get_responds,
-    '$export': export_files
+    '$export': export_files,
+    '$login': lambda: ""
 }
 
 
