@@ -216,8 +216,8 @@ def export_files(sock):
     for fname in glob(log_folder + "/*.json"):
         if not os.access(fname, os.W_OK):
             print(fname, "is currently being written to")
-        with gzip.GzipFile(fname, 'rb') as outgzip:
-            json_zipped_bytes = outgzip.read()
+        with open(fname, 'rb') as infile:
+            json_zipped_bytes = gzip.compress(infile.read())
             msg = '$export={}={}.gz!'.format(len(json_zipped_bytes), pathlib.Path(fname).name)
             print(msg)
             sock.send(msg)
