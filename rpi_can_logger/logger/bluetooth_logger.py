@@ -60,7 +60,7 @@ class BluetoothLogger(threading.Thread):
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
         self.client_sock.settimeout(0.3)
-        self.client_sock.send("$RPI-CAN-LOGGER!")
+        self.client_sock.send("$RPI-CAN-LOGGER!\n")
         # self.send("$ip={}".format(get_ip()))
         while 1:
             connected = self._is_connected()
@@ -122,8 +122,8 @@ class BluetoothReceiver(threading.Thread):
                     if pieces[0] == "$login":
                         if pieces[1] == self.btl.password:
                             self.btl.identified = True
-                            self.btl.send("$login=IDENTIFIED")
-                            self.btl.send("$fields={}!".format(','.join(self.fields)))
+                            self.btl.send("$login=IDENTIFIED!")
+                            self.btl.send("$fields={}!".format(','.join(self.btl.fields)))
                         else:
                             self.btl.send("$login=INVALID_PASS")
                     else:
