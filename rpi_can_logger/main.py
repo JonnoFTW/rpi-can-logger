@@ -217,6 +217,7 @@ def export_files(sock):
     for fname in glob(log_folder + "/*.json"):
         if fname == writing_to['name']:
             print(fname, "is currently being written to")
+            continue
         with open(fname, 'r') as infile:
             json_bytes = infile.read()
             msg = '$export={}={}!\n'.format(len(json_bytes), pathlib.Path(fname).name)
