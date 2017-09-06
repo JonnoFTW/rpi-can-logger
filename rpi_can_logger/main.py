@@ -227,7 +227,7 @@ def export_files(sock):
             print("Lines=", len(lines))
             for line in lines:
                 sock.send("$export="+line+"\n")
-            sock.send("$done")
+            sock.send("$done\n")
 
 
 bt_commands = {
