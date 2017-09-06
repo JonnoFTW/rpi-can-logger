@@ -219,7 +219,7 @@ def export_files(sock):
             print(fname, "is currently being written to")
         with open(fname, 'rb') as infile:
             json_zipped_bytes = gzip.compress(infile.read())
-            msg = '$export={}={}.gz!'.format(len(json_zipped_bytes), pathlib.Path(fname).name)
+            msg = '$export={}={}.gz!\n'.format(len(json_zipped_bytes), pathlib.Path(fname).name)
             print(msg)
             sock.send(msg)
             sock.send(json_zipped_bytes)
@@ -238,7 +238,7 @@ bt_commands = {
     '$setvid': set_vid,
     '$respondsto': get_responds,
     '$export': export_files,
-    '$login': lambda x: x
+    '$login': lambda x: "IDENTIFIED"
 }
 
 
