@@ -208,13 +208,14 @@ def set_vid(val):
 
 responds_to = set()
 
-
+writing_to = {}
 def get_responds():
     return ','.join([pids[x]['name'] for x in sorted(responds_to)])
 
 def export_files(sock):
+    print("currently writing", writing_to['name'])
     for fname in glob(log_folder + "/*.json"):
-        if not os.access(fname, os.W_OK):
+        if fname == writing_to['name']:
             print(fname, "is currently being written to")
         with open(fname, 'rb') as infile:
             json_zipped_bytes = gzip.compress(infile.read())
@@ -275,7 +276,9 @@ def do_log(sniffing, tesla):
     trip_sequence = 0
     vid = args.vehicle_id
     json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid)
+    writing_to['name'] = json_writer._out_fh.name
     trip_id = '{}_{}'.format(pathlib.Path(json_writer._out_fh.name).stem, vid)
+
 
     def make_buff():
         return {
