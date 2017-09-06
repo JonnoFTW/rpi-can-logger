@@ -217,12 +217,14 @@ def export_files(sock):
     for fname in glob(log_folder + "/*.json"):
         if fname == writing_to['name']:
             print(fname, "is currently being written to")
-        with open(fname, 'rb') as infile:
-            json_zipped_bytes = gzip.compress(infile.read())
-            msg = '$export={}={}.gz!\n'.format(len(json_zipped_bytes), pathlib.Path(fname).name)
+        with open(fname, 'r') as infile:
+            json_bytes = infile.read()
+            msg = '$export={}={}!\n'.format(len(json_bytes), pathlib.Path(fname).name)
             print(msg)
             sock.send(msg)
-            sock.send(json_zipped_bytes)
+            for line in json_bytes.splitlines():
+                sock.send(line+"\n")
+            sock.send("$done")
 
 
 bt_commands = {
