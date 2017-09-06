@@ -126,12 +126,14 @@ class BluetoothReceiver(threading.Thread):
                         if pieces[1] == self.btl.password:
                             self.btl.identified = True
                             self.btl.send("$login=IDENTIFIED")
-                            self.btl.send("$fields={}!".format(','.join(self.btl.fields)))
+                            self.btl.send("$fields={}".format(','.join(self.btl.fields)))
                         else:
                             self.btl.send("$login=INVALID_PASS")
                     else:
                         continue
                 if pieces[0] == "$export":
+                    if pieces[0] == '$login':
+                        continue
                     # begin exporting the files
                     # read up a whole string containing
                     # take exclusive control of the sending functionality at this time

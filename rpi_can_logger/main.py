@@ -237,7 +237,7 @@ bt_commands = {
     '$setvid': set_vid,
     '$respondsto': get_responds,
     '$export': export_files,
-    '$login': lambda: ""
+    '$login': lambda x: x
 }
 
 
