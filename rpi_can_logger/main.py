@@ -224,7 +224,7 @@ def export_files(sock):
             print(msg)
             sock.send(msg)
             for line in json_bytes.splitlines():
-                sock.send(line+"\n")
+                sock.send("$export="+line+"\n")
             sock.send("$done")
 
 
