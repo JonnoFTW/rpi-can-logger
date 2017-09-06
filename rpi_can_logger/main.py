@@ -221,9 +221,11 @@ def export_files(sock):
         with open(fname, 'r') as infile:
             json_bytes = infile.read()
             msg = '$export={}={}!\n'.format(len(json_bytes), pathlib.Path(fname).name)
-            print(msg)
+            print(msg,end='')
             sock.send(msg)
-            for line in json_bytes.splitlines():
+            lines = json_bytes.splitlines()
+            print("Lines=", len(lines))
+            for line in lines:
                 sock.send("$export="+line+"\n")
             sock.send("$done")
 
