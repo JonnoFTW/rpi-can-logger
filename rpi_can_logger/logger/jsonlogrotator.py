@@ -1,13 +1,11 @@
-import json
-
 from datetime import datetime
-import subprocess
 from pathlib import Path
-import logging
 from io import StringIO
+import subprocess
+import logging
 import random
-import os
 import string
+import json
 from .BaseLogRotator import BaseLogRotator
 
 
@@ -25,8 +23,7 @@ class JSONLogRotator(BaseLogRotator):
 
         self._bytes_written = 0
         now = datetime.now()
-        self._out_fh = os.open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S_{}.json'.format(self.make_random(6))),
-                               mode=os.O_EXLOCK | os.O_WRONLY)
+        self._out_fh = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S_{}.json'.format(self.make_random(6))),'w')
         logging.warning("Writing to {} ({} bytes)".format(self._out_fh.name, self.max_bytes))
 
     @staticmethod
