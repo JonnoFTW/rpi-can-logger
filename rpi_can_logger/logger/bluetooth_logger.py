@@ -13,7 +13,7 @@ from rpi_can_logger.util import get_ip
 class BluetoothLogger(threading.Thread):
     uuid = "08be0e96-6ab4-11e7-907b-a6006ad3dba0"
 
-    def __init__(self, queue_size=512, fields=[], bt_commands={}):
+    def __init__(self, password, queue_size=512, fields=[], bt_commands={}):
         """
         This should be in its own thread
         """
@@ -21,7 +21,9 @@ class BluetoothLogger(threading.Thread):
         self.fields = fields
         self.queue_size = queue_size
         self.bt_commands = bt_commands
+        self.password = password
         self._finished = False
+        self.identified = False
 
     def run(self):
         self.recv_queue = deque(maxlen=self.queue_size)
@@ -58,8 +60,8 @@ class BluetoothLogger(threading.Thread):
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
         self.client_sock.settimeout(0.3)
-        self.client_sock.send("RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
-        self.send("$ip={}".format(get_ip()))
+        self.client_sock.send("$RPI-CAN-LOGGER!\n#{}!\n".format(','.join(self.fields)))
+        # self.send("$ip={}".format(get_ip()))
         while 1:
             connected = self._is_connected()
             if self._finished:
@@ -116,6 +118,16 @@ class BluetoothReceiver(threading.Thread):
             while len(self.recv_queue) > 0:
                 cmd = self.recv_queue.popleft()
                 pieces = cmd.split('=')
+                if not self.btl.identified:
+                    if pieces[0] == "$login":
+                        if pieces[1] == self.btl.password:
+                            self.btl.identified = True
+                            self.btl.send("$login=IDENTIFIED")
+                        else:
+                            self.btl.send("$login=INVALID_PASS")
+                    else:
+                        continue
+
                 try:
                     bt_reply = self.bt_commands.get(pieces[0].lower().strip(), None)(*pieces[1:])
                     if bt_reply is not None:

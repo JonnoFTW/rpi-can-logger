@@ -44,6 +44,7 @@ parser.add_argument('--log-bluetooth', action='store_true', help='Log to Bluetoo
 parser.add_argument('--vid', help='Vehicle Identifier, will try to fetch the VIN, otherwise will a RPi identifier')
 parser.add_argument('--log-level', '-ll', help='Logging level', default='warning', choices=['warning', 'debug'])
 parser.add_argument('--vehicle-id', '-vh', help='Unique identifier for the vehicle')
+parser.add_argument('--bluetooth-pass', '-btp', help='Bluetooth password')
 args = parser.parse_args()
 
 if args.conf:
@@ -209,6 +210,7 @@ def get_responds():
     return ','.join([pids[x]['name'] for x in sorted(responds_to)])
 
 
+
 bt_commands = {
     '$ip': get_ip,
     '$serial': get_serial,
@@ -220,7 +222,7 @@ bt_commands = {
     '$reset': reset,
     '$resetwifi': reset_wifi,
     '$setvid': set_vid,
-    '$respondsto': get_responds
+    '$respondsto': get_responds,
 }
 
 
@@ -232,7 +234,7 @@ def do_log(sniffing, tesla):
     try:
         if log_bluetooth:
             logging.warning("Starting BT")
-            btl = BluetoothLogger(fields=all_fields, bt_commands=bt_commands)
+            btl = BluetoothLogger(fields=all_fields, bt_commands=bt_commands, password=args.bluetooth_pass)
             btl.start()
         logging.warning("Waiting for CAN Bus channel={} interface={}".format(args.channel, args.interface))
         led1(1)
@@ -305,7 +307,7 @@ def do_log(sniffing, tesla):
         trip_sequence += 1
         if log_bluetooth:
             led2(1)
-            if bt_log:
+            if bt_log and btl.identified:
                 btl.send(row_txt)
             led2(0)
 
