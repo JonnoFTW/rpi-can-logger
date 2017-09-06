@@ -5,6 +5,7 @@ except ImportError:
 import logging
 import threading
 import queue
+import gzip
 import time
 from collections import deque
 from rpi_can_logger.util import get_ip
@@ -23,6 +24,7 @@ class BluetoothLogger(threading.Thread):
         self.bt_commands = bt_commands
         self.password = password
         self._finished = False
+        self.exporting = False
         self.identified = False
 
     def run(self):
@@ -81,7 +83,8 @@ class BluetoothLogger(threading.Thread):
                     msg = self.queue.popleft()
                     if msg:
                         try:
-                            self.client_sock.send("{}!\n".format(msg.strip()))
+                            if not self.exporting:
+                                self.client_sock.send("{}!\n".format(msg.strip()))
                         except bt.BluetoothError as e:
                             pass
             else:
@@ -128,7 +131,17 @@ class BluetoothReceiver(threading.Thread):
                             self.btl.send("$login=INVALID_PASS")
                     else:
                         continue
-
+                if pieces[0] == "$export":
+                    # begin exporting the files
+                    # read up a whole string containing
+                    # take exclusive control of the sending functionality at this time
+                    self.btl.exporting = True
+                    try:
+                        self.bt_commands.get('$export')(self.btl.client_sock)
+                    except Exception as e:
+                        print("Failed to export:", e)
+                    self.btl.exporting = False
+                    continue
                 try:
                     bt_reply = self.bt_commands.get(pieces[0].lower().strip(), None)(*pieces[1:])
                     if bt_reply is not None:

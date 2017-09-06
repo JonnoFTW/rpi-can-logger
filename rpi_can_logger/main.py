@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import argparse
 import atexit
+import gzip
 import logging
 import os
 import subprocess
 from datetime import datetime
+from glob import glob
+
 from yaml import load, dump
 import can
 import pathlib
@@ -209,6 +212,14 @@ responds_to = set()
 def get_responds():
     return ','.join([pids[x]['name'] for x in sorted(responds_to)])
 
+def export_files(sock):
+    for fname in glob(log_folder + "/*.json"):
+        if not os.access(fname, os.W_OK):
+            print(fname, "is currently being written to")
+        with gzip.GzipFile(fname, 'rb') as outgzip:
+            json_zipped_bytes = outgzip.read()
+            sock.write('$export={}={}.gz!'.format(len(json_zipped_bytes), pathlib.Path(fname).name))
+            sock.write(json_zipped_bytes)
 
 
 bt_commands = {
@@ -223,6 +234,7 @@ bt_commands = {
     '$resetwifi': reset_wifi,
     '$setvid': set_vid,
     '$respondsto': get_responds,
+    '$export': export_files
 }
 
 
