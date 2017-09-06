@@ -218,7 +218,9 @@ def export_files(sock):
             print(fname, "is currently being written to")
         with gzip.GzipFile(fname, 'rb') as outgzip:
             json_zipped_bytes = outgzip.read()
-            sock.write('$export={}={}.gz!'.format(len(json_zipped_bytes), pathlib.Path(fname).name))
+            msg = '$export={}={}.gz!'.format(len(json_zipped_bytes), pathlib.Path(fname).name)
+            print(msg)
+            sock.write(msg)
             sock.write(json_zipped_bytes)
 
 
