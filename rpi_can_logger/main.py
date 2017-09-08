@@ -220,13 +220,13 @@ def export_files(sock):
             continue
         with open(fname, 'r') as infile:
             json_bytes = infile.read()
-            msg = '$export={}={}!\n'.format(len(json_bytes), pathlib.Path(fname).name)
+            lines = json_bytes.splitlines()
+            msg = '$export={}={}={}!\n'.format(len(json_bytes), len(lines), pathlib.Path(fname).name)
             if len(json_bytes) == 0:
                 # don't send empty files
                 continue
             print(msg, end='')
             sock.send(msg)
-            lines = json_bytes.splitlines()
             print("Lines=", len(lines))
             for line in lines:
                 sock.send("$export="+line+"\n")
