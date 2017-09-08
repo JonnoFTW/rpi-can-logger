@@ -80,7 +80,7 @@ if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
 elif args.fms:
     args.sniffing = True
-    from rpi_can_logger.logger import fms_pids as pid, fms_name2pid as name2pid
+    from rpi_can_logger.logger import fms_pids as pids, fms_name2pid as name2pid
 else:
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
     args.sniffing = True
