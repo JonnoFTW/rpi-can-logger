@@ -48,6 +48,7 @@ parser.add_argument('--vid', help='Vehicle Identifier, will try to fetch the VIN
 parser.add_argument('--log-level', '-ll', help='Logging level', default='warning', choices=['warning', 'debug'])
 parser.add_argument('--vehicle-id', '-vh', help='Unique identifier for the vehicle')
 parser.add_argument('--bluetooth-pass', '-btp', help='Bluetooth password')
+parser.add_argument('--fms', action='store_true', help='Indicate that we are using a FMS CAN')
 args = parser.parse_args()
 
 if args.conf:
