@@ -54,6 +54,9 @@ for fname in sorted(glob(log_dir + '/*.json')):
                     row_obj['timestamp'] = parse(row_obj['timestamp'])
                 except:
                     pass
+            if row_obj.get('pos') is not None and not all(row_obj['pos']['coordinates']):
+                # ignore invalid gps fields, don't skip because they might have gps turned off or something
+                del row_obj['pos']
             row_count += 1
             rows.append(row_obj)
         except json.JSONDecodeError as e:

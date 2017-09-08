@@ -78,10 +78,11 @@ B5 62 06 08 06 00 64 00 01 00 01 00 7A 12 B5 62 06 08 00 00 0E 30
         if out[self.FIELDS[-1]] is not None:
             out[self.FIELDS[-1]] *= self.KNOTS_PER_KMPH
         if out.get('latitude') is not None and out.get('longitude') is not None:
-            out['pos'] = {
-                'type': 'Point',
-                'coordinates': [out['longitude'], out['latitude']]
-            }
+            if out['latitude'] != 0.0 and out['longitude'] != 0.0:
+                out['pos'] = {
+                    'type': 'Point',
+                    'coordinates': [out['longitude'], out['latitude']]
+                }
             del out['latitude']
             del out['longitude']
         for f in self.EXTRA_FIELD:

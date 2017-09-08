@@ -228,6 +228,7 @@ def export_files(sock):
             for line in lines:
                 sock.send("$export="+line+"\n")
             sock.send("$done\n")
+        sock.send('$export=done\n')
 
 
 bt_commands = {
@@ -307,7 +308,7 @@ def do_log(sniffing, tesla):
             err_count += 1
             if err_count == 3:
                 shutdown()
-                shutdown_msg = "Shutting down after failing to get OBD data"
+                shutdown_msg = "$status=Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
                 logging.warning(subprocess.check_output('sudo shutdown -h now'.split()))
