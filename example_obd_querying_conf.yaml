@@ -21,3 +21,4 @@ log-bluetooth: true
 bluetooth-pass: secret_password_here
 log-level: warning
 vehicle-id: 'Flinders Hilux'
+fms: false
