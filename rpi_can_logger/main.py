@@ -279,13 +279,13 @@ def do_log(sniffing, tesla):
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
-    if tesla:
-        logger_c = TeslaSniffingLogger
-    elif sniffing:
-        logger_c = SniffingOBDLogger
-    else:
-        logger_c = QueryingOBDLogger
-        init_sniff(bus)
+    # if tesla:
+    #     logger_c = TeslaSniffingLogger
+    # elif sniffing:
+    #     logger_c = SniffingOBDLogger
+    # else:
+    logger_c = QueryingOBDLogger
+    init_sniff(bus)
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     responds_to.update(logger.responds_to)
     trip_sequence = 0
