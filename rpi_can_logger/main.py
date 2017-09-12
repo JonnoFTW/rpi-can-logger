@@ -288,16 +288,17 @@ def do_log(sniffing, tesla):
     if tesla:
         logging.warning("Using TeslaSnifferLogger")
         logger_c = TeslaSniffingLogger
-    elif sniffing:
-        logging.warning("Using SnifferLogger")
-        logger_c = SniffingOBDLogger
+    elif is_obd_query:
+        logging.warning("Using QueryingOBDLogger")
+        logger_c = QueryingOBDLogger
+        init_sniff(bus)
+
     elif is_fms:
         logging.warning("Using FMSLogger")
         logger_c = FMSLogger
     else:
-        logging.warning("Using QueryingOBDLogger")
-        logger_c = QueryingOBDLogger
-        init_sniff(bus)
+        logging.warning("Using SnifferLogger")
+        logger_c = SniffingOBDLogger
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     responds_to.update(logger.responds_to)
     trip_sequence = 0
