@@ -92,7 +92,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         :return:
         """
         self.responds_to = set()
-        support_check = [0, 32, 64]
+        support_check = [0, 32, 64, 96, ]
         logging.warning("Determining supported PIDs")
         start = datetime.now()
         count = 0
@@ -159,7 +159,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                     #        logging.warning("finished log loop")
         if self.first_log:
             # only log those that get a response the first time around
-            self.pids2log = set(pids_responded)
+            # self.pids2log = set(pids_responded)
             logging.warning("Setting PIDs to {}".format(",".join(self.pids[p]['name'] for p in self.pids2log)))
             self.first_log = False
             self.log_timeout = self.log_timeout_tail

@@ -16,10 +16,8 @@ log-pids:
 log-trigger: PID_ENGINE_FUEL_RATE
 disable-gps: false
 gps-port: /dev/ttyS0
-tesla: false
-sniffing: false
 log-bluetooth: true
 bluetooth-pass: secret_password_here
 log-level: warning
-vehicle-id: 'Flinders Hilux'
-fms: false
+vehicle-id: 'rocco_phev'
+obd-query: true

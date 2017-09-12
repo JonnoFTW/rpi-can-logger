@@ -53,6 +53,22 @@ dtoverlay=spi-bcm2835
 ```
 console=serial0,baudrate=115200
 ```
+5. Add these lines to your `/etc/network/interfaces` file (set it to 250000 if you are using FMS):
+```angular
+auto can0
+iface can0 inet manual
+    pre-up /sbin/ip link set can0 type can bitrate 500000 triple-sampling on
+    up /sbin/ifconfig can0 up
+    down /sbin/ifconfig can0 down
+
+auto can1
+iface can1 inet manual
+    pre-up /sbin/ip link set can1 type can bitrate 500000 triple-sampling on
+    up /sbin/ifconfig can1 up
+    down /sbin/ifconfig can1 down
+
+```
+
 5. The logging and file upload service will now run on startup. By default it will use: [example_obd_querying_conf.yaml](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_obd_querying_conf.yaml).
 6. To setup uploading of files, you will need to create a `mongo_conf.yaml` file in the project directory.
   

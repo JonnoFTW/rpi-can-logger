@@ -19,7 +19,7 @@ except RuntimeError:
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE
 from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
-    BluetoothLogger
+    BluetoothLogger, FMSLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
@@ -49,6 +49,7 @@ parser.add_argument('--log-level', '-ll', help='Logging level', default='warning
 parser.add_argument('--vehicle-id', '-vh', help='Unique identifier for the vehicle')
 parser.add_argument('--bluetooth-pass', '-btp', help='Bluetooth password')
 parser.add_argument('--fms', action='store_true', help='Indicate that we are using a FMS CAN')
+parser.add_argument('--obd-query', action='store_true', help='Indicate we are querying OBD')
 args = parser.parse_args()
 
 if args.conf:
@@ -76,17 +77,22 @@ if args.verbose:
 log_bluetooth = args.log_bluetooth
 log_level = args.log_level
 is_tesla = args.tesla
+is_fms = args.fms
+is_obd_query = args.obd_query
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
     logging.warning("USING TESLA")
-# elif args.fms:
-#     args.sniffing = True
-#     logging.warning("USING FMS")
-#     from rpi_can_logger.logger import fms_pids as pids, fms_name2pid as name2pid
-else:
-    print("USING OBD")
+elif is_fms:
+    args.sniffing = True
+    logging.warning("USING FMS")
+    from rpi_can_logger.logger import fms_pids as pids, fms_name2pid as name2pid
+elif is_obd_query:
+    print("USING OBD QUERY")
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
     args.sniffing = True
+else:
+    logging.error("Please specify what kind of CAN logging you want")
+    exit("Please specify what kind of CAN logging you want")
 
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
@@ -279,13 +285,19 @@ def do_log(sniffing, tesla):
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
-    # if tesla:
-    #     logger_c = TeslaSniffingLogger
-    # elif sniffing:
-    #     logger_c = SniffingOBDLogger
-    # else:
-    logger_c = QueryingOBDLogger
-    init_sniff(bus)
+    if tesla:
+        logging.warning("Using TeslaSnifferLogger")
+        logger_c = TeslaSniffingLogger
+    elif sniffing:
+        logging.warning("Using SnifferLogger")
+        logger_c = SniffingOBDLogger
+    elif is_fms:
+        logging.warning("Using FMSLogger")
+        logger_c = FMSLogger
+    else:
+        logging.warning("Using QueryingOBDLogger")
+        logger_c = QueryingOBDLogger
+        init_sniff(bus)
     logger = logger_c(bus, pid_ids, pids, log_trigger)
     responds_to.update(logger.responds_to)
     trip_sequence = 0
