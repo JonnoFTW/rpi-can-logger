@@ -1,4 +1,3 @@
-from typing import Callable
 from itertools import cycle
 from datetime import datetime, timezone
 import struct
@@ -12,7 +11,7 @@ http://www.fms-standard.com/Bus/down_load/fms_document_ver03_vers_14_09_2012.pdf
 
 class FMSPID:
 
-    def __init__(self, pid: int, name: str, parser: Callable, fields: [list, str]):
+    def __init__(self, pid: int, name: str, parser, fields: [list, str]):
         """
         A class representing an FMSPID and its conversion
         :param pid: The PID
