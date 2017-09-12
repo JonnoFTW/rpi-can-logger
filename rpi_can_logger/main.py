@@ -78,10 +78,13 @@ log_level = args.log_level
 is_tesla = args.tesla
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
+    logging.warning("USING TESLA")
 elif args.fms:
     args.sniffing = True
+    logging.warning("USING FMS")
     from rpi_can_logger.logger import fms_pids as pids, fms_name2pid as name2pid
 else:
+    print("USING OBD")
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
     args.sniffing = True
 
