@@ -2,6 +2,7 @@
 import argparse
 import atexit
 import gzip
+import base64
 import logging
 import os
 import subprocess
@@ -81,6 +82,7 @@ is_fms = args.fms
 is_obd_query = args.obd_query
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
+
     logging.warning("USING TESLA")
 elif is_fms:
     args.sniffing = True
@@ -89,6 +91,7 @@ elif is_fms:
 elif is_obd_query:
     print("USING OBD QUERY")
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
+
     args.sniffing = True
 else:
     logging.error("Please specify what kind of CAN logging you want")
@@ -221,8 +224,11 @@ def set_vid(val):
 responds_to = set()
 
 writing_to = {}
+
+
 def get_responds():
     return ','.join([pids[x]['name'] for x in sorted(responds_to)])
+
 
 def export_files(sock):
     print("currently writing", writing_to['name'])
@@ -230,18 +236,17 @@ def export_files(sock):
         if fname == writing_to['name']:
             print(fname, "is currently being written to")
             continue
-        with open(fname, 'r') as infile:
-            json_bytes = infile.read()
-            lines = json_bytes.splitlines()
-            msg = '$export={}={}={}!\n'.format(len(json_bytes), len(lines), pathlib.Path(fname).name)
-            if len(json_bytes) == 0:
+        with open(fname, 'rb') as infile:
+            json_gzip_bytes = gzip.compress(infile.read())
+            json_gzip_base64 = base64.b64encode(json_gzip_bytes)
+            msg = '$export={}={}!\n'.format(len(json_gzip_bytes), pathlib.Path(fname).name)
+            if len(json_gzip_bytes) == 0:
                 # don't send empty files
+                print("skipping empty file:", pathlib.Path(fname).name)
                 continue
             print(msg, end='')
             sock.send(msg)
-            print("Lines=", len(lines))
-            for line in lines:
-                sock.send("$export="+line+"\n")
+            sock.send(json_gzip_base64)
             sock.send("$done\n")
         sock.send('$export=done\n')
 
@@ -307,7 +312,6 @@ def do_log(sniffing, tesla):
     path = pathlib.Path(json_writer._out_fh.name)
     writing_to['name'] = path.name
     trip_id = '{}_{}'.format(path.stem, vid)
-
 
     def make_buff():
         return {
