@@ -247,7 +247,7 @@ def export_files(sock):
                 continue
             print(msg, end='')
             sock.send(msg)
-            sock.send("$export="+json_gzip_base64)
+            sock.send("$export={}\n".format(str(json_gzip_base64, 'ascii')))
             sock.send("$done\n")
         sock.send('$export=done\n')
 
