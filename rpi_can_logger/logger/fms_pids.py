@@ -255,7 +255,7 @@ _pids = [
     FMSPID(0xFEAE, 'FMS_AIR_SUPPLY_PRESSURE', air_supply_pressure, ['kPa', 'kPa']),
     FMSPID(0xFD09, 'FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION', hr_fuel_consumption, 'L'),
     FMSPID(0xFE56, 'FMS_AFTERTREATMENT_1_DIESEL_EXHAUST_FLUID_TANK_1_INFORMATION', at1t1i, '%'),
-    FMSPID(0xFD7D, 'FMS_TELL_TALE_STATUS', tts, [f'TTS_{i}' for i in range(16)]),
+    FMSPID(0xFD7D, 'FMS_TELL_TALE_STATUS', tts, ['TTS_{}'.format(i) for i in range(16)]),
     FMSPID(0xFEF1, 'FMS_CRUISE_CONTROL_VEHICLE_SPEED', ccvs, 'km/h'),
     FMSPID(0xFEEA, 'FMS_VEHICLE_WEIGHT', vw, 'kg'),
     FMSPID(0xFEC0, 'FMS_SERVICE_INFORMATION', serv, 'km'),
