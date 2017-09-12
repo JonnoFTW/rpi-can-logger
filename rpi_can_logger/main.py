@@ -237,12 +237,13 @@ def export_files(sock):
             print(fname, "is currently being written to")
             continue
         with open(fname, 'rb') as infile:
-            json_gzip_bytes = gzip.compress(infile.read())
+            file_bytes = infile.read()
+            json_gzip_bytes = gzip.compress(file_bytes)
             json_gzip_base64 = base64.b64encode(json_gzip_bytes)
             msg = '$export={}={}!\n'.format(len(json_gzip_bytes), pathlib.Path(fname).name)
-            if len(json_gzip_bytes) == 0:
+            if len(file_bytes) == 0:
                 # don't send empty files
-                print("skipping empty file:", pathlib.Path(fname).name)
+                logging.warning("Skipping empty file: " + pathlib.Path(fname).name)
                 continue
             print(msg, end='')
             sock.send(msg)
