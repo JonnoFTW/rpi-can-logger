@@ -15,7 +15,7 @@ class GPS:
     KNOTS_PER_KMPH = 1.852
 
     def __init__(self, port, baudrate=115200, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE,
-                 bytesize=serial.EIGHTBITS, timeout=1):
+                 bytesize=serial.EIGHTBITS, timeout=0.5):
         self.port = port
         self.baudrate = baudrate
         self.parity = parity
