@@ -67,7 +67,7 @@ class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
 class QueryingOBDLogger(BaseOBDLogger):
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
-        self._determine_pids()
+        # self._determine_pids()
         self.responds_to = set()
         self.first_log = True
         self.log_timeout_first = 4
