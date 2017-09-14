@@ -108,8 +108,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                         logging.warning("Could not determine PIDs in time")
                         return
                     continue
-                if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[
-                    2] in support_check:
+                if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[2] in support_check:
                     logging.warning("R> {}".format(recvd))
                     self._parse_support_frame(recvd)
                     support_check.remove(recvd.data[2])
@@ -136,7 +135,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             start = datetime.now()
             while count < 64:
                 count += 1
-                msg = self.bus.recv(0.1)
+                msg = self.bus.recv(0.2)
                 if msg is None:
                     # logging.warning("No message")
                     if (datetime.now() - start).total_seconds() > self.log_timeout:
