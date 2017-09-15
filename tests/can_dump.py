@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import can
 import csv
 import datetime
@@ -15,7 +16,8 @@ if len(sys.argv) > 2:
         interface = 'socketcan_native'
     else:
         exit("Invalid CAN bus specified")
-
+channel = "can1"
+interface = "socketcan_native"
 with open('/home/pi/log/can-dumps/can_dump_{}.csv'.format(datetime.datetime.now().timestamp()), 'w') as outf:
     fields = ['seq', 'arb_id', 'bytes']
     i = 0
@@ -23,6 +25,7 @@ with open('/home/pi/log/can-dumps/can_dump_{}.csv'.format(datetime.datetime.now(
     writer.writeheader()
     bus = can.interface.Bus(channel=channel, bustype=interface)
     while True:
+        i +=1
         msg = bus.recv()
         row = {
             'seq': i,

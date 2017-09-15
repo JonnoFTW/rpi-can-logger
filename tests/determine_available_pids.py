@@ -3,9 +3,9 @@ import can
 import atexit
 import time
 from rpi_can_logger.logger import obd_pids
-from .util import get_args
+#from .util import get_args
 
-interface, channel = get_args()
+interface, channel = "socketcan_native", "can1"
 
 bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)
@@ -32,12 +32,14 @@ while 1:
             time.sleep(0.1)
             msg = can.Message(extended_id=0, data=[2, 1, rcvd[0], 0, 0, 0, 0, 0], arbitration_id=0x07DF)
             bus.send(msg)
-            print("S>", msg)
+#o            print("S>", msg)
             for i in range(100):
                 msg = bus.recv()
                 if msg.arbitration_id in [0x7df, 0x7e8]:
                     print("R>", msg)
-                    rcvd.remove(msg.data[2])
+                    if msg.data[2] in rcvd:
+                        parse_support_frame(msg)
+                        rcvd.remove(msg.data[2])
 
     except KeyboardInterrupt:
         print("Terminating")
