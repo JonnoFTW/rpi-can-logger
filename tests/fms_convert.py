@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from rpi_can_logger.logger import fms_name2pid, fms_pids
 import re
 import sys

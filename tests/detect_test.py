@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from rpi_can_logger.logger import fms_pids, fms_name2pid
 import can
 import atexit

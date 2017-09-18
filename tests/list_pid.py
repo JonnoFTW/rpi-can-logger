@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from rpi_can_logger.logger import obd_name2pid
 import yaml
 import os

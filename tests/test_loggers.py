@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from rpi_can_logger.logger import TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, tesla_pids, obd_pids
 import can
 
