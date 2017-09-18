@@ -8,13 +8,14 @@ interface, channel = get_args()
 
 bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)
-print("Querying PHEV battery on ", channel, interface)
+print("Querying PHEV on ", channel, interface)
 
 for response_addr, pid_d in outlander_pids.items():
+    pid = pid_d['pid']
     msg = can.Message(arbitration_id=pid_d['request'],
-                      data=[2, 0x21, 0x01, 0, 0, 0, 0, 0])
+                      data=[2, 0x21, pid, 0, 0, 0, 0, 0])
     # listen for responses on addrs[1]
-    print("Requesting:\t", pid_d['request'])
+    print("Requesting:\t", pid_d['request'], pid_d['name'])
     print(msg)
     bus.send(msg)
     buf = bytes()

@@ -2,7 +2,7 @@
 import can
 import atexit
 
-from .util import get_args
+from util import get_args
 
 interface, channel = get_args()
 
