@@ -4,12 +4,10 @@ import time
 import can
 import atexit
 import re
+from util import get_args
+interface, channel = get_args()
 
-
-can.rc['interface'] = 'pcan'
-can.rc['channel'] = 'PCAN_USBBUS1'
-
-bus = can.interface.Bus(channel=can.rc['channel'], interface=can.rc['interface'])
+bus = can.interface.Bus(channel=channel, interface=interface)
 atexit.register(bus.shutdown)
 if len(sys.argv) != 2:
     exit("Please provide a pcan trace file to play back")
