@@ -34,8 +34,9 @@ def outlander_rear_rpm(bs):
 # functions to return  value, name and unit
 # map the response address to
 class PID:
-    def __init__(self, name, request, response, parser):
+    def __init__(self, name, request, response, pid, parser):
         self.name = name
+        self.pid = pid
         self.request = request
         self.response = response
         self.parser = parser
@@ -45,10 +46,10 @@ class PID:
 
 
 _pids = [
-    PID('outlander_battery_health', 0x761, 0x762, outlander_battery_health),
-    PID('outlander_charges', 0x765, 0x766, outlander_charges),
-    PID('outlander_front_rpm', 0x753, 0x754, outlander_front_rpm),
-    PID('outlander_rear_rpm', 0x755, 0x756, outlander_rear_rpm),
+    PID('outlander_battery_health', 0x761, 0x762, 1, outlander_battery_health),
+    PID('outlander_charges', 0x765, 0x766, 1, outlander_charges),
+    PID('outlander_front_rpm', 0x753, 0x754, 2, outlander_front_rpm),
+    PID('outlander_rear_rpm', 0x755, 0x756, 2, outlander_rear_rpm),
 
 ]
 pids = {
@@ -57,6 +58,7 @@ pids = {
             'request': p.request,
             'parse': p.parser,
             'name': p.name,
-            'pid': p,
+            'pidobj': p,
+            'pid': p.pid
         } for p in _pids
 }
