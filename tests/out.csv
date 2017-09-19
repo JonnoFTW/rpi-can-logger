@@ -1,4 +1,3 @@
-Querying PHEV on  can1 socketcan_native
 SOC (%),Batt Health (Ah),Current Charge (Ah),Charge Current  (V),Battery Total Voltage (V)
 73.5,37.2,27.4,384,318.1
 73.5,37.2,27.4,384,318.1
