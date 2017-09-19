@@ -7,6 +7,7 @@ from .jsonlogrotator import JSONLogRotator
 from .loggers import QueryingOBDLogger, SniffingOBDLogger, TeslaSniffingLogger, FMSLogger
 from .bluetooth_logger import BluetoothLogger
 
+obd_pids += outlander_pids
 tesla_name2pid = {y['name']: x for x, y in tesla_pids.items()}
 obd_name2pid = {y['name']: x for x, y in obd_pids.items()}
 fms_name2pid = {y['name']: x for x, y in fms_pids.items()}

@@ -46,16 +46,16 @@ class PID:
 
 
 _pids = [
-    PID('outlander_battery_health', 0x761, 0x762, 1, outlander_battery_health),
-    PID('outlander_charges', 0x765, 0x766, 1, outlander_charges),
-    PID('outlander_front_rpm', 0x753, 0x754, 2, outlander_front_rpm),
-    PID('outlander_rear_rpm', 0x755, 0x756, 2, outlander_rear_rpm),
+    PID('OUTLANDER_BATTERY_HEALTH', 0x761, 0x762, 1, outlander_battery_health),
+    PID('OUTLANDER_CHARGES', 0x765, 0x766, 1, outlander_charges),
+    PID('OUTLANDER_FRONT_RPM', 0x753, 0x754, 2, outlander_front_rpm),
+    PID('OUTLANDER_REAR_RPM', 0x755, 0x756, 2, outlander_rear_rpm),
 
 ]
 pids = {
-    p.response:
+    p.request:
         {
-            'request': p.request,
+            'response': p.response,
             'parse': p.parser,
             'name': p.name,
             'pidobj': p,

@@ -5,7 +5,7 @@ from datetime import datetime
 import subprocess
 
 from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
-from rpi_can_logger.logger import obd_pids
+from rpi_can_logger.logger import obd_pids, outlander_pids
 
 
 class BaseLogger:
@@ -108,7 +108,8 @@ class QueryingOBDLogger(BaseOBDLogger):
                         logging.warning("Could not determine PIDs in time")
                         return
                     continue
-                if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[2] in support_check:
+                if recvd.arbitration_id == OBD_RESPONSE and list(recvd.data[:2]) == [6, 0x41] and recvd.data[
+                    2] in support_check:
                     logging.warning("R> {}".format(recvd))
                     self._parse_support_frame(recvd)
                     support_check.remove(recvd.data[2])
@@ -124,38 +125,40 @@ class QueryingOBDLogger(BaseOBDLogger):
         out = {}
         pids_responded = []
         for m in self.pids2log:
-            # if self.responds_to is not None and m in self.responds_to:
-            out_msg = self.make_msg(m)
-            # logging.warning("S> {}".format(out_msg))
-            self.bus.send(self.make_msg(m))
+            if m in outlander_pids:
+                out.update(self._log_outlander(m))
+            else:
+                # if self.responds_to is not None and m in self.responds_to:
+                out_msg = self.make_msg(m)
+                # logging.warning("S> {}".format(out_msg))
+                self.bus.send(self.make_msg(m))
 
-            # receive the pid back, (hoping it's the right one)
-            #
-            count = 0
-            start = datetime.now()
-            while count < 64:
-                count += 1
-                msg = self.bus.recv(0.2)
-                if msg is None:
-                    # logging.warning("No message")
-                    if (datetime.now() - start).total_seconds() > self.log_timeout:
-                        break
+                # receive the pid back, (hoping it's the right one)
+                #
+                count = 0
+                start = datetime.now()
+                while count < 64:
+                    count += 1
+                    msg = self.bus.recv(0.2)
+                    if msg is None:
+                        # logging.warning("No message")
+                        if (datetime.now() - start).total_seconds() > self.log_timeout:
+                            break
+                        continue
+                    if msg.arbitration_id == OBD_RESPONSE:
+                        #                       logging.warning("R> {}".format(msg))
 
-                    continue
-                if msg.arbitration_id == OBD_RESPONSE:
-                    #                       logging.warning("R> {}".format(msg))
-
-                    pid, obd_data = self.separate_can_msg(msg)
-                    #                        logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
-                    # try and receive
-                    if pid in self.pids2log:
-                        out.update(self.pids[pid]['parse'](obd_data))
-                        pids_responded.append(pid)
-                        #                           logging.warning(out)
-                    if len(out) == len(self.pids2log):
-                        break
-                        #      logging.warning(out)
-                    #        logging.warning("finished log loop")
+                        pid, obd_data = self.separate_can_msg(msg)
+                        #                        logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
+                        # try and receive
+                        if pid in self.pids2log:
+                            out.update(self.pids[pid]['parse'](obd_data))
+                            pids_responded.append(pid)
+                            #                           logging.warning(out)
+                        if len(out) == len(self.pids2log):
+                            break
+                            #      logging.warning(out)
+                            #        logging.warning("finished log loop")
         if self.first_log:
             # only log those that get a response the first time around
             # self.pids2log = set(pids_responded)
@@ -176,6 +179,39 @@ class QueryingOBDLogger(BaseOBDLogger):
             data=[2, mode, pid, 0, 0, 0, 0, 0],
             extended_id=False
         )
+
+    def _log_outlander(self, request_arb_id):
+        p = outlander_pids[request_arb_id]
+        pid = p['pid']
+        msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],
+                          arbitration_id=request_arb_id)
+        bus = self.bus
+        bus.send(msg)
+        buf = bytes()
+        num_bytes = 0
+        multiline = True
+        for i in range(500):
+            recvd = bus.recv()
+            if recvd.arbitration_id == p['response']:
+                # print("R>", recvd)
+                sequence = recvd.data[0]
+                if sequence == 0x10:
+                    buf += recvd.data[4:]
+                    multiline = True
+                    num_bytes = recvd.data[1] - 2
+                    # print("Multiline bytes expected", num_bytes)
+                    # send control frame to receive rest of multiline message
+                    ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
+                                          data=[0x30, 0x08, 0x0a, 0, 0, 0, 0, 0])
+                    bus.send(ctl_msg)
+                # print("S>", ctl_msg)
+                elif multiline:
+                    buf += recvd.data[1:]
+                    # print(len(buf), buf)
+                    if len(buf) >= num_bytes:
+                        return p['parse'](buf).values()
+                else:
+                    return p['parse'](recvd.data)
 
 
 class FMSLogger(BaseSnifferLogger):
