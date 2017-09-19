@@ -126,7 +126,10 @@ class QueryingOBDLogger(BaseOBDLogger):
         pids_responded = []
         for m in self.pids2log:
             if m in outlander_pids:
-                out.update(self._log_outlander(m))
+                outlander_data = self._log_outlander(m)
+                if outlander_data != {}:
+                    pids_responded.append(m)
+                    out.update(outlander_data)
             else:
                 # if self.responds_to is not None and m in self.responds_to:
                 out_msg = self.make_msg(m)
@@ -137,7 +140,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                 #
                 count = 0
                 start = datetime.now()
-                while count < 64:
+                while count < 100:
                     count += 1
                     msg = self.bus.recv(0.2)
                     if msg is None:
@@ -165,6 +168,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             logging.warning("Setting PIDs to {}".format(",".join(self.pids[p]['name'] for p in self.pids2log)))
             self.first_log = False
             self.log_timeout = self.log_timeout_tail
+        print(out)
         return out
 
     @staticmethod
@@ -181,37 +185,46 @@ class QueryingOBDLogger(BaseOBDLogger):
         )
 
     def _log_outlander(self, request_arb_id):
+        time.sleep(0.5)
         p = outlander_pids[request_arb_id]
         pid = p['pid']
-        msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],
+        req_msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],
                           arbitration_id=request_arb_id)
-        bus = self.bus
-        bus.send(msg)
+        
+        ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
+                           data=[0x30, 0x0, 0x0, 0, 0, 0, 0, 0])
+
         buf = bytes()
         num_bytes = 0
         multiline = True
-        for i in range(500):
-            recvd = bus.recv()
+
+        #print("S>", req_msg)
+        self.bus.send(req_msg)
+        for i in range(5000):
+            recvd = self.bus.recv()
+
             if recvd.arbitration_id == p['response']:
-                # print("R>", recvd)
-                sequence = recvd.data[0]
-                if sequence == 0x10:
-                    buf += recvd.data[4:]
+ #              print("R>",i, recvd)
+ 
+               sequence = recvd.data[0]
+               if sequence == 0x10:
+                    self.bus.send(ctl_msg) 
+                    self.bus.send(req_msg)
+
+                    buf = recvd.data[4:]
                     multiline = True
                     num_bytes = recvd.data[1] - 2
-                    # print("Multiline bytes expected", num_bytes)
+  #                  print("Multiline bytes expected", num_bytes)
                     # send control frame to receive rest of multiline message
-                    ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
-                                          data=[0x30, 0x08, 0x0a, 0, 0, 0, 0, 0])
-                    bus.send(ctl_msg)
-                # print("S>", ctl_msg)
-                elif multiline:
+               elif multiline:
                     buf += recvd.data[1:]
-                    # print(len(buf), buf)
+   #                 print(len(buf), buf)
                     if len(buf) >= num_bytes:
-                        return p['parse'](buf).values()
-                else:
+                        return p['parse'](buf)
+               else:
                     return p['parse'](recvd.data)
+       # print("nothing")
+        return {}
 
 
 class FMSLogger(BaseSnifferLogger):
