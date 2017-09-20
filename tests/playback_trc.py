@@ -17,6 +17,7 @@ fname = sys.argv[2]
 # fname = '/scratch/Dropbox/obd/lonsdale_Test/scania_2450_loop.trc'
 # fname = '/scratch/Dropbox/obd/tesla.trc'
 last_sleep = 0
+i = 0
 with open(fname, 'r') as infile:
     print("Playing back", infile.name)
     [infile.readline() for _ in range(16)]
@@ -33,4 +34,5 @@ with open(fname, 'r') as infile:
                           arbitration_id=int(row[3], 16),
                           extended_id=0)
         bus.send(msg)
-        print("S>", msg)
+        i += 1
+        print("S>",i, msg)

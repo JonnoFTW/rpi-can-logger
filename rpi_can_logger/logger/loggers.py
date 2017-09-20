@@ -232,10 +232,10 @@ class FMSLogger(BaseSnifferLogger):
     def separate_can_msg(msg):
         return (msg.arbitration_id >> 8) & 0xffff, msg.data
 
-    def __init__(self, bus, pids2log, pids, trigger):
-        super().__init__(bus, pids2log, pids, trigger)
-        # put the CAN loggers in 250k mode
-        # need to use extended ID
-        for i in ['can0', 'can1']:
-            print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split()))
-            print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split()))
+    # def __init__(self, bus, pids2log, pids, trigger):
+    #     super().__init__(bus, pids2log, pids, trigger)
+    #     # put the CAN loggers in 250k mode
+    #     # need to use extended ID
+    #     # for i in ['can0', 'can1']:
+    #     #     print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split()))
+    #     #     print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split()))
