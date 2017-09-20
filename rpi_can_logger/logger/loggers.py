@@ -189,41 +189,41 @@ class QueryingOBDLogger(BaseOBDLogger):
         p = outlander_pids[request_arb_id]
         pid = p['pid']
         req_msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],
-                          arbitration_id=request_arb_id)
-        
+                              arbitration_id=request_arb_id)
+
         ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
-                           data=[0x30, 0x0, 0x0, 0, 0, 0, 0, 0])
+                              data=[0x30, 0x0, 0x0, 0, 0, 0, 0, 0])
 
         buf = bytes()
         num_bytes = 0
         multiline = True
 
-        #print("S>", req_msg)
+        # print("S>", req_msg)
         self.bus.send(req_msg)
         for i in range(5000):
             recvd = self.bus.recv()
 
             if recvd.arbitration_id == p['response']:
- #              print("R>",i, recvd)
- 
-               sequence = recvd.data[0]
-               if sequence == 0x10:
-                    self.bus.send(ctl_msg) 
+                #              print("R>",i, recvd)
+
+                sequence = recvd.data[0]
+                if sequence == 0x10:
+                    self.bus.send(ctl_msg)
                     self.bus.send(req_msg)
 
                     buf = recvd.data[4:]
                     multiline = True
                     num_bytes = recvd.data[1] - 2
-  #                  print("Multiline bytes expected", num_bytes)
+                    #                  print("Multiline bytes expected", num_bytes)
                     # send control frame to receive rest of multiline message
-               elif multiline:
+                elif multiline:
                     buf += recvd.data[1:]
-   #                 print(len(buf), buf)
+                    #                 print(len(buf), buf)
                     if len(buf) >= num_bytes:
                         return p['parse'](buf)
-               else:
+                else:
                     return p['parse'](recvd.data)
-       # print("nothing")
+                    # print("nothing")
         return {}
 
 
@@ -232,10 +232,13 @@ class FMSLogger(BaseSnifferLogger):
     def separate_can_msg(msg):
         return (msg.arbitration_id >> 8) & 0xffff, msg.data
 
-    # def __init__(self, bus, pids2log, pids, trigger):
-    #     super().__init__(bus, pids2log, pids, trigger)
-    #     # put the CAN loggers in 250k mode
-    #     # need to use extended ID
-    #     # for i in ['can0', 'can1']:
-    #     #     print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split()))
-    #     #     print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split()))
+    def __init__(self, bus, pids2log, pids, trigger):
+        super().__init__(bus, pids2log, pids, trigger)
+        # put the CAN loggers in 250k mode
+        # need to use extended ID
+        for i in ['can0', 'can1']:
+            logging.warning("Bringing down: " + i)
+            print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split(), shell=True))
+            logging.warning("Bringing up: {} with 250kBaud".format(i))
+            print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split(),
+                                          shell=True))

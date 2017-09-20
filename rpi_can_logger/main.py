@@ -199,13 +199,13 @@ def get_error():
 
 
 def reset():
-    return subprocess.check_output('sudo shutdown -r now'.split())
+    return subprocess.check_output('sudo shutdown -r now'.split(), shell=True)
 
 
 def reset_wifi():
     out = ''
     for cmd in ['ifdown', 'ifup']:
-        out += subprocess.check_output(['sudo', cmd, 'wlan0'])
+        out += subprocess.check_output(['sudo', cmd, 'wlan0'], shell=True)
     return out
 
 
@@ -338,7 +338,7 @@ def do_log(sniffing, tesla):
                 shutdown_msg = "$status=Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
-                logging.warning(subprocess.check_output('sudo shutdown -h now'.split()))
+                logging.warning(subprocess.check_output('sudo shutdown -h now'.split(), shell=True))
         else:
             err_count = 0
         buff.update(new_log)
