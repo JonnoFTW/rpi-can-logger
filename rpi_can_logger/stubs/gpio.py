@@ -1,6 +1,24 @@
-class GPIO:
-    def __getattr__(self, item):
-        return self._noop()
+class GPIO(object):
+    BOARD = 0
+    OUT = 1
 
-    def _noop(self, *args, **kwargs):
-        return
+    def output(self, *args, **kwargs):
+        pass
+
+    def setup(self, *args, **kwargs):
+        pass
+
+    def __getattr__(self, item):
+        def wrapper(*args, **kwargs):
+            pass
+
+        return wrapper
+
+    def cleanup(self, *args, **kwargs):
+        pass
+
+    def setwarnings(self, *args, **kwargs):
+        pass
+
+    def setmode(self, *args, **kwargs):
+        pass

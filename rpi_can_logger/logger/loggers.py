@@ -34,7 +34,11 @@ class BaseSnifferLogger(BaseLogger):
     def log(self):
         # keep reading until we get a log_trigger
         buff = {}
+        timeout = 1
+        start_time = datetime.now()
         while 1:
+            if (datetime.now() - start_time).total_seconds() > timeout:
+                return buff
             msg = self.bus.recv()
             pid, obd_data = self.separate_can_msg(msg)
 
@@ -238,7 +242,7 @@ class FMSLogger(BaseSnifferLogger):
         # need to use extended ID
         for i in ['can0', 'can1']:
             logging.warning("Bringing down: " + i)
-            print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split(), shell=True))
+#            print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split(), shell=True))
             logging.warning("Bringing up: {} with 250kBaud".format(i))
-            print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split(),
-                                          shell=True))
+ #           print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split(),
+ #                                         shell=True))

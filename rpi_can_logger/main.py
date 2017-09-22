@@ -15,7 +15,7 @@ import pathlib
 
 try:
     import RPi.GPIO as GPIO
-except RuntimeError:
+except ImportError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE
@@ -74,7 +74,7 @@ if args.conf:
     args = ArgStruct(**out_args)
 if args.verbose:
     print(dump(args))
-
+disable_gps = args.disable_gps
 log_bluetooth = args.log_bluetooth
 log_level = args.log_level
 is_tesla = args.tesla
@@ -282,8 +282,13 @@ def do_log(sniffing, tesla):
         logging.warning("Waiting for CAN Bus channel={} interface={}".format(args.channel, args.interface))
         led1(1)
         led2(1)
-        bus = can.interface.Bus(channel=args.channel, bustype=args.interface)
-        gps = GPS(args.gps_port)
+        if is_fms:
+            baud = 250000
+        else:
+            baud = 500000
+        bus = can.interface.Bus(channel=args.channel, bustype=args.interface, bitrate=baud)
+        if not disable_gps:
+            gps = GPS(args.gps_port)
         led2(0)
         led1(0)
         logging.warning("Connected CAN Bus and GPS")
@@ -338,7 +343,7 @@ def do_log(sniffing, tesla):
                 shutdown_msg = "$status=Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
-                logging.warning(subprocess.check_output('sudo shutdown -h now'.split(), shell=True))
+                logging.warning(subprocess.check_output('sudo shutdown -h now'.split()))
         else:
             err_count = 0
         buff.update(new_log)
