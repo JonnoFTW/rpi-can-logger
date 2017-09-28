@@ -90,7 +90,7 @@ channel: can1 # which can bus to use
 log-messages: /home/pi/log/can-log/messages/ # location of debug messages
 log-folder: /home/pi/log/can-log/ # location of log files
 log-size: 32 # maximum size in MB before log file is rotated 
-log-pids: # the pids we want to log, refer to rpi_can_logger/logger/obd_pids.py or tesla_pids.py
+log-pids: # the pids we want to log, refer to rpi_can_logger/logger/obd_pids.py,  tesla_pids.py fms_pids.py outlander_pid
   - PID_ENGINE_LOAD
   - PID_THROTTLE
   - PID_INTAKE_MAP
@@ -103,7 +103,11 @@ gps-port: /dev/ttyS0 # serial port for GPS device
 tesla: false # indicates whether or not we are logging a tesla vehicle
 sniffing: false # indicates that we are sniffing
 log-bluetooth: true # whether or not we log to bluetooth
+bluetooth-pass: super_secret_password # the password required to stream the bluetooth data
 log-level: warning # log level (warning or debug)
+vid: vehicle_identifier # a unique way to identify this vehicle
+fms: false # are we logging FMS? (Bus and Truck only)
+verbose: true # give verbose message output on stdout
 ```
 
 ### Configuring Data Upload

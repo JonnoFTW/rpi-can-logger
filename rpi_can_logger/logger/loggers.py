@@ -240,9 +240,28 @@ class FMSLogger(BaseSnifferLogger):
         super().__init__(bus, pids2log, pids, trigger)
         # put the CAN loggers in 250k mode
         # need to use extended ID
+        self.buff = {}
         for i in ['can0', 'can1']:
             logging.warning("Bringing down: " + i)
-#            print(subprocess.check_output("sudo /sbin/ifconfig {} down".format(i).split(), shell=True))
+            subprocess.call("sudo bash -c '/sbin/ifconfig {} down'".format(i).split(), shell=True)
             logging.warning("Bringing up: {} with 250kBaud".format(i))
- #           print(subprocess.check_output("sudo /sbin/ip link set {} up type can bitrate 250000".format(i).split(),
- #                                         shell=True))
+            subprocess.call("sudo bash -c '/sbin/ip link set {} up type can bitrate 250000'".format(i), shell=True)
+
+    def log(self):
+        # keep reading until we get a log_trigger
+        timeout = 0.5
+        start_time = datetime.now()
+        fms_ccvs = 'FMS_CRUISE_CONTROL_VEHICLE_SPEED (km/h)'
+        while 1:
+            if (datetime.now() - start_time).total_seconds() > timeout:
+                return self.buff
+            msg = self.bus.recv()
+            pid, obd_data = self.separate_can_msg(msg)
+
+            if pid in self.pids2log:
+                parsed = self.pids[pid]['parse'](obd_data)
+                self.buff.update(parsed)
+                if fms_ccvs in self.buff and self.buff[fms_ccvs] > 200:
+                    del self.buff[fms_ccvs]
+            # if pid == self.trigger:
+            #     return self.buff
