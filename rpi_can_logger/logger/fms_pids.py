@@ -231,12 +231,18 @@ def vehicle_id_bam(msg):
 
 def vehicle_id_part(msg):
     global vin_str
+    return
     if vin_len is not None:
         if msg[0] == vin_packets:
             vin_str += msg[1:vin_len - len(vin_str) + 1].decode('ascii')
             return vin_str
         else:
-            vin_str += msg[1:].decode('ascii')
+            # find the index of 0xff and go to there
+            try:
+                last_index = msg.index(b'\xff')
+                vin_str += msg[1:last_index-1].decode('ascii')
+            except ValueError:
+                vin_str += msg[1:].decode('ascii')
 
 _pids = [
     FMSPID(0xFEE9, 'FMS_FUEL_CONSUMPTION', fuel_consumption, 'L'),
@@ -264,7 +270,7 @@ _pids = [
     FMSPID(0xFE4E, 'FMS_DOOR_CONTROL_1', door_control_1, 'bytes'),
     FMSPID(0xFDA5, 'FMS_DOOR_CONTROL_2', door_control_2, 'bytes'),
     FMSPID(0xFEE6, 'FMS_TIME_DATE', time_date, 'datetime'),
-    FMSPID(0xFDD1, 'FMS_CAPABILITIES', fms_sw,'SWvers'),
+    FMSPID(0xFDD1, 'FMS_CAPABILITIES', fms_sw, 'SWvers'),
     FMSPID(0xFED5, 'FMS_ALTERNATOR_SPEED', alternator_speed, 'str'),
     FMSPID(0xECFF, 'FMS_BAM', vehicle_id_bam, ''),
     FMSPID(0xEBFF, 'FMS_VEHICLE_ID', vehicle_id_part, 'str'),

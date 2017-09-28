@@ -2,7 +2,7 @@ import abc
 
 
 class BaseLogRotator:
-    def __init__(self, log_folder, maxbytes, fieldnames, vin):
+    def __init__(self, log_folder, maxbytes, fieldnames, vin, pid_file):
         """
 
         :param log_folder:
@@ -15,6 +15,7 @@ class BaseLogRotator:
         self.max_bytes = maxbytes
         self.fieldnames = fieldnames
         self.vin = vin
+        self.pid_file = pid_file
         self._make_writer()
 
     @abc.abstractmethod

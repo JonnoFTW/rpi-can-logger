@@ -54,7 +54,7 @@ dtoverlay=spi-bcm2835
 console=serial0,baudrate=115200
 ```
 5. Add these lines to your `/etc/network/interfaces` file (set it to 250000 if you are using FMS):
-```angular
+```
 auto can0
 iface can0 inet manual
     pre-up /sbin/ip link set can0 type can bitrate 500000 triple-sampling on

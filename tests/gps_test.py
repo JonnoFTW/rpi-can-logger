@@ -2,7 +2,6 @@
 from io import StringIO
 from rpi_can_logger.gps import GPS
 import sys
-import pynmea2
 
 # should be ttyUSB0 or 1, tty AMA0
 port = '/dev/ttyS0'

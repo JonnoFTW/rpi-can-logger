@@ -5,9 +5,11 @@ import yaml
 import json
 from glob import glob
 import os
+import os.path
 from datetime import datetime
 from dateutil.parser import parse
 from io import StringIO
+import pathlib
 
 from rpi_can_logger.util import get_serial, get_ip
 
@@ -29,14 +31,21 @@ print(yaml.dump(info, default_flow_style=False))
 rpi_info.delete_many({'serial': serial})
 rpi_info.insert_one(info)
 # start putting everything we've seen in the db
-
+with open(conf.pid_file, 'r') as pid:
+    currently_logging_to = pathlib.Path(pid.read().strip())
 
 for fname in sorted(glob(log_dir + '/*.json')):
-    if not os.access(fname, os.W_OK):
+    if not os.access(fname, os.W_OK) or pathlib.Path(fname) == currently_logging_to:
         print("Can't import {}, currently in use".format(fname))
     # make sure this file isn't open by another process
     trip_id = os.path.split(fname)[-1].split('.')[0]
-
+    try:
+        if os.path.getsize(fname) == 0:
+            print("Removing empty log:", fname)
+            os.remove(fname)
+            continue
+    except OSError:
+        pass
     print("Importing", trip_id)
 
     with open(fname, 'r') as data_fh:

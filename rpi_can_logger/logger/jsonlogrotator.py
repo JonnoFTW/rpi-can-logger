@@ -23,7 +23,10 @@ class JSONLogRotator(BaseLogRotator):
 
         self._bytes_written = 0
         now = datetime.now()
-        self._out_fh = open(self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S_{}.json'.format(self.make_random(6))),'w')
+        self.fname = self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S_{}.json'.format(self.make_random(6)))
+        self._out_fh = open(self.fname, 'w')
+        with open(self.pid_file, 'w') as pid_out:
+            pid_out.write(self.fname)
         logging.warning("Writing to {} ({} bytes)".format(self._out_fh.name, self.max_bytes))
 
     @staticmethod

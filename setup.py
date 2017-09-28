@@ -31,6 +31,8 @@ for fname in glob('./systemd/*.service'):
         print("Writing to", service_fd.name)
         service_fd.write(txt)
 
+
+
     for i in [
         ['sudo', 'chmod', '644', service_fname_dest],
         ['sudo', 'systemctl', 'daemon-reload'],
@@ -38,3 +40,11 @@ for fname in glob('./systemd/*.service'):
 
     ]:
         print(i, subprocess.check_output(i))
+# modify /etc/systemd/system/dbus-org.bluez.service
+# to use bluetoothd -C
+with open('/etc/systemd/system/dbus-org.bluez.service','r') as btservice:
+    btservicetxt = btservice.read()
+    btservicetxt = btservicetxt.replace('ExecStart=/usr/lib/bluetooth/bluetoothd\n',
+                                        'ExecStart=/usr/lib/bluetooth/bluetoothd -C\n')
+with open('/etc/systemd/system/dbus-org.bluez.service','w') as btservice:
+    btservice.write(btservicetxt)

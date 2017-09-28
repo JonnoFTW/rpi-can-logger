@@ -1,7 +1,8 @@
 interface: socketcan_native
 channel: can1
-log-messages: /home/pi/log/can-log/messages/
-log-folder: /home/pi/log/can-log/
+log-messages: ~/log/can-log/messages/
+log-folder: ~/log/can-log/
+pid-file: ~/log/can-log.pid
 log-size: 32
 log-pids:
   - PID_ENGINE_LOAD

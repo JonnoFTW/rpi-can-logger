@@ -11,6 +11,7 @@ from glob import glob
 
 from yaml import load, dump
 import can
+from os.path import expanduser
 import pathlib
 
 try:
@@ -25,6 +26,7 @@ from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingO
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
 parser.add_argument('--channel', '-c', default='socketcan_native', help='CAN Channel to use')
+parser.add_argument('--pid-file', '-pf', default='/var/log/can-log/can_log.pid', help='PID file to record what file we are currently writing to')
 parser.add_argument('--log-messages', '-lm', default='/var/log/can-log/messages/',
                     help='Folder where debug messages are store')
 parser.add_argument('--log-folder', '-lf', default='/var/log/can-log/', help='Where logged CAN/GPS data is stored')
@@ -100,9 +102,10 @@ else:
 can.rc['interface'] = args.interface
 can.rc['channel'] = args.channel
 
-log_messages = args.log_messages
+log_messages = expanduser(args.log_messages)
 # log folder
-log_folder = args.log_folder
+log_folder = expanduser(args.log_folder)
+log_pid_location = expanduser(args.pid_file)
 for p in [log_messages, log_folder]:
     if not os.path.exists(p):
         os.makedirs(p)
@@ -199,13 +202,13 @@ def get_error():
 
 
 def reset():
-    return subprocess.check_output('sudo shutdown -r now'.split(), shell=True)
+    return subprocess.call("sudo bash -c 'shutdown -r now'", shell=True)
 
 
 def reset_wifi():
     out = ''
     for cmd in ['ifdown', 'ifup']:
-        out += subprocess.check_output(['sudo', cmd, 'wlan0'], shell=True)
+        out += subprocess.call(['sudo', cmd, 'wlan0'], shell=True)
     return out
 
 
@@ -314,7 +317,7 @@ def do_log(sniffing, tesla):
     responds_to.update(logger.responds_to)
     trip_sequence = 0
     vid = args.vehicle_id
-    json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid)
+    json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid, pid_file=log_pid_location)
     path = pathlib.Path(json_writer._out_fh.name)
     writing_to['name'] = path.name
     trip_id = '{}_{}'.format(path.stem, vid)

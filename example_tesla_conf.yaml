@@ -2,6 +2,7 @@ interface: socketcan_native
 channel: can1
 log-messages: /home/pi/log/can-log/messages/
 log-folder: /home/pi/log/can-log/
+pid-file: ~/log/can-log.pid
 log-size: 32
 log-pids:
   - PID_TESLA_REAR_DRIVE_UNIT_POWER
@@ -15,4 +16,5 @@ tesla: true
 sniffing: true
 log-bluetooth: true
 log-level: warning
-vehicle-id: tesla_1
+vehicle-id: 'tesla_1'
+bluetooth-pass: secret_password_here

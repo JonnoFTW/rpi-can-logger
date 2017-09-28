@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+
 print(os.environ['PYTHONPATH'])
 
 from rpi_can_logger.logger import BluetoothLogger
@@ -7,10 +8,16 @@ from math import sin, pi
 from itertools import cycle
 import time
 
+import yaml
+
+with open('../example_obd_querying_conf.yaml', 'r') as infile:
+    conf = yaml.load(infile)
+
+password = conf['bluetooth-pass']
+
 
 def test_send():
-
-    btl = BluetoothLogger(fields=["speed", "rpm", "soc"])
+    btl = BluetoothLogger(fields=["speed", "rpm", "soc"], password=password)
     btl.start()
 
     # generate some data and send it
