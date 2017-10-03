@@ -23,3 +23,4 @@ bluetooth-pass: secret_password_here
 log-level: warning
 vehicle-id: 'rocco_phev'
 obd-query: true
+verbose: true

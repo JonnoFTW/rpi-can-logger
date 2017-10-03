@@ -31,7 +31,7 @@ print(yaml.dump(info, default_flow_style=False))
 rpi_info.delete_many({'serial': serial})
 rpi_info.insert_one(info)
 # start putting everything we've seen in the db
-with open(conf.pid_file, 'r') as pid:
+with open(os.path.expanduser(conf['pid-file']), 'r') as pid:
     currently_logging_to = pathlib.Path(pid.read().strip())
 
 for fname in sorted(glob(log_dir + '/*.json')):
@@ -76,7 +76,7 @@ for fname in sorted(glob(log_dir + '/*.json')):
             rpi_readings_collection.remove({'trip_id': trip_id})
             rpi_readings_collection.insert_many(rows, ordered=False)
             # delete the file
-            os.remove(fname)
+#            os.remove(fname)
         except Exception as e:
             print("Err", e)
 

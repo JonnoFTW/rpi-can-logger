@@ -189,7 +189,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         )
 
     def _log_outlander(self, request_arb_id):
-        time.sleep(0.5)
+        #time.sleep(0.5)
         p = outlander_pids[request_arb_id]
         pid = p['pid']
         req_msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],

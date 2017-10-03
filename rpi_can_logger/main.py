@@ -208,7 +208,7 @@ def reset():
 def reset_wifi():
     out = ''
     for cmd in ['ifdown', 'ifup']:
-        out += subprocess.call(['sudo', cmd, 'wlan0'], shell=True)
+        out += subprocess.call("sudo bash -c'{} wlan0'".format(cmd), shell=True)
     return out
 
 
@@ -346,7 +346,7 @@ def do_log(sniffing, tesla):
                 shutdown_msg = "$status=Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
-                logging.warning(subprocess.check_output('sudo shutdown -h now'.split()))
+                logging.warning(subprocess.check_output("sudo bash -c 'shutdown -h now'", shell=True))
         else:
             err_count = 0
         buff.update(new_log)
