@@ -21,6 +21,7 @@ class BaseLogger:
         self.pids = pids
         self.trigger = trigger
         self.responds_to = []
+        self.buff = {}
 
     def _make_buff(self):
         return {k: None for k in self.pids2log}
@@ -33,18 +34,17 @@ class BaseSnifferLogger(BaseLogger):
 
     def log(self):
         # keep reading until we get a log_trigger
-        buff = {}
         timeout = 0.5
         start_time = datetime.now()
         while 1:
             if (datetime.now() - start_time).total_seconds() > timeout:
-                return buff
+                return self.buff
             msg = self.bus.recv()
             pid, obd_data = self.separate_can_msg(msg)
 
             if pid in self.pids2log:
                 parsed = self.pids[pid]['parse'](obd_data)
-                buff.update(parsed)
+                self.buff.update(parsed)
             # if pid == self.trigger:
             #     return buff
 
