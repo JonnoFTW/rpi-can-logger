@@ -34,7 +34,7 @@ class BaseSnifferLogger(BaseLogger):
     def log(self):
         # keep reading until we get a log_trigger
         buff = {}
-        timeout = 1
+        timeout = 0.5
         start_time = datetime.now()
         while 1:
             if (datetime.now() - start_time).total_seconds() > timeout:
@@ -45,8 +45,8 @@ class BaseSnifferLogger(BaseLogger):
             if pid in self.pids2log:
                 parsed = self.pids[pid]['parse'](obd_data)
                 buff.update(parsed)
-            if pid == self.trigger:
-                return buff
+            # if pid == self.trigger:
+            #     return buff
 
 
 class TeslaSniffingLogger(BaseSnifferLogger):
@@ -263,5 +263,8 @@ class FMSLogger(BaseSnifferLogger):
                 self.buff.update(parsed)
                 if fms_ccvs in self.buff and self.buff[fms_ccvs] > 200:
                     del self.buff[fms_ccvs]
-            # if pid == self.trigger:
-            #     return self.buff
+                    # don't trigger a log if we get an invalid value
+                    continue
+
+            if pid == self.trigger:
+                return self.buff
