@@ -58,6 +58,7 @@ for fname in sorted(glob(log_dir + '/*.json')):
     for line in all_data_fh.getvalue().splitlines():
         try:
             row_obj = json.loads(line)
+            trip_id = row_obj.get('trip_id')
             if row_obj.get('timestamp') is not None:
                 try:
                     row_obj['timestamp'] = parse(row_obj['timestamp'])
@@ -73,10 +74,13 @@ for fname in sorted(glob(log_dir + '/*.json')):
 
     if len(rows):
         try:
+            print("\tRemoving:", trip_id)
             rpi_readings_collection.remove({'trip_id': trip_id})
+            print("\tInterting:", trip_id)
             rpi_readings_collection.insert_many(rows, ordered=False)
             # delete the file
-#            os.remove(fname)
+            print("\tRemoving file:", fname)
+            os.remove(fname)
         except Exception as e:
             print("Err", e)
 
