@@ -74,8 +74,7 @@ B5 62 06 08 06 00 64 00 01 00 01 00 7A 12 B5 62 06 08 00 00 0E 30
         if out['datestamp'] is not None and out['timestamp'] is not None:
             timestamp = datetime.combine(out['datestamp'], out['timestamp']).replace(tzinfo=timezone.utc)
             out['timestamp'] = timestamp.isoformat()
-        elif out['timestamp'] is not None:
-            out['timestamp'] = out['timestamp'].isoformat()
+
         if out[self.FIELDS[-1]] is not None:
             out[self.FIELDS[-1]] *= self.KNOTS_PER_KMPH
         if out.get('latitude') is not None and out.get('longitude') is not None:
