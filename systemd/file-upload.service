@@ -11,7 +11,7 @@ Group=pi
 Environment="PYTHONPATH={{pwd}}"
 Environment=PATH=/home/pi/.pyenv/versions/3.6.1/bin:$PATH
 WorkingDirectory={{pwd}}
-ExecStart={{pwd}}/rpi_can_logger/uploaders/mongo_upload.py
+ExecStart={{pwd}}/rpi_can_logger/uploaders/api-upload.py
 StandardOutput=journal
 StandardError=journal
 Restart=always

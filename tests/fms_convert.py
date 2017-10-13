@@ -21,12 +21,13 @@ for i in filters:
 filters = set([fms_name2pid[i] for i in filters])
 flatten = lambda l: [item for sublist in l for item in sublist]
 
-with open(sys.argv[1] + '.csv', 'w') as outcsv:
+with open(sys.argv[1] + '_2.csv', 'w') as outcsv:
     headers = flatten([fms_pids[f]['fieldnames'] for f in filters])
     headers = ['ts'] + headers
     writer = csv.DictWriter(outcsv, fieldnames=headers)
     writer.writeheader()
     lc = 0
+    buf = {}
     for line in lines:
         pieces = re.split(r'\s+', line.strip())
         pid = (int("0x{}".format(pieces[3]), 16) >> 8) & 0xffff
@@ -43,9 +44,11 @@ with open(sys.argv[1] + '.csv', 'w') as outcsv:
                 parsed = fms_pids[pid]['parse'](msg)
                 if pid in filters:
                     # pass
-                    print(pieces[0], fms_pids[pid]['name'], parsed)
+                    # print(pieces[0], fms_pids[pid]['name'], parsed)
                     parsed['ts'] = pieces[0][:-1]
-                    writer.writerow(parsed)
+                    buf.update(parsed)
+                if fms_pids[pid]['name'] == conf['log-trigger']:
+                    writer.writerow(buf)
 
                 read.add(pid)
             # except Exception as e:

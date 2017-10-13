@@ -153,6 +153,7 @@ def setup_GPIO():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(7, GPIO.OUT)
     GPIO.setup(37, GPIO.OUT)
+    GPIO.setup(35, GPIO.IN)
 
 
 def led1(on_off):

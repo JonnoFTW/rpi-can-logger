@@ -6,6 +6,7 @@ import json
 from glob import glob
 import os
 import os.path
+import gzip
 from datetime import datetime
 from dateutil.parser import parse
 from io import StringIO
@@ -34,13 +35,15 @@ rpi_info.insert_one(info)
 with open(os.path.expanduser(conf['pid-file']), 'r') as pid:
     currently_logging_to = pathlib.Path(pid.read().strip())
 
-for fname in sorted(glob(log_dir + '/*.json')):
+for fname in sorted(glob(log_dir + '/*.json.gz')):
     if not os.access(fname, os.W_OK) or pathlib.Path(fname) == currently_logging_to:
         print("Can't import {}, currently in use".format(fname))
     # make sure this file isn't open by another process
     trip_id = os.path.split(fname)[-1].split('.')[0]
+    with gzip.open(fname, 'rb') as f:
+        all_data = f.read().decode('ascii', 'ignore')
     try:
-        if os.path.getsize(fname) == 0:
+        if len(all_data) == 0:
             print("Removing empty log:", fname)
             os.remove(fname)
             continue
@@ -48,14 +51,11 @@ for fname in sorted(glob(log_dir + '/*.json')):
         pass
     print("Importing", trip_id)
 
-    with open(fname, 'r') as data_fh:
-        all_data = data_fh.read().replace('\x00', '')
-    all_data_fh = StringIO(all_data)
-    del all_data
+    all_data = all_data.replace('\x00', '')
 
     rows = []
     row_count = 0
-    for line in all_data_fh.getvalue().splitlines():
+    for line in all_data.splitlines():
         try:
             row_obj = json.loads(line)
             trip_id = row_obj.get('trip_id')

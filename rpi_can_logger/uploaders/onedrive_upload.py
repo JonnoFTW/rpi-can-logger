@@ -5,6 +5,9 @@ import yaml
 import requests
 from rpi_can_logger.uploaders import is_connected
 
+"""
+This doesn't even work
+"""
 if not is_connected():
     exit('No internet connection')
 
