@@ -1,5 +1,6 @@
 from datetime import datetime
 from io import StringIO
+import pathlib
 from glob import glob
 import logging
 import random
@@ -26,10 +27,10 @@ class JSONLogRotator(BaseLogRotator):
         self._bytes_written = 0
         now = datetime.now()
         self.fname = self.log_folder + '/' + now.strftime('%Y%m%d_%H%M%S_{}.json'.format(self.make_random(6)))
+        self.fname = str(pathlib.Path(self.fname))
         self._out_fh = open(self.fname, 'w')
         self.write_pid()
-        self.fname = self._out_fh.name
-        logging.warning("Writing to {} ({} bytes)".format(self._out_fh.name, self.max_bytes))
+        logging.warning("Writing to  {} ({} bytes)".format(self._out_fh.name, self.max_bytes))
 
         # compress any old files still lying around
         for fname in glob(self.log_folder+"/*.json"):
