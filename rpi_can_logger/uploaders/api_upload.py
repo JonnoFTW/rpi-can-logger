@@ -31,6 +31,6 @@ for fname in sorted(glob(log_dir + '/*.json*')):
         continue
     b64_data = base64.encode(contents)
     print("Uploading", end="... ")
-    res = requests.post(api_url, {'keys': keys, 'data': b64_data})
+    res = requests.post(api_url, {'keys': ",".join(keys), 'data': b64_data})
     # should probably remove the file here upon success
     print("Done")
