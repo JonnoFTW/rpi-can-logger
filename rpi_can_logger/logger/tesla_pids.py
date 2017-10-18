@@ -130,7 +130,7 @@ class PID:
     def __init__(self, pid, name, parse, fields):
         self.pid = pid
         self.name = name
-        self.parse = parse
+        self.parser = parse
         self.fields = fields
 
     def __call__(self, msg):
