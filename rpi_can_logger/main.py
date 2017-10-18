@@ -238,7 +238,7 @@ def get_responds():
 def export_files(sock):
     print("currently writing", writing_to['name'])
     for fname in glob(log_folder + "/*.json*"):
-        if fname == writing_to['name']:
+        if fname.endswith(writing_to['name']):
             print(fname, "is currently being written to")
             continue
         # we will send base64 encoded gzipped json
@@ -247,6 +247,7 @@ def export_files(sock):
             if fname.endswith(".json"):
                 if len(file_bytes) == 0:
                     print("Skipping empty file:", fname)
+                    os.remove(fname)
                     continue
                 json_gzip_bytes = gzip.compress(file_bytes)
             else:
@@ -257,6 +258,7 @@ def export_files(sock):
                 if struct.unpack('I', json_gzip_bytes[-4:])[0] == 0:
                     # don't send empty files
                     logging.warning("Skipping empty file: " + pathlib.Path(fname).name)
+                    os.remove(fname)
                     continue
             except:
                 logging.warning("Not a GZIP file: "+fname)
@@ -264,7 +266,8 @@ def export_files(sock):
             msg = '$export={}={}!\n'.format(len(json_gzip_bytes), pathlib.Path(fname).name)
             print(msg, end='')
             sock.send(msg)
-            sock.send("$export={}\n".format(str(json_gzip_base64, 'ascii')))
+            line = "$export={}\n".format(str(json_gzip_base64, 'ascii'))
+            sock.send(line)
             sock.send("$done\n")
         sock.send('$export=done\n')
 
