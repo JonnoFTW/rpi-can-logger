@@ -33,7 +33,8 @@ class JSONLogRotator(BaseLogRotator):
 
         # compress any old files still lying around
         for fname in glob(self.log_folder+"/*.json"):
-            self._compress(self.fname)
+            if fname != self.fname:
+                self._compress(fname)
 
     def write_pid(self):
         with open(self.pid_file, 'w') as pid_out:
