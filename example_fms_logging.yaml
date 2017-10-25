@@ -1,5 +1,5 @@
-interface: pcan
-channel: PCAN_USBBUS1
+interface: socketcan_native
+channel: can0
 log-messages: ~/log/can-log/messages/
 log-folder: ~/log/can-log/
 pid-file: ~/log/can-log.pid
@@ -24,13 +24,13 @@ log-pids:
     - FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION
 log-trigger: FMS_CRUISE_CONTROL_VEHICLE_SPEED
 disable-gps: true
-vehicle-id: adl_metro_2453
+vehicle-id: adl_metro_2450
 bluetooth-pass: secret_password_here
 gps-port: /dev/ttyS0
 tesla: false
 vid: adl_metro_2450
 sniffing: false
-log-bluetooth: false
+log-bluetooth: true
 log-level: warning
 fms: true
 verbose: true
