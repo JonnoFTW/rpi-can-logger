@@ -308,7 +308,7 @@ def do_log(sniffing, tesla):
             baud = 500000
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface, bitrate=baud)
         if not disable_gps:
-            gps = GPS(args.gps_port)
+            gps = GPS(args.gps_port, 9600)
         led2(0)
         led1(0)
         logging.warning("Connected CAN Bus and GPS")
