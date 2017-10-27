@@ -44,6 +44,7 @@ parser.add_argument('--sniffing', action='store_true',
 parser.add_argument('--log-trigger', '-lg', help='PID to trigger logging event.')
 parser.add_argument('--disable-gps', '-dg', action='store_true', help='Explicitly disable GPS logging')
 parser.add_argument('--gps-port', '-gp', default='/dev/ttyS0', help='GPS serial port')
+parser.add_argument('--gps-baud', '-gb', default=9600, type=int, help='Baud rate of GPS serial')
 parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
 parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
@@ -204,13 +205,13 @@ def get_error():
 
 
 def reset():
-    return subprocess.call("sudo bash -c 'shutdown -r now'", shell=True)
+    return subprocess.call("/usr/bin/sudo bash -c 'shutdown -r now'", shell=True)
 
 
 def reset_wifi():
     out = ''
     for cmd in ['ifdown', 'ifup']:
-        out += subprocess.call("sudo bash -c'{} wlan0'".format(cmd), shell=True)
+        out += subprocess.call("/usr/bin/sudo bash -c'{} wlan0'".format(cmd), shell=True)
     return out
 
 
@@ -308,7 +309,7 @@ def do_log(sniffing, tesla):
             baud = 500000
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface, bitrate=baud)
         if not disable_gps:
-            gps = GPS(args.gps_port)
+            gps = GPS(args.gps_port, args.gps_baud)
         led2(0)
         led1(0)
         logging.warning("Connected CAN Bus and GPS")
@@ -363,7 +364,7 @@ def do_log(sniffing, tesla):
                 shutdown_msg = "$status=Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
-                logging.warning(subprocess.check_output("sudo bash -c 'shutdown -h now'", shell=True))
+                logging.warning(subprocess.check_output("/usr/bin/sudo bash -c 'shutdown -h now'", shell=True))
         else:
             err_count = 0
         buff.update(new_log)

@@ -34,9 +34,9 @@ for fname in glob('./systemd/*.service'):
 
 
     for i in [
-        ['sudo', 'chmod', '644', service_fname_dest],
-        ['sudo', 'systemctl', 'daemon-reload'],
-        ['sudo', 'systemctl', 'enable', service],
+        ['/usr/bin/sudo', 'chmod', '644', service_fname_dest],
+        ['/usr/bin/sudo', 'systemctl', 'daemon-reload'],
+        ['/usr/bin/sudo', 'systemctl', 'enable', service],
 
     ]:
         print(i, subprocess.check_output(i))
