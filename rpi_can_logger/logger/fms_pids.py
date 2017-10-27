@@ -289,8 +289,8 @@ _pids = [
 pids = {
     p.pid: {
         'name': p.name,
-        'fields': p.fields,
-        'fieldnames': p.fieldnames,
+        'fields': p.fieldnames,
+        # 'fieldnames': p.fieldnames,
         'parse': p,
     } for p in _pids
 }
