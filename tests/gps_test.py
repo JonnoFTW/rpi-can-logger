@@ -8,7 +8,7 @@ port = '/dev/ttyS0'
 if len(sys.argv) >= 2:
     port = sys.argv[1]
 
-gps = GPS(port)
+gps = GPS(port, 9600)
 print("Reading from", gps.ser.portstr)
 
 buff = StringIO()

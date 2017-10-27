@@ -7,6 +7,7 @@ import threading
 import queue
 import gzip
 import time
+import subprocess
 from collections import deque
 from rpi_can_logger.util import get_ip
 
@@ -26,6 +27,7 @@ class BluetoothLogger(threading.Thread):
         self._finished = False
         self.exporting = False
         self.identified = False
+        subprocess.call("/usr/bin/sudo bash -c 'service var-run-sdp start'", shell=True)
 
     def run(self):
         self.recv_queue = deque(maxlen=self.queue_size)

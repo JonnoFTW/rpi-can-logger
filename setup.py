@@ -1,4 +1,4 @@
-from setuptools import setup
+#from setuptools import setup
 import subprocess
 import os
 from glob import glob

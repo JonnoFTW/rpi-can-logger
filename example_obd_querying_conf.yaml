@@ -1,9 +1,9 @@
 interface: socketcan_native
-channel: can1
+channel: can0
 log-messages: ~/log/can-log/messages/
 log-folder: ~/log/can-log/
 pid-file: ~/log/can-log.pid
-log-size: 32
+log-size: 16
 log-pids:
   - PID_ENGINE_LOAD
   - PID_THROTTLE
@@ -12,15 +12,15 @@ log-pids:
   - PID_SPEED
   - PID_MAF_FLOW
   - PID_AIR_FUEL_EQUIV_RATIO
-  - PID_HYBRID_BATTERY_PERCENTAGE
+#  - PID_HYBRID_BATTERY_PERCENTAGE
   - PID_ENGINE_FUEL_RATE
-  - OUTLANDER_BATTERY_HEALTH
+#  - OUTLANDER_BATTERY_HEALTH
 log-trigger: PID_ENGINE_FUEL_RATE
 disable-gps: false
 gps-port: /dev/ttyS0
 log-bluetooth: true
 bluetooth-pass: secret_password_here
 log-level: warning
-vehicle-id: 'rocco_phev'
+vehicle-id: 'Flinders Hilux'
 obd-query: true
-verbose: true
+verbose: false
