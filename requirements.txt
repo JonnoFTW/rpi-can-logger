@@ -5,9 +5,7 @@ pyyaml
 pyserial
 rpi.gpio
 pybluez
-onedrivesdk
 requests
-twisted
 pymongo
 netifaces
 pytz
