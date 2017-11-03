@@ -114,6 +114,35 @@ verbose: true # give verbose message output on stdout
 
 In the root directory of this project create a file called: `mongo_conf.yaml`, it should look like this:
 
-```yaml
+```
 
 ```
+
+
+### Cloning SD Cards
+
+Because we're deploying to a lot of these devices, you'll need to make an image after setting everything up on your SD
+card. Once you're done, plug your SD card into another computer and run:
+
+`dd of=logger.img if=/dev/sdb bs=4M conv=fsync status=progress`
+
+Once that's finished you'll have a file called `logger.img` on your machine, insert a new card and run:
+
+`dd if=logger.img of=/dev/sdb bs=4M conv=fsync status=progress`
+
+This should clone the SD card assuming they're exactly the same. If the cards are different sizes (ie. the new card is 
+**LARGER**), run `raspi-config` and resize the partition.
+
+If the target card is smaller (and assuming the amount of data used on the image is less than the target SD card size),
+ then you will need to resize the partition.
+ 
+ 
+After you've done all that, boot up your new device with a clone SD card and modify the following:
+
+ * `/etc/hostname`
+ * `/etc/hosts`
+ 
+To use a unique hostname and restart the device. You'll also probably need to pair the bluetooth with your phone.
+
+In order to connect via the bluetooth app, the device hostname must start with `rpi-logger`
+
