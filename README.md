@@ -28,7 +28,27 @@ If you want WiFi to work with the PiCAN2 shield attached, you'll need to unsolde
 
 Better description of all necessary parts (coming soon).
 
-## Installation
+## Full Setup
+1. Downoad the latest raspbian  software from here: https://raspberrypi.org/downloads/raspbian
+2. Insert your SD card into your computer
+3. Use your preferred method to put the rasbpian image onto your machine. On linux:
+````
+wget https://downloads.raspberrypi.org/raspbian_lite_latest
+tar -xvf  raspbian_lite_latest
+# the if argument might be different
+dd if=2017-09-07-raspbian_stretch-lite.img of=/dev/sdb bs=4M conv=fsync status=progress
+````
+4. Unmount your SD card, and plug it into your raspberry pi
+5. Run the following commands after logging in and configuring wifi by putting your settings in `/etc/wpa_supplicant/wpa_supplicant.conf`:
+````
+sudo su
+apt update
+apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils bluez python-bluez pi-bluetooth
+exit
+curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
+env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.2
+````
+### Install Rpi-Logger
 
 1. Assemble the parts from the part list.
 2. Copy this repo to your Raspberry Pi:
@@ -41,6 +61,7 @@ sudo pip3 install -r requirements.txt
 sudo python3 setup.py install
 ```
  to install everything. You'll need root access if you want it to be installed a service that runs on startup.
+3. If you want to change your hostname, run the `pairable.py` script in the `systemd` folder
 3. Enable UART on your RPI (for the GPS) and CAN for the CAN shield by adding these lines to `/boot/config.txt`:
 ```
 enable_uart=1
