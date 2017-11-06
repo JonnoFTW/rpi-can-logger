@@ -5,6 +5,7 @@ This project provides code for logging CAN Bus data with a Raspberry Pi. It addi
 ## Features
 
 * Logs CAN bus from either OBD2 or Tesla vehicles
+* Logs FMS
 * Logs GPS
 * Can operate in polling and sniffing mode
 * Stores data on SD card. Can be configured to automatically upload to FTP or web service when connected to WiFi or 4G internet.
@@ -29,40 +30,41 @@ If you want WiFi to work with the PiCAN2 shield attached, you'll need to unsolde
 Better description of all necessary parts (coming soon).
 
 ## Full Setup
-1. Downoad the latest raspbian  software from here: https://raspberrypi.org/downloads/raspbian
+
+1. Download the latest raspbian  lite image from here: https://raspberrypi.org/downloads/raspbian
 2. Insert your SD card into your computer
 3. Use your preferred method to put the rasbpian image onto your machine. On linux:
-````
+````bash
 wget https://downloads.raspberrypi.org/raspbian_lite_latest
 tar -xvf  raspbian_lite_latest
 # the if argument might be different
 dd if=2017-09-07-raspbian_stretch-lite.img of=/dev/sdb bs=4M conv=fsync status=progress
 ````
 4. Unmount your SD card, and plug it into your raspberry pi
-5. Run the following commands after logging in and configuring wifi by putting your settings in `/etc/wpa_supplicant/wpa_supplicant.conf`:
-````
-sudo su
-apt update
-apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils bluez python-bluez pi-bluetooth
-exit
+5. Run the following commands after logging in (default username is `pi`, password is `raspberry`) and configuring 
+wifi by putting your settings in `/etc/wpa_supplicant/wpa_supplicant.conf` (you will need to restart the wifi to have
+ the settings take effect by 
+running `sudo service networking restart`):
+````bash
+sudo apt update
+sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils bluez python-bluez pi-bluetooth
 curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.2
+git clone https://github.com/JonnoFTW/rpi-can-logger.git
 ````
 ### Install Rpi-Logger
 
-1. Assemble the parts from the part list.
-2. Copy this repo to your Raspberry Pi:
-````
-git clone https://github.com/JonnoFTW/rpi-can-logger.git
-````  
-4. Run 
-```
+1. Depending on which configuration file you want to use, edit the argument in the `systemd/rpi-logger.service` file 
+ on line 12, to be the configuration you want
+1. Run 
+```bash
 sudo pip3 install -r requirements.txt
 sudo python3 setup.py install
 ```
  to install everything. You'll need root access if you want it to be installed a service that runs on startup.
-3. If you want to change your hostname, run the `pairable.py` script in the `systemd` folder
-3. Enable UART on your RPI (for the GPS) and CAN for the CAN shield by adding these lines to `/boot/config.txt`:
+1. If you want to change your hostname, run the `pairable.py` script in the `systemd` folder
+1. Enable UART on your RPI (for the GPS) and CAN (skip the second `dtoverlay` line if your CAN shield only has 1 input)
+ for the CAN shield by adding these lines to `/boot/config.txt`:
 ```
 enable_uart=1
 dtparam=spi=on
@@ -74,7 +76,8 @@ dtoverlay=spi-bcm2835
 ```
 console=serial0,baudrate=115200
 ```
-5. Add these lines to your `/etc/network/interfaces` file (set it to 250000 if you are using FMS):
+5. Add these lines to your `/etc/network/interfaces` file (set it to 250000 if you are using FMS and skip `can1` if 
+you only have 1 CAN port):
 ```
 auto can0
 iface can0 inet manual
@@ -90,8 +93,15 @@ iface can1 inet manual
 
 ```
 
-5. The logging and file upload service will now run on startup. By default it will use: [example_obd_querying_conf.yaml](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_obd_querying_conf.yaml).
-6. To setup uploading of files, you will need to create a `mongo_conf.yaml` file in the project directory.
+5. The logging and file upload service will now run on startup. By default it will use: [example_fms_logging.yaml](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_fms_logging.yaml).
+6. To setup uploading of files, you will need to create a `mongo_conf.yaml` file in the project directory:
+```yaml
+log_dir: ~/log/can-log/
+keys:
+ - vid_key_1
+ - vid_key_2
+api_url: http://url.to/api/ # the api on the end is important
+```
   
 ## Configuration
 RPI-CAN-Logger is highly configurable and supports nearly all standard OBD-2 PIDs and the currently understood frames from Tesla as described in [this document].
@@ -135,10 +145,15 @@ verbose: true # give verbose message output on stdout
 
 In the root directory of this project create a file called: `mongo_conf.yaml`, it should look like this:
 
+```yaml
+log_dir: /home/pi/log/can-log/
+pid-file: ~/log/can-log.pid
+api_url: 'https://url.to.server.com/api/'
+keys:
+    - vid_key_1
+    - vid_key_2
 ```
-
-```
-
+The keys are the API keys for each vehicle that this logger will log for.
 
 ### Cloning SD Cards
 
@@ -161,9 +176,27 @@ If the target card is smaller (and assuming the amount of data used on the image
 After you've done all that, boot up your new device with a clone SD card and modify the following:
 
  * `/etc/hostname`
- * `/etc/hosts`
- 
-To use a unique hostname and restart the device. You'll also probably need to pair the bluetooth with your phone.
+ * `/etc/hosts` 
+To use a unique hostname and restart the device. You can easily do this by running the `systemd/pairable.py` script like this:
 
-In order to connect via the bluetooth app, the device hostname must start with `rpi-logger`
+```bash
+./systemd/pariable.py rpi-logger-12345
+sudo reboot
+```
+
+Where `12345` is the vehicle identifier. In order to connect via the bluetooth app, the device hostname must start with `rpi-logger`
+ 
+You'll also probably need to pair the bluetooth with your phone, run:
+
+```bash
+sudo bluetoothctl
+discoverable on
+pairable on
+```
+Initiate pairing on your phone. Then run:
+```bash
+discoverable off
+pairable off
+quit
+```
 

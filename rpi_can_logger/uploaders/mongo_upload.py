@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import print_function
+"""
+WARNING: THIS LOGGER IS DEPRECATED. PLEASE USE api_upload.py 
+"""
 import pymongo
 import yaml
 import json
