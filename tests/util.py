@@ -15,3 +15,6 @@ def get_args():
         else:
             exit("Invalid CAN bus specified")
         return interface, channel
+    else:
+        channel = 'can0'
+        interface = 'socketcan_native'
