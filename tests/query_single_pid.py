@@ -3,7 +3,8 @@ import can
 import atexit
 import time
 from rpi_can_logger.logger import obd_pids
-interface, channel = "socketcan_native", "can1"
+from util import get_args
+interface, channel = get_args()
 
 bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)

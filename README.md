@@ -4,20 +4,23 @@ This project provides code for logging CAN Bus data with a Raspberry Pi. It addi
 
 ## Features
 
-* Logs CAN bus from either OBD2 or Tesla vehicles
-* Logs FMS
+* Logs and interprets CAN bus data from:
+  * OBD2
+  * Tesla vehicles
+  * Bus and Truck with FMS
+  * Outlander PHEV
 * Logs GPS
 * Can operate in polling and sniffing mode
 * Stores data on SD card. Can be configured to automatically upload to FTP or web service when connected to WiFi or 4G internet.
 * Can be powered entirely from power provided by the OBD port in your vehicle!  You can also wire it into your fuse box or cigarette lighter to prevent it being powered permanently and draining your battery.
-* Accompanying Bluetooth App to visualise your data while you drive (coming soon)
-* Web based data visualiser (coming soon)
+* Accompanying Bluetooth App to visualise your data in realtime and to fetch and upload the data (https://github.com/JonnoFTW/OBD-Datalogger)
+* Web based data visualiser (https://github.com/JonnoFTW/webcan)
 
 ## Parts
 
 The following parts are used:
 
-* Raspberry PI 3 Model B
+* Raspberry Pi 3 Model B or Raspberry Pi Zero W
 * [PiCAN CAN-Bus board](http://skpang.co.uk/catalog/pican2-duo-canbus-board-for-raspberry-pi-23-p-1480.html) or equivalent PiCAN product with 1 or 2 CAN buses
 * [GPS Receiver](https://www.dfrobot.com/product-1103.html)
 * [DC-DC Converter](https://www.digikey.com.au/products/en?keywords=1597-1243-ND)
@@ -199,4 +202,16 @@ discoverable off
 pairable off
 quit
 ```
+Reboot your device and everything should be good to go.
 
+## Testing
+
+There's a bunch of different tests provided the `tests` folder:
+
+* [`can_spam.py can 0`](tests/can_spam.py) will transmit CAN frames with the last two of eight bytes as increasing integers from 0 to 0xff 
+* [`gps_test.py`](tests/gps_test.py) will dump output of the GPS
+* [`gps_sniff_test.py can0`](tests/gps_sniff_test.py) will dump raw CAN messages to display
+* [`gpio_led_test.py`](tests/gpio_led_test.py) will test the LEDs
+* [`can_dump.py`](tests/can_dump.py) will dump the CAN data to a CSV file
+* [`query_single_pid.py can0`](tests/query_single_pid.py) will query every OBD PID and check for a response
+* 
