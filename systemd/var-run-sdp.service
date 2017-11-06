@@ -8,3 +8,5 @@ RequiredBy=var-run-sdp.path
 Type=simple
 ExecStart=/bin/chgrp bluetooth /var/run/sdp
 ExecStartPost=/bin/chmod 662 /var/run/sdp
+Restart=on-failure
+RestartSec=1s

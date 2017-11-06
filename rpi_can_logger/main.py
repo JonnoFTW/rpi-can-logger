@@ -267,8 +267,11 @@ def export_files(sock):
             msg = '$export={}={}!\n'.format(len(json_gzip_bytes), pathlib.Path(fname).name)
             print(msg, end='')
             sock.send(msg)
-            line = "$export={}\n".format(str(json_gzip_base64, 'ascii'))
-            sock.send(line)
+            n = 900
+            to_send_str = str(json_gzip_base64, 'ascii')
+            lines = [to_send_str[i:i+n] for i in range(0, len(to_send_str), n)]
+            for line in lines:
+                sock.send("$export={}\n".format(line))
             sock.send("$done\n")
         sock.send('$export=done\n')
 

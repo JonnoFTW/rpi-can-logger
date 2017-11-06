@@ -1,6 +1,6 @@
 [Unit]
 Description=CAN Bus and GPS Logging Service
-After=syslog.target
+After=syslog.target bluetooth.service
 
 [Service]
 Type=simple
