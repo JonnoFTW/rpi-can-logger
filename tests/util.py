@@ -2,6 +2,7 @@ import sys
 
 
 def get_args():
+    print(sys.argv)
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == 'pcan':
@@ -14,4 +15,7 @@ def get_args():
             interface = 'socketcan_native'
         else:
             exit("Invalid CAN bus specified")
-        return interface, channel
+    else:
+        channel = 'can0'
+        interface = 'socketcan_native'
+    return interface, channel
