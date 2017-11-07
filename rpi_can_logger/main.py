@@ -210,7 +210,7 @@ def reset():
 def reset_wifi():
     out = ''
     for cmd in ['ifdown', 'ifup']:
-        out += subprocess.call("/usr/bin/sudo bash -c'{} wlan0'".format(cmd), shell=True)
+        out += subprocess.call("/usr/bin/sudo bash -c '/sbin/{} wlan0'".format(cmd), shell=True)
     return out
 
 
@@ -295,9 +295,15 @@ bt_commands = {
 def init_sniff(bus):
     bus.send(can.Message(extended_id=False, data=[2, 1, 0, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
 
-
+def set_can(interface, updown):
+    subprocess.call("/usr/bin/sudo bash -c '/sbin/if{} {}'".format(updown, interface), shell=True)
+def reset_can():
+    set_can(args.channel, 'down')
+    set_can(args.channel, 'up')
 def do_log(sniffing, tesla):
     try:
+
+        reset_can()
         if log_bluetooth:
             logging.warning("Starting BT")
             btl = BluetoothLogger(fields=all_fields, bt_commands=bt_commands, password=args.bluetooth_pass)
