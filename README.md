@@ -1,6 +1,6 @@
 # Raspberry PI CAN Bus Logger
 
-This project provides code for logging CAN Bus data with a Raspberry Pi. It additionally also logs GPS data. All of this data is stored on an SD card and intended to be used in a running .
+This project provides code for logging CAN Bus data with a Raspberry Pi. It additionally also logs GPS data. All of this data is stored on an SD card and can then be easily uploaded to a server for easy viewing.
 
 ## Features
 
@@ -11,22 +11,24 @@ This project provides code for logging CAN Bus data with a Raspberry Pi. It addi
   * Outlander PHEV
 * Logs GPS
 * Can operate in polling and sniffing mode
-* Stores data on SD card. Can be configured to automatically upload to FTP or web service when connected to WiFi or 4G internet.
+* Stores data on SD card. Can be configured to automatically upload via web API when connected to WiFi or 4G internet.
 * Can be powered entirely from power provided by the OBD port in your vehicle!  You can also wire it into your fuse box or cigarette lighter to prevent it being powered permanently and draining your battery.
-* Accompanying Bluetooth App to visualise your data in realtime and to fetch and upload the data (https://github.com/JonnoFTW/OBD-Datalogger)
-* Web based data visualiser (https://github.com/JonnoFTW/webcan)
+* Accompanying []Bluetooth App](https://github.com/JonnoFTW/OBD-Datalogger) to:
+  * Visualise your data in realtime 
+  * Fetch and upload stored data  
+* [Web based data visualiser](https://github.com/JonnoFTW/webcan)
 
 ## Parts
 
 The following parts are used:
 
 * Raspberry Pi 3 Model B or Raspberry Pi Zero W
-* [PiCAN CAN-Bus board](http://skpang.co.uk/catalog/pican2-duo-canbus-board-for-raspberry-pi-23-p-1480.html) or equivalent PiCAN product with 1 or 2 CAN buses
+* [PiCAN CAN-Bus board](http://skpang.co.uk/catalog/pican2-duo-canbus-board-for-raspberry-pi-23-p-1480.html) or equivalent PiCAN product with 1 or 2 CAN buses. Any CAN receiver compatible with [python-can](https://python-can.readthedocs.io/en/latest/index.html) should work though.
 * [GPS Receiver](https://www.dfrobot.com/product-1103.html)
 * [DC-DC Converter](https://www.digikey.com.au/products/en?keywords=1597-1243-ND)
 
 
-You'll need to do some soldering to make the connector from your OBD port or [Tesla port](http://au.rs-online.com/web/p/pcb-connector-housings/7201162/?searchTerm=720-1162&relevancy-data=636F3D3126696E3D4931384E525353746F636B4E756D626572266C753D656E266D6D3D6D61746368616C6C26706D3D5E285C647B362C377D5B4161426250705D297C285C647B337D5B5C732D2F255C2E2C5D5C647B332C347D5B4161426250705D3F292426706F3D3126736E3D592673743D52535F53544F434B5F4E554D4245522677633D4E4F4E45267573743D3732302D31313632267374613D3732303131363226)to your PiCAN.
+You'll need to do some soldering to make the connector from your OBD port or [Tesla port](http://au.rs-online.com/web/p/pcb-connector-housings/7201162/?searchTerm=720-1162&relevancy-data=636F3D3126696E3D4931384E525353746F636B4E756D626572266C753D656E266D6D3D6D61746368616C6C26706D3D5E285C647B362C377D5B4161426250705D297C285C647B337D5B5C732D2F255C2E2C5D5C647B332C347D5B4161426250705D3F292426706F3D3126736E3D592673743D52535F53544F434B5F4E554D4245522677633D4E4F4E45267573743D3732302D31313632267374613D3732303131363226) to your CAN interface.
 
 If you want WiFi to work with the PiCAN2 shield attached, you'll need to unsolder the GPIO pins and drop them to the bottom and reattach the shield.
 
@@ -59,14 +61,12 @@ git clone https://github.com/JonnoFTW/rpi-can-logger.git
 
 1. Depending on which configuration file you want to use, edit the argument in the `systemd/rpi-logger.service` file 
  on line 12, to be the configuration you want
-1. Run 
+2. To install the dependencies and system services, run:
 ```bash
-sudo pip3 install -r requirements.txt
+pip3 install -r requirements.txt
 sudo python3 setup.py install
 ```
- to install everything. You'll need root access if you want it to be installed a service that runs on startup.
-1. If you want to change your hostname, run the `pairable.py` script in the `systemd` folder
-1. Enable UART on your RPI (for the GPS) and CAN (skip the second `dtoverlay` line if your CAN shield only has 1 input)
+3. Enable UART on your RPI (for the GPS) and CAN (skip the second `dtoverlay` line if your CAN shield only has 1 input)
  for the CAN shield by adding these lines to `/boot/config.txt`:
 ```
 enable_uart=1
@@ -96,8 +96,8 @@ iface can1 inet manual
 
 ```
 
-5. The logging and file upload service will now run on startup. By default it will use: [example_fms_logging.yaml](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_fms_logging.yaml).
-6. To setup uploading of files, you will need to create a `mongo_conf.yaml` file in the project directory:
+6. The logging and file upload service will now run on startup. By default it will use: [example_fms_logging.yaml](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_fms_logging.yaml).
+7. To setup uploading of files, you will need to create a `mongo_conf.yaml` file in the project directory:
 ```yaml
 log_dir: ~/log/can-log/
 keys:
@@ -107,7 +107,7 @@ api_url: http://url.to/api/ # the api on the end is important
 ```
   
 ## Configuration
-RPI-CAN-Logger is highly configurable and supports nearly all standard OBD-2 PIDs and the currently understood frames from Tesla as described in [this document](https://skie.net/uploads/TeslaCAN/Tesla Model S CAN Deciphering - v0.1 - by wk057.pdf).
+RPI-CAN-Logger is highly configurable and supports nearly all standard OBD-2 PIDs and the currently understood frames from Tesla as described in [this document](https://skie.net/uploads/TeslaCAN/Tesla%20Model%20S%20CAN%20Deciphering%20-%20v0.1%20-%20by%20wk057.pdf).
 ### Configuring CAN Logging
 
 We currently support 4 forms of logging:
@@ -158,7 +158,7 @@ keys:
 ```
 The keys are the API keys for each vehicle that this logger will log for.
 
-### Cloning SD Cards
+## Cloning SD Cards
 
 Because we're deploying to a lot of these devices, you'll need to make an image after setting everything up on your SD
 card. Once you're done, plug your SD card into another computer and run:
