@@ -8,7 +8,7 @@ interface, channel = get_args()
 
 bus = can.interface.Bus(channel=channel, bustype=interface)
 atexit.register(bus.shutdown)
-print("Sniffing on CAN:", bus)
+print("Sniffing on CAN:", interface, channel)
 
 while True:
     msg = bus.recv()
