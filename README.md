@@ -50,7 +50,7 @@ wifi by putting your settings in `/etc/wpa_supplicant/wpa_supplicant.conf` (you 
 running `sudo service networking restart`):
 ````bash
 sudo apt update
-sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils bluez python-bluez pi-bluetooth
+sudo apt install git make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils bluez python-bluez pi-bluetooth python3-yaml python-yaml
 curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.6.2
 git clone https://github.com/JonnoFTW/rpi-can-logger.git
@@ -107,14 +107,15 @@ api_url: http://url.to/api/ # the api on the end is important
 ```
   
 ## Configuration
-RPI-CAN-Logger is highly configurable and supports nearly all standard OBD-2 PIDs and the currently understood frames from Tesla as described in [this document].
+RPI-CAN-Logger is highly configurable and supports nearly all standard OBD-2 PIDs and the currently understood frames from Tesla as described in [this document](https://skie.net/uploads/TeslaCAN/Tesla Model S CAN Deciphering - v0.1 - by wk057.pdf).
 ### Configuring CAN Logging
 
-We currently support 3 forms of logging  (with CAN FMS and CAN FD to come soon):
+We currently support 4 forms of logging:
 
-* [Sniffing OBD](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_obd_sniffing_conf.yaml)
-* [Querying OBD](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_obd_querying_conf.yaml)
-* [Sniffing Tesla](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_tesla_conf.yaml)
+* [Sniffing OBD](example_obd_sniffing_conf.yaml)
+* [Querying OBD](example_obd_querying_conf.yaml)
+* [Sniffing Tesla](example_tesla_conf.yaml)
+* [Sniffing FMS](example_fms_logging.yaml)
 
 Here we will examine the various configuration options:
 
@@ -139,7 +140,6 @@ sniffing: false # indicates that we are sniffing
 log-bluetooth: true # whether or not we log to bluetooth
 bluetooth-pass: super_secret_password # the password required to stream the bluetooth data
 log-level: warning # log level (warning or debug)
-vid: vehicle_identifier # a unique way to identify this vehicle
 fms: false # are we logging FMS? (Bus and Truck only)
 verbose: true # give verbose message output on stdout
 ```
@@ -176,18 +176,14 @@ If the target card is smaller (and assuming the amount of data used on the image
  then you will need to resize the partition.
  
  
-After you've done all that, boot up your new device with a clone SD card and modify the following:
-
- * `/etc/hostname`
- * `/etc/hosts` 
-To use a unique hostname and restart the device. You can easily do this by running the `systemd/pairable.py` script like this:
+After you've done all that set a new hostname (with no hyphens after `rpi-logger-`) for your device by running:
 
 ```bash
-./systemd/pariable.py rpi-logger-12345
+sudo python3 ./systemd/pariable.py rpi-logger-12345
 sudo reboot
 ```
 
-Where `12345` is the vehicle identifier. In order to connect via the bluetooth app, the device hostname must start with `rpi-logger`
+Where `12345` is the vehicle identifier. In order to connect via the bluetooth app, the device hostname must start with `rpi-logger-`
  
 You'll also probably need to pair the bluetooth with your phone, run:
 
@@ -214,4 +210,3 @@ There's a bunch of different tests provided the `tests` folder:
 * [`gpio_led_test.py`](tests/gpio_led_test.py) will test the LEDs
 * [`can_dump.py`](tests/can_dump.py) will dump the CAN data to a CSV file
 * [`query_single_pid.py can0`](tests/query_single_pid.py) will query every OBD PID and check for a response
-* 

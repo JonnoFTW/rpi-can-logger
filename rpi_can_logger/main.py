@@ -49,7 +49,6 @@ parser.add_argument('--conf', default=False, type=str,
                     help='Override options given here with those in the provided config file')
 parser.add_argument('--verbose', '-v', action='store_true', help='Show rows on the stdout')
 parser.add_argument('--log-bluetooth', action='store_true', help='Log to Bluetooth if Available')
-parser.add_argument('--vid', help='Vehicle Identifier, will try to fetch the VIN, otherwise will a RPi identifier')
 parser.add_argument('--log-level', '-ll', help='Logging level', default='warning', choices=['warning', 'debug'])
 parser.add_argument('--vehicle-id', '-vh', help='Unique identifier for the vehicle')
 parser.add_argument('--bluetooth-pass', '-btp', help='Bluetooth password')

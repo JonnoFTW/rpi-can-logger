@@ -7,11 +7,13 @@ from io import StringIO
 import string
 import random
 
+"""
+WARNING: THIS CLASS IS DEPRECATED DO NOT USE IT
+"""
 class CSVLogRotator:
     """
 
     """
-
 
     def __init__(self, log_folder, maxbytes, fieldnames, vin):
         """
@@ -51,7 +53,6 @@ class CSVLogRotator:
     def _reset_buffer(self):
         self._buffer.truncate(0)
         self._buffer.seek(0)
-
 
     def close(self):
         """

@@ -20,7 +20,6 @@ vehicle-id: adl_metro_1901
 bluetooth-pass: secret_password_here
 gps-port: /dev/ttyS0
 tesla: false
-vid: adl_metro_1999
 sniffing: false
 log-bluetooth: true
 log-level: warning
