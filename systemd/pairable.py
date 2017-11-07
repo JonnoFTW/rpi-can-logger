@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import yaml
 hostname = sys.argv[1]
 
 # set the hostname of the device to be hostname
@@ -14,9 +15,10 @@ for f in ['/etc/hosts', '/etc/hostname']:
 bus_id = hostname.split("-")[-1]
 conf = '/home/pi/rpi-can-logger/example_fms_logging.yaml'
 with open(conf, 'r') as stream:
-    data = stream.read()
-
+    data = yaml.load(stream)
+print(data)
 with open(conf, 'w') as outstream:
-    data = data.replace('2450', bus_id)
-    outstream.write(data)
+    data['vehicle-id'] = bus_id
+    data['vid'] = bus_id
+    yaml.dump(data, outstream)
 

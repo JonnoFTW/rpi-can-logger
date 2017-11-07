@@ -201,7 +201,7 @@ def btlog(opt):
 
 
 def get_error():
-    return subprocess.check_output(['tail', '-n', '20', log_file])
+    return subprocess.check_output(['/usr/bin/tail', '-n', '20', log_file])
 
 
 def reset():

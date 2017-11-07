@@ -5,30 +5,22 @@ log-folder: ~/log/can-log/
 pid-file: ~/log/can-log.pid
 log-size: 32
 log-pids:
-#    - FMS_VEHICLE_ID
-    - FMS_ELECTRONIC_ENGINE_CONTROLLER_1
-#    - FMS_ELECTRONIC_ENGINE_CONTROLLER_2
-#    - FMS_ELECTRONIC_TRANSMISSION_CONTROL_2
-#    - FMS_TACHOGRAPH
-#    - FMS_AIR_SUPPLY_PRESSURE
-    - FMS_HIGH_RESOLUTION_DISTANCE
-#    - FMS_ALTERNATOR_SPEED
-    - FMS_ENGINE_HOURS
-#    - FMS_TIME_DATE
-    - FMS_FUEL_CONSUMPTION
-    - FMS_ENGINE_TEMP
-    - FMS_FUEL_ECONOMY
-    - FMS_CRUISE_CONTROL_VEHICLE_SPEED
-#    - FMS_AMBIENT_CONDITIONS
-#    - FMS_DASH_DISPLAY
-    - FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION
+ - FMS_ELECTRONIC_ENGINE_CONTROLLER_1
+ - FMS_HIGH_RESOLUTION_DISTANCE
+ - FMS_ALTERNATOR_SPEED
+ - FMS_ENGINE_HOURS
+ - FMS_FUEL_CONSUMPTION
+ - FMS_ENGINE_TEMP
+ - FMS_FUEL_ECONOMY
+ - FMS_CRUISE_CONTROL_VEHICLE_SPEED
+ - FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION
 log-trigger: FMS_CRUISE_CONTROL_VEHICLE_SPEED
-disable-gps: true
-vehicle-id: adl_metro_2450
+disable-gps: false
+vehicle-id: adl_metro_1901
 bluetooth-pass: secret_password_here
 gps-port: /dev/ttyS0
 tesla: false
-vid: adl_metro_2450
+vid: adl_metro_1999
 sniffing: false
 log-bluetooth: true
 log-level: warning
