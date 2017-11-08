@@ -229,9 +229,9 @@ Reboot your device and everything should be good to go.
 
 There's a bunch of different tests provided the `tests` folder:
 
-* [`can_spam.py can 0`](tests/can_spam.py) will transmit CAN frames with the last two of eight bytes as increasing integers from 0 to 0xff 
+* [`can_spam.py`](tests/can_spam.py) will transmit CAN frames with the last two of eight bytes as increasing integers from 0 to 0xff 
 * [`gps_test.py`](tests/gps_test.py) will dump output of the GPS
-* [`gps_sniff_test.py can0`](tests/gps_sniff_test.py) will dump raw CAN messages to display
+* [`gps_sniff_test.py`](tests/gps_sniff_test.py) will dump raw CAN messages to display
 * [`gpio_led_test.py`](tests/gpio_led_test.py) will test the LEDs
 * [`can_dump.py`](tests/can_dump.py) will dump the CAN data to a CSV file
-* [`query_single_pid.py can0`](tests/query_single_pid.py) will query every OBD PID and check for a response
+* [`query_single_pid.py`](tests/query_single_pid.py) will query every OBD PID and check for a response
