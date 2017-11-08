@@ -13,7 +13,7 @@ This project provides code for logging CAN Bus data with a Raspberry Pi. It addi
 * Can operate in polling and sniffing mode
 * Stores data on SD card. Can be configured to automatically upload via web API when connected to WiFi or 4G internet.
 * Can be powered entirely from power provided by the OBD port in your vehicle!  You can also wire it into your fuse box or cigarette lighter to prevent it being powered permanently and draining your battery.
-* Accompanying []Bluetooth App](https://github.com/JonnoFTW/OBD-Datalogger) to:
+* Accompanying [Bluetooth App](https://github.com/JonnoFTW/OBD-Datalogger) to:
   * Visualise your data in realtime 
   * Fetch and upload stored data  
 * [Web based data visualiser](https://github.com/JonnoFTW/webcan)
@@ -28,12 +28,37 @@ The following parts are used:
 * [DC-DC Converter](https://www.digikey.com.au/products/en?keywords=1597-1243-ND)
 
 
-You'll need to do some soldering to make the connector from your OBD port or [Tesla port](http://au.rs-online.com/web/p/pcb-connector-housings/7201162/?searchTerm=720-1162&relevancy-data=636F3D3126696E3D4931384E525353746F636B4E756D626572266C753D656E266D6D3D6D61746368616C6C26706D3D5E285C647B362C377D5B4161426250705D297C285C647B337D5B5C732D2F255C2E2C5D5C647B332C347D5B4161426250705D3F292426706F3D3126736E3D592673743D52535F53544F434B5F4E554D4245522677633D4E4F4E45267573743D3732302D31313632267374613D3732303131363226) to your CAN interface.
-
 If you want WiFi to work with the PiCAN2 shield attached, you'll need to unsolder the GPIO pins and drop them to the bottom and reattach the shield.
 
-Better description of all necessary parts (coming soon).
 
+If you are using the DC-DC converter, you will need to plug its outputs into the GPIO pins of the Raspberry Pi at pins 2 (5v power) and 6 (ground):
+
+![Rpi Pins](https://www.element14.com/community/servlet/JiveServlet/previewBody/73950-102-11-339300/pi3_gpio.png)
+
+To make your own OBD connector, you will need:
+
+* [OBD Male connector](http://au.rs-online.com/web/p/automotive-connectors/8010991/)
+* [Crimps](http://au.rs-online.com/web/p/automotive-connector-accessories/8010884/)
+
+You'll only need to connect pins:
+
+* 4 Chassis Ground
+* 6 CAN High
+* 14 CAN Low
+* 16 12V Power
+
+![OBD Pins](http://www.mbcluster.com/Old_Website/Media_Diagnostics/ODBII%20Master%20Pinout.jpg)
+
+
+### Tesla
+
+Please follow steps 1 and 2 from this instructable to access the Tesla CAN bus http://www.instructables.com/id/Exploring-the-Tesla-Model-S-CAN-Bus/: 
+ 
+You will need the following parts:
+ 
+ * [Tesla port](http://au.rs-online.com/web/p/pcb-connector-housings/7201162/)
+ * [Crimps](http://au.rs-online.com/web/p/pcb-connector-contacts/7196555/)
+ 
 ## Full Setup
 
 1. Download the latest raspbian  lite image from here: https://raspberrypi.org/downloads/raspbian
@@ -96,7 +121,7 @@ iface can1 inet manual
 
 ```
 
-6. The logging and file upload service will now run on startup. By default it will use: [example_fms_logging.yaml](https://github.com/JonnoFTW/rpi-can-logger/blob/master/example_fms_logging.yaml).
+6. The logging and file upload service will now run on startup. By default it will use: [example_fms_logging.yaml](example_fms_logging.yaml).
 7. To setup uploading of files, you will need to create a `mongo_conf.yaml` file in the project directory:
 ```yaml
 log_dir: ~/log/can-log/
