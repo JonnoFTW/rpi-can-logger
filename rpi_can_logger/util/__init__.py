@@ -3,6 +3,7 @@ try:
 except ImportError:
     ni = None
 from glob import glob
+import subprocess
 
 OBD_REQUEST = 0x07DF
 OBD_RESPONSE = 0x07E8
@@ -22,3 +23,7 @@ def get_ip():
 
 def list_log(log_dir):
     return ", ".join(sorted(glob(log_dir + "/*.csv")))
+
+
+def sudo(cmd):
+    subprocess.call("/usr/bin/sudo bash -c '{}'".format(cmd), shell=True)

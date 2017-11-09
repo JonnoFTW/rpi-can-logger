@@ -1,6 +1,6 @@
 [Unit]
 Description=CAN Bus and GPS Logging Service
-After=syslog.target bluetooth.service
+After=bluetooth.service
 
 [Service]
 Type=simple
@@ -9,7 +9,7 @@ Group=pi
 Environment="PYTHONPATH={{pwd}}"
 Environment=PATH=/home/pi/.pyenv/versions/3.6.1/bin:$PATH
 WorkingDirectory={{pwd}}
-ExecStart={{pwd}}/rpi_can_logger/main.py --conf {{pwd}}/example_fms_logging.yaml
+ExecStart={{pwd}}/rpi_can_logger/main.py --conf {{pwd}}/{{conf}}
 StandardOutput=journal
 StandardError=journal
 Restart=always

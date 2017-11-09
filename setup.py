@@ -2,7 +2,10 @@
 import subprocess
 import os
 from glob import glob
-
+import sys
+if len(sys.argv) < 2:
+    exit("Please specify a config file")
+conf = sys.argv[1]
 version = map(int, (0, 0, 1))
 with open('requirements.txt', 'r') as reqs:
     requires = reqs.readlines()
@@ -23,6 +26,7 @@ for fname in glob('./systemd/*.service'):
         txt = service_fd.read()
 
     txt = txt.replace('{{pwd}}', os.getcwd())
+    txt = txt.replace('{{conf}}', conf)
     print(txt)
     service_dir = '/lib/systemd/system/'
     service_fname_dest = service_dir + service
@@ -30,8 +34,6 @@ for fname in glob('./systemd/*.service'):
     with open(service_fname_dest, 'w') as service_fd:
         print("Writing to", service_fd.name)
         service_fd.write(txt)
-
-
 
     for i in [
         ['/usr/bin/sudo', 'chmod', '644', service_fname_dest],

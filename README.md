@@ -109,13 +109,13 @@ you only have 1 CAN port):
 ```
 auto can0
 iface can0 inet manual
-    pre-up /sbin/ip link set can0 type can bitrate 500000 triple-sampling on
+    pre-up /sbin/ip link set can0 type can bitrate 500000 triple-sampling on restart-ms 100
     up /sbin/ifconfig can0 up
     down /sbin/ifconfig can0 down
 
 auto can1
 iface can1 inet manual
-    pre-up /sbin/ip link set can1 type can bitrate 500000 triple-sampling on
+    pre-up /sbin/ip link set can1 type can bitrate 500000 triple-sampling on restart-ms 100
     up /sbin/ifconfig can1 up
     down /sbin/ifconfig can1 down
 

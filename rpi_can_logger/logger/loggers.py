@@ -8,7 +8,7 @@ try:
 except ImportError:
     from rpi_can_logger.stubs import GPIO
 
-from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE
+from rpi_can_logger.util import OBD_REQUEST, OBD_RESPONSE, sudo
 from rpi_can_logger.logger import obd_pids, outlander_pids
 
 
@@ -246,12 +246,6 @@ class FMSLogger(BaseSnifferLogger):
         # need to use extended ID
         self.shutdown = False
         self.buff = {}
-        for i in ['can0', 'can1']:
-            pass
-            # logging.warning("Bringing down: " + i)
-            # subprocess.call("sudo bash -c '/sbin/ifconfig {} down'".format(i), shell=True)
-            # logging.warning("Bringing up: {} with 250kBaud".format(i))
-            # subprocess.call("sudo bash -c '/sbin/ip link set {} up type can bitrate 250000'".format(i), shell=True)
 
     def log(self):
         # keep reading until we get a log_trigger
@@ -263,7 +257,7 @@ class FMSLogger(BaseSnifferLogger):
         # check the ignition off pin, shutdown if its on.
         if GPIO.input(35) == 1:
             self.shutdown = True
-            subprocess.call("/usr/bin/sudo bash -c 'shutdown -h now'", shell=True)
+            sudo('shutdown -h now')
         while 1:
             if (datetime.now() - start_time).total_seconds() > timeout:
                 return self.buff

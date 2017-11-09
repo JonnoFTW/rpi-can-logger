@@ -20,7 +20,7 @@ try:
 except ImportError:
     from rpi_can_logger.stubs import GPIO
 from rpi_can_logger.gps import GPS
-from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE
+from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE, sudo
 from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
     BluetoothLogger, FMSLogger
 
@@ -204,14 +204,12 @@ def get_error():
 
 
 def reset():
-    return subprocess.call("/usr/bin/sudo bash -c 'shutdown -r now'", shell=True)
+    return sudo('shutdown -r now')
 
 
 def reset_wifi():
-    out = ''
     for cmd in ['ifdown', 'ifup']:
-        out += subprocess.call("/usr/bin/sudo bash -c '/sbin/{} wlan0'".format(cmd), shell=True)
-    return out
+        sudo('/sbin/{} wlan0'.format(cmd))
 
 
 def set_vid(val):
@@ -295,15 +293,10 @@ bt_commands = {
 def init_sniff(bus):
     bus.send(can.Message(extended_id=False, data=[2, 1, 0, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
 
-def set_can(interface, updown):
-    subprocess.call("/usr/bin/sudo bash -c '/sbin/if{} {}'".format(updown, interface), shell=True)
-def reset_can():
-    set_can(args.channel, 'down')
-    set_can(args.channel, 'up')
+
 def do_log(sniffing, tesla):
     try:
 
-        reset_can()
         if log_bluetooth:
             logging.warning("Starting BT")
             btl = BluetoothLogger(fields=all_fields, bt_commands=bt_commands, password=args.bluetooth_pass)
@@ -372,7 +365,7 @@ def do_log(sniffing, tesla):
                 shutdown_msg = "$status=Shutting down after failing to get OBD data"
                 logging.warning(shutdown_msg)
                 btl.send(shutdown_msg)
-                logging.warning(subprocess.check_output("/usr/bin/sudo bash -c 'shutdown -h now'", shell=True))
+                sudo('shutdown -h now')
         else:
             err_count = 0
         buff.update(new_log)
