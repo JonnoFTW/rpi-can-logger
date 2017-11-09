@@ -15,17 +15,21 @@ for request_arb_id, p in cycle([list(outlander_pids.items())[0]]):
     pid = p['pid']
     msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
                       data=[2, 0x21, pid, 0, 0, 0, 0, 0])
+    ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
+                      data=[0x30, 0x0, 0x0, 0, 0, 0, 0, 0])
+
     # listen for responses on addrs[1]
     #    print("Requesting:\t", pid_d['request'], pid_d['name'])
-    print("S>", msg)
+#    print("S>", msg)
     bus.send(msg)
+#    bus.send(ctl_msg)
     buf = bytes()
     num_bytes = 0
     multiline = True
     for i in range(500):
         recvd = bus.recv()
         if recvd.arbitration_id == p['response']:
-            print("R>", i, recvd)
+#            print("R>", i, recvd)
             sequence = recvd.data[0]
             if sequence == 0x10:
                 buf += recvd.data[4:]
@@ -33,11 +37,9 @@ for request_arb_id, p in cycle([list(outlander_pids.items())[0]]):
                 num_bytes = recvd.data[1] - 2
                 # print("Multiline bytes expected", num_bytes)
 
-                ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
-                                      data=[0x30, 0x0, 0x0, 0, 0, 0, 0, 0])
-
+#                bus.send(msg)
                 bus.send(ctl_msg)
-                print("S>", ctl_msg)
+#                print("S>", ctl_msg)
             elif multiline:
                 buf += recvd.data[1:]
                 #                print(len(buf), buf)
