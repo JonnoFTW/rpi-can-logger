@@ -25,9 +25,10 @@ from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingO
     BluetoothLogger, FMSLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
-parser.add_argument('--interface', '-i', default='can1', help='CAN Interface to use')
+parser.add_argument('--interface', '-i', default='can0', help='CAN Interface to use')
 parser.add_argument('--channel', '-c', default='socketcan_native', help='CAN Channel to use')
-parser.add_argument('--pid-file', '-pf', default='/var/log/can-log/can_log.pid', help='PID file to record what file we are currently writing to')
+parser.add_argument('--pid-file', '-pf', default='/var/log/can-log/can_log.pid',
+                    help='PID file to record what file we are currently writing to')
 parser.add_argument('--log-messages', '-lm', default='/var/log/can-log/messages/',
                     help='Folder where debug messages are store')
 parser.add_argument('--log-folder', '-lf', default='/var/log/can-log/', help='Where logged CAN/GPS data is stored')
@@ -259,14 +260,14 @@ def export_files(sock):
                     os.remove(fname)
                     continue
             except:
-                logging.warning("Not a GZIP file: "+fname)
+                logging.warning("Not a GZIP file: " + fname)
                 continue
             msg = '$export={}={}!\n'.format(len(json_gzip_bytes), pathlib.Path(fname).name)
             print(msg, end='')
             sock.send(msg)
             n = 900
             to_send_str = str(json_gzip_base64, 'ascii')
-            lines = [to_send_str[i:i+n] for i in range(0, len(to_send_str), n)]
+            lines = [to_send_str[i:i + n] for i in range(0, len(to_send_str), n)]
             for line in lines:
                 sock.send("$export={}\n".format(line))
             sock.send("$done\n")
@@ -294,7 +295,12 @@ def init_sniff(bus):
     bus.send(can.Message(extended_id=False, data=[2, 1, 0, 0, 0, 0, 0, 0], arbitration_id=OBD_REQUEST))
 
 
-def do_log(sniffing, tesla):
+def reset_can_interface(interface):
+    sudo('ifdown ' + interface)
+    sudo('ifup ' + interface)
+
+
+def do_log():
     try:
 
         if log_bluetooth:
@@ -308,6 +314,8 @@ def do_log(sniffing, tesla):
             baud = 250000
         else:
             baud = 500000
+        # Reset the CAN interface just in case it doesn't come up
+        reset_can_interface(args.channel)
         bus = can.interface.Bus(channel=args.channel, bustype=args.interface, bitrate=baud)
         if not disable_gps:
             gps = GPS(args.gps_port, args.gps_baud)
@@ -318,7 +326,7 @@ def do_log(sniffing, tesla):
     except can.CanError as err:
         logging.error('Failed to initialise CAN BUS: ' + str(err))
         return
-    if tesla:
+    if is_tesla:
         logging.warning("Using TeslaSnifferLogger")
         logger_c = TeslaSniffingLogger
     elif is_obd_query:
@@ -336,7 +344,8 @@ def do_log(sniffing, tesla):
     responds_to.update(logger.responds_to)
     trip_sequence = 0
     vid = args.vehicle_id
-    json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid, pid_file=log_pid_location)
+    json_writer = JSONLogRotator(log_folder=log_folder, maxbytes=bytes_per_log, fieldnames=all_fields, vin=vid,
+                                 pid_file=log_pid_location)
     path = pathlib.Path(json_writer._out_fh.name)
     writing_to['name'] = path.name
     trip_id = '{}_{}'.format(path.stem, vid)
@@ -407,7 +416,7 @@ if __name__ == "__main__":
     logging.warning("Starting logging")
     while 1:
         try:
-            do_log(args.sniffing, args.tesla)
+            do_log()
         except Exception as e:
             logging.error(e, exc_info=True)
         led1(1)

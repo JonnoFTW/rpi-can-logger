@@ -16,7 +16,7 @@ with open(os.path.expanduser(conf['pid-file']), 'r') as pid:
     currently_logging_to = pathlib.Path(pid.read().strip())
 
 for fname in sorted(glob(log_dir + '/*.json*')):
-    if fname == currently_logging_to:
+    if fname == currently_logging_to or fname.endswith('.done'):
         continue
     print("Importing", fname)
 
@@ -29,8 +29,9 @@ for fname in sorted(glob(log_dir + '/*.json*')):
         print("Removing empty file")
         os.remove(fname)
         continue
-    b64_data = base64.encode(contents)
+    b64_data = base64.b64encode(contents)
     print("Uploading", end="... ")
     res = requests.post(api_url, {'keys': ",".join(keys), 'data': b64_data})
     # should probably remove the file here upon success
+    os.rename(fname, fname+'.done')
     print("Done")

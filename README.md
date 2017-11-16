@@ -10,7 +10,7 @@ This project provides code for logging CAN Bus data with a Raspberry Pi. It addi
   * Bus and Truck with FMS
   * Outlander PHEV
 * Logs GPS
-* Can operate in polling and sniffing mode
+* Can operate in querying and sniffing mode
 * Stores data on SD card. Can be configured to automatically upload via web API when connected to WiFi or 4G internet.
 * Can be powered entirely from power provided by the OBD port in your vehicle!  You can also wire it into your fuse box or cigarette lighter to prevent it being powered permanently and draining your battery.
 * Accompanying [Bluetooth App](https://github.com/JonnoFTW/OBD-Datalogger) to:
@@ -84,12 +84,11 @@ git clone https://github.com/JonnoFTW/rpi-can-logger.git
 ````
 ### Install Rpi-Logger
 
-1. Depending on which configuration file you want to use, edit the argument in the `systemd/rpi-logger.service` file 
- on line 12, to be the configuration you want
+1. Determine the configuration file you want to use or roll your own.
 2. To install the dependencies and system services, run:
 ```bash
 pip3 install -r requirements.txt
-sudo python3 setup.py install
+sudo python3 setup.py config_file.yaml
 ```
 3. Enable UART on your RPI (for the GPS) and CAN (skip the second `dtoverlay` line if your CAN shield only has 1 input)
  for the CAN shield by adding these lines to `/boot/config.txt`:
@@ -194,13 +193,56 @@ Once that's finished you'll have a file called `logger.img` on your machine, ins
 
 `dd if=logger.img of=/dev/sdb bs=4M conv=fsync status=progress`
 
-This should clone the SD card assuming they're exactly the same. If the cards are different sizes (ie. the new card is 
-**LARGER**), run `raspi-config` and resize the partition.
+This should clone the SD card assuming they're exactly the same. If the cards are different sizes:
+ 
+##### Larger Card
+* Run `raspi-config` and resize the partition OR
+* Remount the SD card and use your favourite partitioning tool to expand the 2nd partition
 
-If the target card is smaller (and assuming the amount of data used on the image is less than the target SD card size),
- then you will need to resize the partition.
- 
- 
+##### Smaller Card
+Assuming the amount of data used on the image is less than the target SD card size, then you will need to shrink the 
+data partition before you make the clone SD card. You can do this on Linux with the following (from this [tutorial](https://softwarebakery.com/shrinking-images-on-linux)):
+
+```bash
+sudo modprobe loop
+sudo losetup -f
+sudo losetup /dev/loop0 logger.img
+sudo partprobe /dev/loop0
+gksu gparted /dev/loop0
+```
+Use gparted to resize the 2nd partition so that it fits within the size of your target SD card. Then hit apply. Now we 
+will truncate the image.
+
+```bash
+sudo losetup -d /dev/loop0
+fdisk -l logger.img
+```
+You should get something like:
+
+```
+$ fdisk -l logger.img 
+
+Disk fmslogger.img: 15.9 GB, 15931539456 bytes
+255 heads, 63 sectors/track, 1936 cylinders, total 31116288 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x96bbdd32
+
+        Device Boot      Start         End      Blocks   Id  System
+logger.img1            8192       93813       42811    c  W95 FAT32 (LBA)
+logger.img2           94208    31116287    15511040   83  Linux
+```
+Record the sector size (on the 2nd line `"Units = ..."`, 512 bytes here) and end for the 2nd partition (31116287 here),
+now you can run:
+
+```bash
+truncate --size=$[(31116287+1)*512] logger.img
+```
+You can now write the shrunken image.
+
+#### Configuring Clones
+
 After you've done all that set a new hostname (with no hyphens after `rpi-logger-`) for your device by running:
 
 ```bash
@@ -235,3 +277,4 @@ There's a bunch of different tests provided the `tests` folder:
 * [`gpio_led_test.py`](tests/gpio_led_test.py) will test the LEDs
 * [`can_dump.py`](tests/can_dump.py) will dump the CAN data to a CSV file
 * [`query_single_pid.py`](tests/query_single_pid.py) will query every OBD PID and check for a response
+* [`phev_query`](tests/phev_query.py) will query data from the battery control unit on a Mistubishi PHEV Outlander
