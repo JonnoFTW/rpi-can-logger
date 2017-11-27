@@ -1,27 +1,20 @@
-interface: socketcan_native
-channel: can0
-log-messages: ~/log/can-log/messages/
-log-folder: ~/log/can-log/
-pid-file: ~/log/can-log.pid
-log-size: 32
-log-pids:
- - FMS_ELECTRONIC_ENGINE_CONTROLLER_1
- - FMS_HIGH_RESOLUTION_DISTANCE
- - FMS_ALTERNATOR_SPEED
- - FMS_ENGINE_HOURS
- - FMS_FUEL_CONSUMPTION
- - FMS_ENGINE_TEMP
- - FMS_FUEL_ECONOMY
- - FMS_CRUISE_CONTROL_VEHICLE_SPEED
- - FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION
-log-trigger: FMS_CRUISE_CONTROL_VEHICLE_SPEED
-disable-gps: false
-vehicle-id: adl_metro_1901
 bluetooth-pass: secret_password_here
-gps-port: /dev/ttyS0
-tesla: false
-sniffing: false
-log-bluetooth: true
-log-level: warning
+channel: can0
+disable-gps: false
 fms: true
+gps-port: /dev/ttyS0
+interface: socketcan_native
+log-bluetooth: true
+log-folder: ~/log/can-log/
+log-level: warning
+log-messages: ~/log/can-log/messages/
+log-pids: [FMS_ELECTRONIC_ENGINE_CONTROLLER_1, FMS_HIGH_RESOLUTION_DISTANCE,
+  FMS_ENGINE_HOURS, FMS_FUEL_CONSUMPTION, FMS_ENGINE_TEMP, FMS_FUEL_ECONOMY, FMS_CRUISE_CONTROL_VEHICLE_SPEED,
+  FMS_HIGH_RESOLUTION_FUEL_CONSUMPTION]
+log-size: 32
+log-trigger: FMS_CRUISE_CONTROL_VEHICLE_SPEED
+pid-file: ~/log/can-log.pid
+sniffing: false
+tesla: false
+vehicle-id: adl_metro_1902
 verbose: true

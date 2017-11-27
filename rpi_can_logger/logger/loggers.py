@@ -42,7 +42,9 @@ class BaseSnifferLogger(BaseLogger):
         while 1:
             if (datetime.now() - start_time).total_seconds() > timeout:
                 return self.buff
-            msg = self.bus.recv()
+            msg = self.bus.recv(0.5)
+            if msg is None:
+                continue
             pid, obd_data = self.separate_can_msg(msg)
 
             if pid in self.pids2log:
@@ -208,7 +210,9 @@ class QueryingOBDLogger(BaseOBDLogger):
         # print("S>", req_msg)
         self.bus.send(req_msg)
         for i in range(5000):
-            recvd = self.bus.recv()
+            recvd = self.bus.recv(0.5)
+            if msg is None:
+                continue
 
             if recvd.arbitration_id == p['response']:
                 #              print("R>",i, recvd)
@@ -256,6 +260,8 @@ class FMSLogger(BaseSnifferLogger):
             if (datetime.now() - start_time).total_seconds() > timeout:
                 return self.buff
             msg = self.bus.recv(0.5)
+            if msg is None:
+                continue
             pid, obd_data = self.separate_can_msg(msg)
 
             if pid in self.pids2log:
@@ -290,6 +296,8 @@ class BustechLogger(BaseSnifferLogger):
             if (datetime.now() - start).total_seconds() > timeout:
                 return buff
             msg = self.bus.recv(0.5)
+            if msg is None:
+                continue
             pid, can_bytes = self.separate_can_msg(msg)
             if pid in self.pids2log:
                 parsed = self.pids[pid]['parse'][can_bytes]
