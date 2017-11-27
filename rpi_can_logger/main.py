@@ -22,7 +22,7 @@ except ImportError:
 from rpi_can_logger.gps import GPS
 from rpi_can_logger.util import get_serial, get_ip, list_log, OBD_REQUEST, OBD_RESPONSE, sudo
 from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingOBDLogger, QueryingOBDLogger, \
-    BluetoothLogger, FMSLogger
+    BluetoothLogger, FMSLogger, BustechLogger
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can0', help='CAN Interface to use')
@@ -54,6 +54,8 @@ parser.add_argument('--log-level', '-ll', help='Logging level', default='warning
 parser.add_argument('--vehicle-id', '-vh', help='Unique identifier for the vehicle')
 parser.add_argument('--bluetooth-pass', '-btp', help='Bluetooth password')
 parser.add_argument('--fms', action='store_true', help='Indicate that we are using a FMS CAN')
+parser.add_argument('--bustech', action='store_true', help='Indicate that we are using a Bustech Electric CAN')
+
 parser.add_argument('--obd-query', action='store_true', help='Indicate we are querying OBD')
 args = parser.parse_args()
 
@@ -84,6 +86,7 @@ log_level = args.log_level
 is_tesla = args.tesla
 is_fms = args.fms
 is_obd_query = args.obd_query
+is_bustech = args.bustech
 if is_tesla:
     from rpi_can_logger.logger import tesla_pids as pids, tesla_name2pid as name2pid
 
@@ -92,10 +95,13 @@ elif is_fms:
     args.sniffing = True
     logging.warning("USING FMS")
     from rpi_can_logger.logger import fms_pids as pids, fms_name2pid as name2pid
+elif is_bustech:
+    args.sniffing = True
+    logging.warning("USING BUSTECH")
+    from rpi_can_logger.logger import bustech_pids as pids, bustech_name2pid as name2pid
 elif is_obd_query:
     print("USING OBD QUERY")
     from rpi_can_logger.logger import obd_pids as pids, obd_name2pid as name2pid
-
     args.sniffing = True
 else:
     logging.error("Please specify what kind of CAN logging you want")
@@ -357,26 +363,17 @@ def do_log():
             'trip_sequence': trip_sequence
         }
 
-    # if sniffing or is_tesla:
-    #     vin = get_serial()
-    # else:
-    #     vin = get_vin(bus)
-
-    err_count = 0
     while 1:
         buff = make_buff()
         led1(1)
         new_log = logger.log()
-        if not new_log:
-            err_count += 1
-            if err_count == 3:
-                shutdown()
-                shutdown_msg = "$status=Shutting down after failing to get OBD data"
-                logging.warning(shutdown_msg)
+        if GPIO.input(35) == 1:
+            shutdown_msg = "$status=Received shutdown signal"
+            logging.warning(shutdown_msg)
+            if log_bluetooth:
                 btl.send(shutdown_msg)
-                sudo('shutdown -h now')
-        else:
-            err_count = 0
+            sudo('shutdown -h 0')
+
         buff.update(new_log)
         for k, v in buff.items():
             if type(v) is float:
@@ -412,7 +409,7 @@ if __name__ == "__main__":
 
     setup_GPIO()
     sleep_time = 10
-    err_count = 0
+    log_err_count = 0
     logging.warning("Starting logging")
     while 1:
         try:
@@ -425,4 +422,6 @@ if __name__ == "__main__":
         time.sleep(sleep_time)
         led2(0)
         led1(0)
-        err_count += 1
+        log_err_count += 1
+        if log_err_count == 3:
+            sudo('reboot')

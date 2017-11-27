@@ -1,0 +1,20 @@
+interface: socketcan_native
+channel: can0
+log-messages: ~/log/can-log/messages/
+log-folder: ~/log/can-log/
+pid-file: ~/log/can-log.pid
+log-size: 32
+log-pids:
+ - BUSTECH_SOC
+ - BUSTECH_TORQUE
+ - BUSTECH_ACCEL_POS
+ - BUSTECH_READY
+ - BUSTECH_BATTERY_CURRENT
+ - BUSTECH_BATTERY_VOLTAGE
+log-trigger: BUSTECH_READY
+vehicle-id: adl_metro_1907
+bluetooth-pass: secret_password_here
+gps-port: /dev/ttyS0
+log-bluetooth: true
+log-level: warning
+verbose: true

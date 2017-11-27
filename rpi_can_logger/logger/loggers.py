@@ -1,8 +1,7 @@
 import can
+import time
 import logging
 from datetime import datetime
-import subprocess
-
 try:
     import RPi.GPIO as GPIO
 except ImportError:
@@ -49,8 +48,8 @@ class BaseSnifferLogger(BaseLogger):
             if pid in self.pids2log:
                 parsed = self.pids[pid]['parse'](obd_data)
                 self.buff.update(parsed)
-            # if pid == self.trigger:
-            #     return buff
+                # if pid == self.trigger:
+                #     return buff
 
 
 class TeslaSniffingLogger(BaseSnifferLogger):
@@ -193,7 +192,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         )
 
     def _log_outlander(self, request_arb_id):
-        #time.sleep(0.5)
+        # time.sleep(0.5)
         p = outlander_pids[request_arb_id]
         pid = p['pid']
         req_msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],
@@ -252,16 +251,11 @@ class FMSLogger(BaseSnifferLogger):
         timeout = 1
         start_time = datetime.now()
         fms_ccvs = 'FMS_CRUISE_CONTROL_VEHICLE_SPEED (km/h)'
-        if self.shutdown:
-            return {}
-        # check the ignition off pin, shutdown if its on.
-        if GPIO.input(35) == 1:
-            self.shutdown = True
-            sudo('shutdown -h now')
+
         while 1:
             if (datetime.now() - start_time).total_seconds() > timeout:
                 return self.buff
-            msg = self.bus.recv()
+            msg = self.bus.recv(0.5)
             pid, obd_data = self.separate_can_msg(msg)
 
             if pid in self.pids2log:
@@ -274,3 +268,35 @@ class FMSLogger(BaseSnifferLogger):
 
             if pid == self.trigger:
                 return self.buff
+
+
+class BustechLogger(BaseSnifferLogger):
+    def __init__(self, bus, pids2log, pids, trigger):
+        super().__init__(bus, pids2log, pids, trigger)
+        self.shutdown = False
+        self.fast_log = True
+    @staticmethod
+    def separate_can_msg(msg):
+        return msg.arbitration_id, msg.data
+
+    def log(self):
+        buff = {}
+        self.bus.set_filter([{'can_id': 0x7788, 'can_mask': 0xffff}])
+        start = datetime.now()
+        timeout = 1
+        bustech_ready_pid = 'FMS_BUSTECH_READY'
+
+        while 1:
+            if (datetime.now() - start).total_seconds() > timeout:
+                return buff
+            msg = self.bus.recv(0.5)
+            pid, can_bytes = self.separate_can_msg(msg)
+            if pid in self.pids2log:
+                parsed = self.pids[pid]['parse'][can_bytes]
+                buff.update(parsed)
+                if bustech_ready_pid in buff:
+                    self.fast_log = buff[bustech_ready_pid] == 1
+                    # if we are switching from slow to fast logging, we need to log it as a new trip
+                    buff['_reset_trip'] = 1
+            if self.fast_log == 0:
+                time.sleep(10)
