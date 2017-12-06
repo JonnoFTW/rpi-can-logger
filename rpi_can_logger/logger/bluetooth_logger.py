@@ -63,7 +63,7 @@ class BluetoothLogger(threading.Thread):
         print("Waiting for connection on RFCOMM channel {}".format(self.port))
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
-        self.client_sock.settimeout(0.3)
+        self.client_sock.settimeout(1.0)
         self.client_sock.send("$RPI-CAN-LOGGER!\n")
         # self.send("$ip={}".format(get_ip()))
         while 1:
@@ -144,6 +144,7 @@ class BluetoothReceiver(threading.Thread):
                         self.bt_commands.get('$export')(self.btl.client_sock)
                     except Exception as e:
                         print("Failed to export:", e)
+                        self.btl.send("Failed to send: {}".format(e))
                     self.btl.exporting = False
                     continue
                 try:

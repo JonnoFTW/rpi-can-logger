@@ -211,7 +211,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         self.bus.send(req_msg)
         for i in range(5000):
             recvd = self.bus.recv(0.5)
-            if msg is None:
+            if recvd is None:
                 continue
 
             if recvd.arbitration_id == p['response']:
