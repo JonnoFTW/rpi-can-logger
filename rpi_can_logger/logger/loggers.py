@@ -76,12 +76,13 @@ class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
 class QueryingOBDLogger(BaseOBDLogger):
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
-        # self._determine_pids()
+#        self._determine_pids()
         self.responds_to = set()
         self.first_log = True
         self.log_timeout_first = 4
         self.log_timeout = self.log_timeout_first
         self.log_timeout_tail = 1.5
+        bus.set_filters([{'can_id':0x07e8, 'can_mask':0xffff}])
 
     def _parse_support_frame(self, msg):
         by = 0
@@ -101,7 +102,7 @@ class QueryingOBDLogger(BaseOBDLogger):
         :return:
         """
         self.responds_to = set()
-        support_check = [0, 32, 64, 96, ]
+        support_check = [0, 32, 64, 96]
         logging.warning("Determining supported PIDs")
         start = datetime.now()
         count = 0
@@ -143,18 +144,21 @@ class QueryingOBDLogger(BaseOBDLogger):
                 # if self.responds_to is not None and m in self.responds_to:
                 out_msg = self.make_msg(m)
                 # logging.warning("S> {}".format(out_msg))
-                self.bus.send(self.make_msg(m))
+                # self.bus.send(out_msg)
 
                 # receive the pid back, (hoping it's the right one)
                 #
                 count = 0
                 start = datetime.now()
-                while count < 100:
+                while count < 5:
                     count += 1
-                    msg = self.bus.recv(0.2)
+                    self.bus.send(out_msg)
+                    msg = self.bus.recv(0.4)
+                    # logging.warning(self.pids[m]['name']+str(msg))
                     if msg is None:
                         # logging.warning("No message")
                         if (datetime.now() - start).total_seconds() > self.log_timeout:
+                            logging.verbose("Query timeout")
                             break
                         continue
                     if msg.arbitration_id == OBD_RESPONSE:
@@ -166,8 +170,10 @@ class QueryingOBDLogger(BaseOBDLogger):
                         if pid in self.pids2log:
                             out.update(self.pids[pid]['parse'](obd_data))
                             pids_responded.append(pid)
+                            break
                             #                           logging.warning(out)
                         if len(out) == len(self.pids2log):
+                            logging.verbose("got all PIDs")
                             break
                             #      logging.warning(out)
                             #        logging.warning("finished log loop")
