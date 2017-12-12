@@ -242,9 +242,13 @@ def get_responds():
 
 def export_files(sock):
     print("currently writing", writing_to['name'])
-    for fname in glob(log_folder + "/*.json*"):
+    for fname in sorted(glob(log_folder + "/*.json*")):
         if fname.endswith(writing_to['name']):
             print(fname, "is currently being written to")
+            continue
+        if fname.endswith('.done'):
+            print("Skipping", fname)
+            sock.send("$skipping={}!\n".format(fname))
             continue
         # we will send base64 encoded gzipped json
         with open(fname, 'rb') as infile:
@@ -277,6 +281,7 @@ def export_files(sock):
             for line in lines:
                 sock.send("$export={}\n".format(line))
             sock.send("$done\n")
+            os.rename(fname, fname+'.done')
         sock.send('$export=done\n')
 
 

@@ -63,7 +63,7 @@ class BluetoothLogger(threading.Thread):
         print("Waiting for connection on RFCOMM channel {}".format(self.port))
         self.client_sock, client_info = self.server_sock.accept()
         logging.warning("Accepted connection from: {}".format(client_info))
-        self.client_sock.settimeout(1.0)
+        self.client_sock.settimeout(2.0)
         self.client_sock.send("$RPI-CAN-LOGGER!\n")
         # self.send("$ip={}".format(get_ip()))
         while 1:
