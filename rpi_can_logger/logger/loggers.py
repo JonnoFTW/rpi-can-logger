@@ -183,7 +183,7 @@ class QueryingOBDLogger(BaseOBDLogger):
             logging.warning("Setting PIDs to {}".format(",".join(self.pids[p]['name'] for p in self.pids2log)))
             self.first_log = False
             self.log_timeout = self.log_timeout_tail
-        print(out)
+#        print(out)
         return out
 
     @staticmethod
