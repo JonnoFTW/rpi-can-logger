@@ -18,7 +18,7 @@ for request_arb_id, p in cycle([list(outlander_pids.items())[0]]):
     ctl_msg = can.Message(arbitration_id=request_arb_id, extended_id=0,
                           data=[0x30, 0, 0, 0, 0, 0, 0, 0])
 
-    print("Requesting:\t", p['request'], p['name'])
+    print("Requesting:\t",  p['name'])
     bus.send(req_msg)
     bus.set_filters([{'can_id': p['response'], 'can_mask': 0xffff}])
     buf = bytes()
@@ -31,7 +31,7 @@ for request_arb_id, p in cycle([list(outlander_pids.items())[0]]):
             if sequence == 0x10:
                 bus.send(ctl_msg)
                 bus.send(req_msg)
-                buf[:] = recvd.data[4:]
+                buf = recvd.data[4:]
                 multiline = True
                 num_bytes = recvd.data[1] - 2
 

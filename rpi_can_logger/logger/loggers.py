@@ -82,7 +82,6 @@ class QueryingOBDLogger(BaseOBDLogger):
         self.log_timeout_first = 4
         self.log_timeout = self.log_timeout_first
         self.log_timeout_tail = 1.5
-        bus.set_filters([{'can_id':0x07e8, 'can_mask':0xffff}])
 
     def _parse_support_frame(self, msg):
         by = 0
@@ -133,6 +132,7 @@ class QueryingOBDLogger(BaseOBDLogger):
     def log(self):
         # send a message asking for those requested pids
         out = {}
+        time.sleep(0.5)
         pids_responded = []
         for m in self.pids2log:
             if m in outlander_pids:
@@ -141,6 +141,8 @@ class QueryingOBDLogger(BaseOBDLogger):
                     pids_responded.append(m)
                     out.update(outlander_data)
             else:
+                self.bus.set_filters([{'can_id':0x07e8, 'can_mask':0xffff}])
+
                 # if self.responds_to is not None and m in self.responds_to:
                 out_msg = self.make_msg(m)
                 # logging.warning("S> {}".format(out_msg))
@@ -158,7 +160,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                     if msg is None:
                         # logging.warning("No message")
                         if (datetime.now() - start).total_seconds() > self.log_timeout:
-                            logging.verbose("Query timeout")
+                            print("Query timeout")
                             break
                         continue
                     if msg.arbitration_id == OBD_RESPONSE:
@@ -173,7 +175,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                             break
                             #                           logging.warning(out)
                         if len(out) == len(self.pids2log):
-                            logging.verbose("got all PIDs")
+                            logging.debug("got all PIDs")
                             break
                             #      logging.warning(out)
                             #        logging.warning("finished log loop")
@@ -214,14 +216,20 @@ class QueryingOBDLogger(BaseOBDLogger):
         multiline = True
 
         # print("S>", req_msg)
+#        self.bus.set_filters()
+        self.bus.set_filters([{'can_id':p['response'], 'can_mask':0xffff}])
+
         self.bus.send(req_msg)
-        for i in range(5000):
+
+        for i in range(1000):
+
             recvd = self.bus.recv(0.5)
             if recvd is None:
+#                print("got none")
                 continue
 
             if recvd.arbitration_id == p['response']:
-                #              print("R>",i, recvd)
+ #               print("R>",i, recvd)
 
                 sequence = recvd.data[0]
                 if sequence == 0x10:
