@@ -2,6 +2,7 @@ import can
 import time
 import logging
 from datetime import datetime
+
 try:
     import RPi.GPIO as GPIO
 except ImportError:
@@ -76,12 +77,13 @@ class SniffingOBDLogger(BaseOBDLogger, BaseSnifferLogger):
 class QueryingOBDLogger(BaseOBDLogger):
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
-#        self._determine_pids()
+        #        self._determine_pids()
         self.responds_to = set()
         self.first_log = True
         self.log_timeout_first = 4
         self.log_timeout = self.log_timeout_first
         self.log_timeout_tail = 1.5
+        self.errors = 0
 
     def _parse_support_frame(self, msg):
         by = 0
@@ -141,7 +143,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                     pids_responded.append(m)
                     out.update(outlander_data)
             else:
-                self.bus.set_filters([{'can_id':0x07e8, 'can_mask':0xffff}])
+                self.bus.set_filters([{'can_id': 0x07e8, 'can_mask': 0xffff}])
 
                 # if self.responds_to is not None and m in self.responds_to:
                 out_msg = self.make_msg(m)
@@ -167,7 +169,7 @@ class QueryingOBDLogger(BaseOBDLogger):
                         #                       logging.warning("R> {}".format(msg))
 
                         pid, obd_data = self.separate_can_msg(msg)
-                        #                        logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
+                        #  logging.warning("PID={}, pids2log={}, pid in?={}".format(pid, self.pids2log, pid in self.pids2log))
                         # try and receive
                         if pid in self.pids2log:
                             out.update(self.pids[pid]['parse'](obd_data))
@@ -185,7 +187,14 @@ class QueryingOBDLogger(BaseOBDLogger):
             logging.warning("Setting PIDs to {}".format(",".join(self.pids[p]['name'] for p in self.pids2log)))
             self.first_log = False
             self.log_timeout = self.log_timeout_tail
-#        print(out)
+        #        print(out)
+        if out == {}:
+            self.errors += 1
+            if self.errors == 5:
+                logging.warning("Shutting down after failing to receive CAN data")
+                sudo("shutdown -h 0")
+        else:
+            self.errors = 0
         return out
 
     @staticmethod
@@ -216,8 +225,8 @@ class QueryingOBDLogger(BaseOBDLogger):
         multiline = True
 
         # print("S>", req_msg)
-#        self.bus.set_filters()
-        self.bus.set_filters([{'can_id':p['response'], 'can_mask':0xffff}])
+        #        self.bus.set_filters()
+        self.bus.set_filters([{'can_id': p['response'], 'can_mask': 0xffff}])
 
         self.bus.send(req_msg)
 
@@ -225,11 +234,11 @@ class QueryingOBDLogger(BaseOBDLogger):
 
             recvd = self.bus.recv(0.5)
             if recvd is None:
-#                print("got none")
+                #                print("got none")
                 continue
 
             if recvd.arbitration_id == p['response']:
- #               print("R>",i, recvd)
+                #               print("R>",i, recvd)
 
                 sequence = recvd.data[0]
                 if sequence == 0x10:
@@ -295,6 +304,7 @@ class BustechLogger(BaseSnifferLogger):
         super().__init__(bus, pids2log, pids, trigger)
         self.shutdown = False
         self.fast_log = True
+
     @staticmethod
     def separate_can_msg(msg):
         return msg.arbitration_id, msg.data

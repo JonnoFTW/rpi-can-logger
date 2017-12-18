@@ -4,6 +4,7 @@ log-messages: ~/log/can-log/messages/
 log-folder: ~/log/can-log/
 pid-file: ~/log/can-log.pid
 log-size: 16
+gps-baud: 115200
 log-pids:
   - PID_ENGINE_LOAD
   - PID_THROTTLE
@@ -13,9 +14,9 @@ log-pids:
   - PID_MAF_FLOW
   - PID_AIR_FUEL_EQUIV_RATIO
 #  - PID_HYBRID_BATTERY_PERCENTAGE
-  - PID_ENGINE_FUEL_RATE
+#  - PID_ENGINE_FUEL_RATE
 #  - OUTLANDER_BATTERY_HEALTH
-log-trigger: PID_ENGINE_FUEL_RATE
+log-trigger: PID_AIR_FUEL_EQUIV_RATIO
 disable-gps: false
 gps-port: /dev/ttyS0
 log-bluetooth: true
