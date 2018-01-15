@@ -211,7 +211,6 @@ class QueryingOBDLogger(BaseOBDLogger):
         )
 
     def _log_outlander(self, request_arb_id):
-        # time.sleep(0.5)
         p = outlander_pids[request_arb_id]
         pid = p['pid']
         req_msg = can.Message(extended_id=0, data=[2, 0x21, pid, 0, 0, 0, 0, 0],
@@ -278,7 +277,7 @@ class FMSLogger(BaseSnifferLogger):
         timeout = 1
         start_time = datetime.now()
         fms_ccvs = 'FMS_CRUISE_CONTROL_VEHICLE_SPEED (km/h)'
-
+        time.sleep(0.5)
         while 1:
             if (datetime.now() - start_time).total_seconds() > timeout:
                 return self.buff
@@ -303,6 +302,7 @@ class BustechLogger(BaseSnifferLogger):
     def __init__(self, bus, pids2log, pids, trigger):
         super().__init__(bus, pids2log, pids, trigger)
         self.shutdown = False
+        print("Logging bustech")
         self.fast_log = True
 
     @staticmethod
@@ -311,24 +311,27 @@ class BustechLogger(BaseSnifferLogger):
 
     def log(self):
         buff = {}
-        self.bus.set_filter([{'can_id': 0x7788, 'can_mask': 0xffff}])
+#        self.bus.set_filter([
+#            {'can_id': 0x0109, 'can_mask': 0xffff},
+#             {'can_id': 0x0110, 'can_mask': 0xffff}])
         start = datetime.now()
-        timeout = 1
-        bustech_ready_pid = 'FMS_BUSTECH_READY'
+        timeout = 0.5
+        bustech_ready_pid = "BUSTECH_BATTERY (Ready)"
 
         while 1:
             if (datetime.now() - start).total_seconds() > timeout:
                 return buff
-            msg = self.bus.recv(0.5)
+            msg = self.bus.recv(0.1)
+#            print(msg)
             if msg is None:
                 continue
             pid, can_bytes = self.separate_can_msg(msg)
             if pid in self.pids2log:
-                parsed = self.pids[pid]['parse'][can_bytes]
+                parsed = self.pids[pid]['parse'](can_bytes)
                 buff.update(parsed)
                 if bustech_ready_pid in buff:
                     self.fast_log = buff[bustech_ready_pid] == 1
                     # if we are switching from slow to fast logging, we need to log it as a new trip
                     buff['_reset_trip'] = 1
-            if self.fast_log == 0:
-                time.sleep(10)
+ #           if self.fast_log == 0:
+#                time.sleep(10)

@@ -340,6 +340,8 @@ def do_log():
     if is_tesla:
         logging.warning("Using TeslaSnifferLogger")
         logger_c = TeslaSniffingLogger
+    elif is_bustech:
+        logger_c = BustechLogger
     elif is_obd_query:
         logging.warning("Using QueryingOBDLogger")
         logger_c = QueryingOBDLogger
