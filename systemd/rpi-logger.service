@@ -7,7 +7,7 @@ Type=simple
 User=pi
 Group=pi
 Environment="PYTHONPATH={{pwd}}"
-Environment=PATH=/home/pi/.pyenv/versions/3.6.1/bin:$PATH
+Environment=PATH=/home/pi/.pyenv/versions/3.6.2/bin:$PATH
 WorkingDirectory={{pwd}}
 ExecStart={{pwd}}/rpi_can_logger/main.py --conf {{pwd}}/{{conf}}
 StandardOutput=journal
