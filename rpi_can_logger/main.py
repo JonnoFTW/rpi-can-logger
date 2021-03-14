@@ -26,7 +26,7 @@ from rpi_can_logger.logger import JSONLogRotator, TeslaSniffingLogger, SniffingO
 
 parser = argparse.ArgumentParser(description='Log Data from a PiCAN2 Shield and GPS')
 parser.add_argument('--interface', '-i', default='can0', help='CAN Interface to use')
-parser.add_argument('--channel', '-c', default='socketcan_native', help='CAN Channel to use')
+parser.add_argument('--channel', '-c', default='socketcan', help='CAN Channel to use')
 parser.add_argument('--pid-file', '-pf', default='/var/log/can-log/can_log.pid',
                     help='PID file to record what file we are currently writing to')
 parser.add_argument('--log-messages', '-lm', default='/var/log/can-log/messages/',
