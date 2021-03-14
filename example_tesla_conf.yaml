@@ -1,4 +1,4 @@
-interface: socketcan_native
+interface: socketcan
 channel: can1
 log-messages: /home/pi/log/can-log/messages/
 log-folder: /home/pi/log/can-log/
