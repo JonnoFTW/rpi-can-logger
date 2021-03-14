@@ -144,7 +144,7 @@ We currently support 4 forms of logging:
 Here we will examine the various configuration options:
 
 ```yaml
-interface: socketcan_native # can bus driver
+interface: socketcan # can bus driver
 channel: can1 # which can bus to use
 log-messages: /home/pi/log/can-log/messages/ # location of debug messages
 log-folder: /home/pi/log/can-log/ # location of log files

@@ -12,7 +12,7 @@ def get_args():
         elif arg in ['can1', 'can0']:
             # pican
             channel = arg
-            interface = 'socketcan_native'
+            interface = 'socketcan'
         else:
             exit("Invalid CAN bus specified")
     else:

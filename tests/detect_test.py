@@ -12,7 +12,7 @@ if len(sys.argv) > 2:
     elif arg1 in ['can1', 'can0']:
         # pican
         channel = arg1
-        interface = 'socketcan_native'
+        interface = 'socketcan'
     else:
         exit("Invalid CAN bus specified")
     can_type = sys.argv[2].lower()
