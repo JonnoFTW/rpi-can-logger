@@ -1,4 +1,4 @@
-interface: socketcan_native
+interface: socketcan
 channel: can0
 log-messages: ~/log/can-log/messages/
 log-folder: ~/log/can-log/
